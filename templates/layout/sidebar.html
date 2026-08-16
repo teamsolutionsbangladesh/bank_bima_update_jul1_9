@@ -1,0 +1,858 @@
+<div class="sidebar">
+    <ul class="menu">
+
+       <!-- ADMINISTRATOR -->
+        <li class="menu-item has-submenu">
+            <a href="#" class="submenu-toggle">
+                ADMINISTRATOR <span class="arrow">›</span>
+            </a>
+
+            <ul class="submenu">
+
+                <!-- Company -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">
+                        Company <span class="arrow">›</span>
+                    </a>
+                    <ul class="submenu child-menu">
+                        <li><a href="/company-types/">Company Types</a></li>
+                        <li><a href="/company-details/">Company Details</a></li>
+                    </ul>
+                </li>
+
+                <!-- Users -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">
+                        Users <span class="arrow">›</span>
+                    </a>
+                    <ul class="submenu child-menu">
+                        <li><a href="/users/roles/">Roles</a></li>
+                        <li><a href="/users/super-admin/">Super Admin</a></li>
+                        <li><a href="/users/admin/">Admin</a></li> 
+                    </ul>
+                </li>
+
+                <!--Permissions -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">
+                        Permissions <span class="arrow">›</span>
+                    </a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Main Head</a></li>
+                        <li><a href="#">Heads</a></li>
+                        <li><a href="#">Company Type</a></li>
+                        <li><a href="#">Company</a></li>
+                        <li><a href="#">User Permissions</a></li>
+                    </ul>
+                </li>
+
+
+                <!-- Bank -->
+                <li class="menu-item">
+                    <a href="{% url 'bank_page' %}">Bank</a>
+                </li>
+
+                <!-- Locations -->
+                <li class="menu-item">
+                    <a href="{% url 'location_page' %}">Locations</a>
+                </li>
+
+                <!-- Store Details -->
+                <li class="menu-item">
+                    <a href="{% url 'store_page' %}">Store Details</a>
+                </li>
+
+                <!-- Payment Method -->
+                <li class="menu-item">
+                    <a href="{% url 'payment_method_page' %}">Payment Method</a>
+                </li>
+
+                <!-- Main Head -->
+                <li class="menu-item">
+                    <a href="{% url 'transaction_main_head_page' %}">* Main Head</a>
+                </li>
+
+                <!-- Transaction Group -->
+                <li class="menu-item">
+                    <a href="{% url 'transaction_groupe_page' %}">* Transaction Group</a>
+                </li>
+
+                <!-- Transaction Head -->
+                <li class="menu-item">
+                    <a href="{% url 'transaction_head_page' %}">* Transaction Head</a> 
+                </li>
+
+                <!-- Transaction With -->
+                <li class="menu-item">
+                    <a href="{% url 'transaction_with_page' %}">* Transaction With</a>
+                </li>
+
+                <!-- Transaction With User -->
+                <li class="menu-item">
+                    <a href="{% url 'transaction_with_user_form' %}">* Transaction With User</a>
+                </li>
+
+                <!-- Corporate -->
+                <li class="menu-item">
+                    <a href="{% url 'corporates_page' %}">Corporate</a>
+                </li>
+
+                <!-- page_init -->
+                 <li class="menu-item">
+                    <a href="{% url 'page_init' %}">* Page Init</a>
+                </li>           
+
+            </ul>
+        </li>
+
+        <!-- GENERAL TRANSACTION -->
+        <li class="menu-item has-submenu">
+            <a href="#" class="submenu-toggle">GENERAL TRANSACTION <span class="arrow">›</span></a>
+
+            <ul class="submenu">
+
+                <!-- Setup -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Setup <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">                        
+                        <li><a href="#">Category</a></li>
+                        <li><a href="#">Brand</a></li>
+                        <li><a href="#">Unit</a></li>
+                    </ul>
+                </li>
+
+                <!-- Users -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Users <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+
+
+                <!-- Transactions -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Transactions <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="{% url 'payment_list' %}">* Payment </a></li>
+                        <li><a href="{% url 'payment_list' %}">* Pharmacy Purchase </a></li>
+                        <li><a href="{% url 'receive_list' %}">Receive</a></li>
+                    </ul>
+                </li>
+
+                <!-- Adjustment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Adjustment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Party Payment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Party Payment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="{% url 'party_payment_list' %}">* Payment </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Reports -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Reports <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
+        <!-- BANK TRANSACTION -->
+        <li class="menu-item has-submenu">
+            <a href="#" class="submenu-toggle">BANK TRANSACTION <span class="arrow">›</span></a>
+
+            <ul class="submenu">
+
+                <!-- Setup -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Setup <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Category</a></li>
+                        <li><a href="#">Brand</a></li>
+                        <li><a href="#">Unit</a></li>
+                    </ul>
+                </li>
+
+                <!-- Users -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Users <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+
+
+                <!-- Transactions -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Transactions <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Adjustment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Adjustment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Party Payment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Party Payment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Reports -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Reports <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
+        <!-- HR & PAYROLL -->
+        <li class="menu-item has-submenu">
+            <a href="#" class="submenu-toggle">HR & PAYROLL <span class="arrow">›</span></a>
+
+            <ul class="submenu">
+
+                <!-- Setup -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Setup <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Category</a></li>
+                        <li><a href="#">Brand</a></li>
+                        <li><a href="#">Unit</a></li>
+                    </ul>
+                </li>
+
+                <!-- Users -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Users <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+
+
+                <!-- Transactions -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Transactions <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Adjustment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Adjustment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Party Payment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Party Payment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Reports -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Reports <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
+        <!-- PHARMACY -->
+        <li class="menu-item has-submenu">
+            <a href="#" class="submenu-toggle">PHARMACY <span class="arrow">›</span></a>
+
+            <ul class="submenu">
+
+                <!-- Setup -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Setup <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Category</a></li>
+                        <li><a href="#">Brand</a></li>
+                        <li><a href="#">Unit</a></li>
+                    </ul>
+                </li>
+
+                <!-- Users -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Users <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+
+
+                <!-- Transactions -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Transactions <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="/purchase-list/">Pharmacy Purchase </a></li>
+                        <li><a href="/issue-list/">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Adjustment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Adjustment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Party Payment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Party Payment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Reports -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Reports <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
+        <!-- INVENTORY -->
+        <li class="menu-item has-submenu">
+            <a href="#" class="submenu-toggle">INVENTORY <span class="arrow">›</span></a>
+
+            <ul class="submenu">
+
+                <!-- Setup -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Setup <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Category</a></li>
+                        <li><a href="#">Brand</a></li>
+                        <li><a href="#">Unit</a></li>
+                    </ul>
+                </li>
+
+                <!-- Users -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Users <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+
+
+                <!-- Transactions -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Transactions <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Adjustment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Adjustment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Party Payment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Party Payment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Reports -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Reports <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
+        <!-- HOSPITAL -->
+        <li class="menu-item has-submenu">
+            <a href="#" class="submenu-toggle">HOSPITAL <span class="arrow">›</span></a>
+
+            <ul class="submenu">
+
+                <!-- Setup -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Setup <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Category</a></li>
+                        <li><a href="#">Brand</a></li>
+                        <li><a href="#">Unit</a></li>
+                    </ul>
+                </li>
+
+                <!-- Users -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Users <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+
+
+                <!-- Transactions -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Transactions <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Adjustment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Adjustment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Party Payment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Party Payment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Reports -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Reports <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
+        <!-- HOTEL -->
+        <li class="menu-item has-submenu">
+            <a href="#" class="submenu-toggle">HOTEL <span class="arrow">›</span></a>
+
+            <ul class="submenu">
+
+                <!-- Setup -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Setup <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Category</a></li>
+                        <li><a href="#">Brand</a></li>
+                        <li><a href="#">Unit</a></li>
+                    </ul>
+                </li>
+
+                <!-- Users -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Users <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+
+
+                <!-- Transactions -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Transactions <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Adjustment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Adjustment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Party Payment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Party Payment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Reports -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Reports <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
+        <!-- RESTAURANT -->
+        <li class="menu-item has-submenu">
+            <a href="#" class="submenu-toggle">RESTAURANT <span class="arrow">›</span></a>
+
+            <ul class="submenu">
+
+                <!-- Setup -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Setup <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Category</a></li>
+                        <li><a href="#">Brand</a></li>
+                        <li><a href="#">Unit</a></li>
+                    </ul>
+                </li>
+
+                <!-- Users -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Users <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+
+
+                <!-- Transactions -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Transactions <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Adjustment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Adjustment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Party Payment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Party Payment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Reports -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Reports <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
+        <!-- DIAGNOSIS -->
+        <li class="menu-item has-submenu">
+            <a href="#" class="submenu-toggle">DIAGNOSIS <span class="arrow">›</span></a>
+
+            <ul class="submenu">
+
+                <!-- Setup -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Setup <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li class="menu-item has-submenu"> {# #codex #}
+                            <a href="#" class="submenu-toggle">Referral <span class="arrow">›</span></a> {# #codex #}
+                            <ul class="submenu child-menu"> {# #codex #}
+                                <li><a href="{% url 'diagnosis_referral_setup' %}">Doctor</a></li> {# #codex #}
+                                <li><a href="{% url 'diagnosis_referral_sr_setup' %}">SR</a></li> {# #codex #}
+                                <li><a href="{% url 'diagnosis_referral_report' %}">Report</a></li> {# #codex #}
+                            </ul> {# #codex #}
+                        </li> {# #codex #}
+                    </ul>
+                </li>
+                <!-- Users -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Users <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="{% url 'diagnosis_patient_list' %}">Patients</a></li>
+                        <li><a href="{% url 'doctor_list' %}">Doctors</a></li>
+                    </ul>
+                </li>
+
+
+                <!-- Transactions -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Transactions <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="{% url 'diag_payment_list' %}">Diagnosis Transactions</a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Adjustment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Adjustment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Party Payment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Party Payment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="{% url 'diagnosis_party_payment_list' %}">Diagnosis Payment</a></li> {# codex change #}
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Reports -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Reports <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li class="menu-item has-submenu">
+                            <a href="#" class="submenu-toggle">Salesman <span class="arrow">›</span></a>
+                            <ul class="submenu child-menu">
+                                <li><a href="{% url 'diagnosis_salesman_transaction_summary' %}">Transaction Summary</a></li>
+                                <li><a href="{% url 'diagnosis_salesman_transaction_details' %}">Transaction Details</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
+        <!-- SCHOOL -->
+        <li class="menu-item has-submenu">
+            <a href="#" class="submenu-toggle">SCHOOL <span class="arrow">›</span></a>
+
+            <ul class="submenu">
+
+                <!-- Setup -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Setup <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Category</a></li>
+                        <li><a href="#">Brand</a></li>
+                        <li><a href="#">Unit</a></li>
+                    </ul>
+                </li>
+
+                <!-- Users -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Users <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+
+
+                <!-- Transactions -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Transactions <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Adjustment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Adjustment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Party Payment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Party Payment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Reports -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Reports <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
+        <!-- REPORTS -->
+        <li class="menu-item has-submenu">
+            <a href="#" class="submenu-toggle">REPORTS <span class="arrow">›</span></a>
+
+            <ul class="submenu">
+
+                <!-- Setup -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Setup <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Category</a></li>
+                        <li><a href="#">Brand</a></li>
+                        <li><a href="#">Unit</a></li>
+                    </ul>
+                </li>
+
+                <!-- Users -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Users <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+
+
+                <!-- Transactions -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Transactions <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Adjustment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Adjustment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Party Payment -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Party Payment <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Pharmacy Purchase </a></li>
+                        <li><a href="#">Pharmacy Issue </a></li>
+                        <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Reports -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Reports <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="#">Salesman</a></li>
+                        <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
+    </ul>
+</div>
+

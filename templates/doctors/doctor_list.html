@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Doctor Registry Management{% endblock %}
+
+{% block content %}
+
+<input type="hidden" id="global_csrf" value="{{ csrf_token }}">
+
+<div class="d-flex justify-content-between mb-3">
+    <a href="{% url 'doctor_add' %}" class="btn btn-primary">
+        <i class="fa-solid fa-plus me-1"></i> New Doctor
+    </a>
+    <input class="form-control w-25" id="doctorSearchInput" placeholder="Search provider name, chamber...">
+</div>
+
+<h4 class="text-center mb-3">Doctor Registration Details</h4>
+
+<table class="table table-bordered table-striped table-hover align-middle" id="mainDoctorsTable">
+    <thead class="table-dark">
+        <tr>
+            <th>SL</th>
+            <th>Doctor ID</th>
+            <th>Doctor Name</th>
+            <th>Specialization Field</th>
+            <th>Chamber Location</th>
+            <th>Classification Tag</th>
+            <th class="text-center">Action</th>
+        </tr>
+    </thead>
+    <tbody id="doctorTableBody">
+        {% for d in doctors %}
+        <tr id="row{{ d.id }}">
+            <td>{{ forloop.counter }}</td>
+            <td><strong>DOC{{ d.id|stringformat:"09d" }}</strong></td>
+            <td>{{ d.name }}</td>
+            <td>{{ d.specialization|default:"-" }}</td>
+            <td>{{ d.chamber|default:"-" }}</td>
+            <td>
+                {% if d.doctor_type == 'diagnosis' %}
+                <span class="badge bg-info text-dark px-2 py-1 fw-bold">Diagnosis Unit</span>
+                {% else %}
+                <span class="badge bg-purple text-white px-2 py-1 fw-bold">Hospital Desk</span>
+                {% endif %}
+            </td>
+            <td class="text-center">
+                <a href="{% url 'doctor_edit' d.id %}" class="btn btn-sm btn-warning editBtn" data-id="{{ d.id }}">
+                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                </a>
+                <button type="button" class="btn btn-sm btn-danger open-delete-modal-btn" 
+                        data-id="{{ d.id }}" 
+                        data-name="{{ d.name }}"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#deleteConfirmModal">
+                    <i class="fa-solid fa-trash"></i> Delete
+                </button>
+            </td>
+        </tr>
+        {% empty %}
+        <tr class="no-data-row">
+            <td colspan="7" class="text-center py-4 text-muted">
+                <i class="fa-solid fa-triangle-exclamation"></i> No doctor records found in active directory database.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="modal fade" id="deleteConfirmModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-danger shadow-lg">
+            <div class="modal-header bg-danger text-white py-2">
+                <h6 class="modal-title"><i class="fa-solid fa-circle-exclamation me-1"></i> Confirm Delete</h6>
+            </div>
+            <div class="modal-body text-center py-3">
+                <p class="mb-0 text-dark fw-medium">Are you sure you want to permanently delete this provider profile record?</p>
+                <small class="text-danger fw-bold d-block mt-1" id="targetDoctorNameDisplay"></small>
+            </div>
+            <div class="modal-footer py-1 d-flex justify-content-between">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">No</button>
+                <button type="button" class="btn btn-sm btn-danger strict-confirm-delete-btn" id="modalExecuteDeleteBtn" data-id="">
+                    <i class="fa-solid fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+<script src="{% static 'js/doctors/doctors.js' %}"></script>
+{% endblock %}

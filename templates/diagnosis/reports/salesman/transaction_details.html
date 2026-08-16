@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Diagnosis Salesman Transaction Details{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow" style="min-height: 85vh;">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Salesman Transaction Details</h5>
+        </div>
+
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md">
+                    <label class="fw-semibold">Transaction Main Head</label>
+                    <select id="transactionmainheads" class="form-select" disabled>
+                        <option value="10" selected>Diagnosis</option>
+                    </select>
+                </div>
+
+                <div class="col-md">
+                    <label class="fw-semibold">Doctor</label>
+                    <select id="doctor_filter" class="form-select">
+                        <option value="">All Doctor</option>
+                    </select>
+                </div>
+
+                <div class="col-md">
+                    <label class="fw-semibold">SR</label>
+                    <select id="sr_filter" class="form-select">
+                        <option value="">All SR</option>
+                    </select>
+                </div>
+
+                <div class="col-md">
+                    <label class="fw-semibold">Patient</label>
+                    <select id="patient_filter" class="form-select">
+                        <option value="">All Patient</option>
+                    </select>
+                </div>
+
+                <div class="col-md">
+                    <label class="fw-semibold">Transaction By</label>
+                    <select id="tran_by_filter" class="form-select">
+                        <option value="">All Transaction By</option>
+                    </select>
+                </div>
+            </div>
+
+            <form method="get" class="row g-2 align-items-end mb-3">
+                <div class="col-md-3">
+                    <label class="small fw-semibold">Search Product</label>
+                    <input type="text"
+                           id="productSearch"
+                           name="search"
+                           class="form-control"
+                           placeholder="Search by product name">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="small fw-semibold">Status</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">Status</option>
+                        <option value="1">Verified</option>
+                        <option value="0">Non Verified</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="small fw-semibold">Start Date</label>
+                    <input type="date"
+                           id="start_date"
+                           name="start_date"
+                           class="form-control">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="small fw-semibold">End Date</label>
+                    <input type="date"
+                           id="end_date"
+                           name="end_date"
+                           class="form-control">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="small fw-semibold">Per Page</label>
+                    <select id="perPage" class="form-select">
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                    </select>
+                </div>
+
+                <div class="col-md-1 d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        Filter
+                    </button>
+                </div>
+            </form>
+
+            <div class="card">
+                <div class="card-header bg-success text-white text-center">
+                    Transaction Details List
+                </div>
+
+                <div class="table-responsive" style="max-height: 520px; overflow-y:auto;">
+                    <table class="table table-bordered table-sm mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>SL</th>
+                                <th>Tran ID</th>
+                                <th>Invoice Ref</th>
+                                <th>Date</th>
+                                <th>Product ID</th>
+                                <th>Product Name</th>
+                                <th>Supplier</th>
+                                <th>Doctor</th>
+                                <th>SR</th>
+                                <th>Patient</th>
+                                <th>Transaction By</th>
+                                <th class="text-end">Bill</th>
+                                <th class="text-end">Discount</th>
+                                <th class="text-end">Net</th>
+                                <th class="text-end">Advance</th>
+                                <th class="text-end">Due Col</th>
+                                <th class="text-end">Due Disc</th>
+                                <th class="text-end">Due</th>
+                                <th class="text-end">action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="transactionDetailsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+window.APP_URLS = {
+    TRANSACTION_DETAILS_LOAD_URL: "{% url 'diagnosis_salesman_transaction_details_load' %}",
+    DIAGNOSIS_DOCTOR_FILTER_URL: "{% url 'diagnosis_filter_doctor_combo' %}",
+    DIAGNOSIS_SR_FILTER_URL: "{% url 'diagnosis_filter_sr_combo' %}",
+    DIAGNOSIS_PATIENT_FILTER_URL: "{% url 'diagnosis_filter_patient_combo' %}",
+    DIAGNOSIS_TRAN_BY_FILTER_URL: "{% url 'diagnosis_filter_tran_by_combo' %}"
+};
+</script>
+
+<script src="{% static 'js/diagnosis/transaction_details.js' %}"></script>
+
+{% endblock %}

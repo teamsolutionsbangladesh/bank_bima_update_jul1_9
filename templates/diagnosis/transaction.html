@@ -1,0 +1,1925 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if edit_mode %}Edit Payment{% else %}Add Payment{% endif %}{% endblock %} {# codex change #}
+<style>
+    body {
+        background: #f5f5f5;
+    }
+
+    .invoice-page-wrapper {
+        padding: 25px 15px;
+    }
+
+    .invoice-actions {
+        max-width: 1000px;
+        margin: 0 auto 15px auto;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .invoice-sheet {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 35px 45px;
+        color: #111;
+        font-family: Arial, Helvetica, sans-serif;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+        min-height: 700px;
+    }
+
+    .invoice-title {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .invoice-title h3 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .invoice-title small {
+        color: #555;
+    }
+
+    /* =========================
+       TOP INFO
+    ========================== */
+
+    .invoice-info-section {
+        border-top: 2px solid #111;
+        border-bottom: 2px solid #111;
+    }
+
+    .invoice-info-row {
+        display: flex;
+        width: 100%;
+        min-height: 38px;
+        align-items: center;
+        border-bottom: 1px dashed #999;
+    }
+
+    .invoice-info-row:last-child {
+        border-bottom: none;
+    }
+
+    .invoice-info-column {
+        width: 50%;
+        display: flex;
+        align-items: center;
+        padding: 7px 10px;
+    }
+
+    .invoice-info-full {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        padding: 7px 10px;
+    }
+
+    .invoice-label {
+        width: 115px;
+        min-width: 115px;
+        font-weight: 700;
+    }
+
+    .invoice-colon {
+        width: 20px;
+        min-width: 20px;
+        font-weight: 700;
+    }
+
+    .invoice-value {
+        flex: 1;
+        word-break: break-word;
+    }
+
+    /* =========================
+       TRANSACTION META
+    ========================== */
+
+    .transaction-meta-box {
+        margin-top: 15px;
+        padding: 10px 0;
+        border-top: 1px solid #222;
+        border-bottom: 1px solid #222;
+        font-size: 14px;
+    }
+
+    .transaction-meta-item {
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+    .transaction-meta-label {
+        font-weight: 700;
+        margin-right: 4px;
+    }
+
+    /* =========================
+       PRODUCT TABLE
+    ========================== */
+
+    .invoice-product-section {
+        margin-top: 18px;
+    }
+
+    .invoice-product-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 0;
+    }
+
+    .invoice-product-table thead th {
+        background: transparent !important;
+        color: #111 !important;
+        border-top: 2px solid #111 !important;
+        border-bottom: 2px solid #111 !important;
+        border-left: none !important;
+        border-right: none !important;
+        padding: 8px 6px;
+        font-weight: 700;
+    }
+
+    .invoice-product-table tbody td {
+        border-left: none !important;
+        border-right: none !important;
+        border-top: none !important;
+        border-bottom: 1px dashed #bbb !important;
+        padding: 7px 6px;
+        vertical-align: middle;
+    }
+
+    .invoice-product-table tbody tr:last-child td {
+        border-bottom: 2px solid #111 !important;
+    }
+
+    /* =========================
+       REMARKS
+    ========================== */
+
+    .invoice-remarks {
+        padding: 8px 5px;
+        border-bottom: 2px solid #111;
+        font-size: 14px;
+    }
+
+    /* =========================
+       BOTTOM
+    ========================== */
+
+    .invoice-bottom-section {
+        margin-top: 18px;
+    }
+
+    .invoice-bottom-left {
+        padding-top: 15px;
+        font-size: 14px;
+    }
+
+    .invoice-bottom-left .info-line {
+        margin-bottom: 8px;
+    }
+
+    /* =========================
+       SUMMARY
+    ========================== */
+
+    .invoice-summary-box {
+        width: 100%;
+        font-size: 15px;
+    }
+
+    .summary-row {
+        display: grid;
+        grid-template-columns: 1fr 50px 120px;
+        align-items: center;
+        padding: 7px 4px;
+        border-bottom: 1px dashed #777;
+    }
+
+    .summary-label {
+        font-weight: 500;
+    }
+
+    .summary-symbol {
+        text-align: center;
+    }
+
+    .summary-value {
+        text-align: right;
+        font-weight: 600;
+    }
+
+    .summary-strong {
+        border-top: 2px solid #111;
+    }
+
+    .summary-strong .summary-label,
+    .summary-strong .summary-value {
+        font-weight: 700;
+    }
+
+    .summary-balance {
+        border-top: 2px solid #111;
+        border-bottom: 2px solid #111;
+        font-size: 17px;
+    }
+
+    .summary-balance .summary-label,
+    .summary-balance .summary-value {
+        font-weight: 800;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================== */
+
+    @media (max-width: 768px) {
+        .invoice-sheet {
+            padding: 20px 15px;
+        }
+
+        .invoice-info-row {
+            display: block;
+        }
+
+        .invoice-info-column {
+            width: 100%;
+        }
+
+        .invoice-label {
+            width: 100px;
+            min-width: 100px;
+        }
+
+        .summary-row {
+            grid-template-columns: 1fr 35px 95px;
+        }
+    }
+
+    /* =========================
+       PRINT
+    ========================== */
+
+    @media print {
+        body {
+            background: #fff !important;
+        }
+
+        body * {
+            visibility: hidden;
+        }
+
+        .invoice-sheet,
+        .invoice-sheet * {
+            visibility: visible;
+        }
+
+        .invoice-sheet {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            max-width: none;
+            min-height: auto;
+            padding: 15px 20px;
+            margin: 0;
+            box-shadow: none !important;
+        }
+
+        .invoice-actions {
+            display: none !important;
+        }
+
+        .container,
+        .container-fluid,
+        .card,
+        .card-body {
+            margin: 0 !important;
+            padding: 0 !important;
+            max-width: none !important;
+            width: 100% !important;
+            box-shadow: none !important;
+            border: none !important;
+        }
+    }
+</style>
+{% block content %}
+
+<div class="container-fluid mt-4 px-4">
+
+    <div class="card shadow">
+
+        <!-- HEADER -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">{% if edit_mode %}Edit Payment{% else %}Add Payment{% endif %}</h5> {# codex change #}
+
+                <a href="javascript:void(0);"
+                onclick="window.history.back();"
+                class="btn btn-light btn-sm">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body">
+
+
+            <!-- ====================================================== -->
+            <!-- 1. LOCATION / DATE TOP FULL WIDTH -->
+            <!-- ====================================================== -->
+            <div class="mb-4">
+
+                <div class="card border shadow-sm">
+                    <div class="card-body py-3">
+
+                        <div class="row g-3 align-items-end">
+
+                            <div class="col-md-3">
+                                <label class="fw-semibold">Location</label>
+                                <select
+                                    name="location"
+                                    class="form-control form-control-sm location-select"
+                                    data-fixed-location-id="{{ fixed_location_id }}" {# #codex #}
+                                    data-fixed-location-name="{{ fixed_location_name }}" {# #codex #}
+                                    {% if fixed_location_id %}disabled{% endif %}> {# #codex #}
+                                    {% if fixed_location_id %}<option value="{{ fixed_location_id }}" selected>{{ fixed_location_name }}</option>{% endif %} {# #codex #}
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="fw-semibold">Date</label>
+                                <input
+                                    type="date"
+                                    id="tranDate"
+                                    class="form-control form-control-sm">
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- ====================================================== -->
+            <!-- 2. PATIENT + DOCTOR / SR SIDE BY SIDE -->
+            <!-- ====================================================== -->
+            <div class="mb-4">
+
+                <div class="row g-4">
+
+                    <!-- PATIENT BOX -->
+                    <div class="col-md-6">
+
+                        <div class="card h-100 border shadow-sm">
+
+                            <div class="card-header bg-primary text-white py-2">
+                                <h6 class="card-title mb-0">
+                                    <i class="fa-solid fa-user-injured me-1"></i>
+                                    Patient Demographics Registration
+                                </h6>
+                            </div>
+
+                            <div class="card-body bg-light">
+
+                                <div class="row g-2">
+
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold">
+                                            Title
+                                        </label>
+
+                                        <select
+                                            id="pat_title"
+                                            class="form-select form-select-sm"
+                                            name="pat_title">
+
+                                            <option value="Mr.">Mr.</option>
+                                            <option value="Mrs.">Mrs.</option>
+                                            <option value="Miss">Miss</option>
+                                            <option value="Mst.">Mst.</option>
+                                            <option value="Baby">Baby</option>
+
+                                        </select>
+                                    </div>
+
+
+                                    <div class="col-md-5">
+                                        <label class="form-label small fw-bold">
+                                            Patient Name *
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="pat_name"
+                                            class="form-control form-control-sm text-dark"
+                                            name="pat_name"
+                                            placeholder="Full Name"
+                                            required>
+                                    </div>
+
+
+                                    <div class="col-md-4">
+
+                                        <label class="form-label small fw-bold">
+                                            Age
+                                        </label>
+
+                                        <div class="d-flex gap-1">
+
+                                            <input
+                                                type="number"
+                                                id="pat_age_y"
+                                                class="form-control form-control-sm"
+                                                name="pat_age_y"
+                                                placeholder="Y"
+                                                min="0">
+
+                                            <input
+                                                type="number"
+                                                id="pat_age_m"
+                                                class="form-control form-control-sm"
+                                                name="pat_age_m"
+                                                placeholder="M"
+                                                min="0"
+                                                max="11">
+
+                                            <input
+                                                type="number"
+                                                id="pat_age_d"
+                                                class="form-control form-control-sm"
+                                                name="pat_age_d"
+                                                placeholder="D"
+                                                min="0"
+                                                max="31">
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="col-md-4">
+
+                                        <label class="form-label small fw-bold">
+                                            Gender
+                                        </label>
+
+                                        <select
+                                            id="pat_gender"
+                                            class="form-select form-select-sm"
+                                            name="pat_gender">
+
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+
+                                        </select>
+
+                                    </div>
+
+
+                                    <div class="col-md-4">
+
+                                        <label class="form-label small fw-bold">
+                                            Phone Number
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="pat_phone"
+                                            class="form-control form-control-sm"
+                                            name="pat_phone"
+                                            placeholder="017xxxxxxxx">
+
+                                    </div>
+
+
+                                    <div class="col-md-4">
+
+                                        <label class="form-label small fw-bold">
+                                            Address
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="pat_address"
+                                            class="form-control form-control-sm"
+                                            name="pat_address"
+                                            placeholder="Address">
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- DOCTOR / SR BOX -->
+                    <div class="col-md-6">
+
+                        <div class="card h-100 border shadow-sm">
+
+                            <div class="card-header bg-dark text-white py-2">
+
+                                <h6 class="card-title mb-0">
+                                    <i class="fa-solid fa-user-md me-1"></i>
+                                    Reference Provider Matrix
+                                </h6>
+
+                            </div>
+
+                            <div class="card-body bg-light">
+
+
+                                <!-- DOCTOR -->
+                                <div class="row g-2 border-bottom pb-2 mb-2">
+
+                                    <div class="col-md-12">
+
+                                        <label class="form-label small fw-bold text-primary">
+                                            Search Doctor (ID / Name)
+                                        </label>
+
+                                        <select
+                                            id="doc_lookup"
+                                            class="form-select form-select-sm select2-doc"
+                                            style="width: 100%;">
+
+                                            <option value="">
+                                                -- Start Typing Doctor ID / Name --
+                                            </option>
+
+                                        </select>
+
+                                    </div>
+
+
+                                    <div style="display:none;">
+                                        <input
+                                            type="hidden"
+                                            id="doc_id"
+                                            name="doctor_id">
+                                    </div>
+
+
+                                    <div class="col-md-6">
+
+                                        <label class="form-label small text-muted mb-0">
+                                            Speciality
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="doc_speciality"
+                                            class="form-control form-control-sm bg-white"
+                                            readonly>
+
+                                    </div>
+
+
+                                    <div class="col-md-6">
+
+                                        <label class="form-label small text-muted mb-0">
+                                            Chamber
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="doc_chamber"
+                                            class="form-control form-control-sm bg-white"
+                                            readonly>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- SR -->
+                                <div class="row g-2">
+
+                                    <div class="col-md-8">
+
+                                        <label class="form-label small fw-bold text-success">
+                                            Search SR Agent (ID / Name)
+                                        </label>
+
+                                        <select
+                                            id="sr_lookup"
+                                            class="form-select form-select-sm select2-sr"
+                                            style="width: 100%;">
+
+                                            <option value="">
+                                                -- Start Typing SR ID / Name --
+                                            </option>
+
+                                        </select>
+
+                                    </div>
+
+
+                                    <div style="display:none;">
+                                        <input
+                                            type="hidden"
+                                            id="sr_id"
+                                            name="sr_id">
+                                    </div>
+
+
+                                    <div class="col-md-4">
+
+                                        <label class="form-label small text-muted mb-0">
+                                            SR Name
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="sr_name_display"
+                                            class="form-control form-control-sm bg-white"
+                                            readonly>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ====================================================== -->
+            <!-- 3. PRODUCT INFO LEFT + PRODUCT LIST RIGHT -->
+            <!-- ====================================================== -->
+            <div class="mb-4">
+
+                <div class="row g-4">
+
+
+                    <!-- PRODUCT INFO LEFT -->
+                    <div class="col-md-6">
+
+                        <div class="card h-100 border shadow-sm">
+
+                            <div class="card-header bg-secondary text-white py-2">
+                                <h6 class="mb-0">Product Information</h6>
+                            </div>
+
+                            <div class="card-body">
+
+
+                                <!-- ACCOUNT MAIN HEAD -->
+                                <div class="mb-3">
+
+                                    <label class="form-label fw-semibold">
+                                        Account Main Heads
+                                    </label>
+
+                                    <select
+                                        id="transactionmainheads"
+                                        name="transactionmainheads"
+                                        class="form-control">
+                                    </select>
+
+                                </div>
+
+
+                                <!-- TRANSACTION METHOD -->
+                                <div class="mb-3">
+
+                                    <label class="form-label fw-semibold">
+                                        Transaction Method
+                                    </label>
+
+                                    <select
+                                        id="transaction_method"
+                                        name="transaction_method"
+                                        class="form-control">
+                                    </select>
+
+                                </div>
+
+
+                                <!-- TRANSACTION GROUP -->
+                                <div class="mb-3">
+
+                                    <label class="form-label fw-semibold">
+                                        Transaction Group
+                                    </label>
+
+                                    <select
+                                        id="tran_group"
+                                        name="tran_group"
+                                        class="form-control">
+                                    </select>
+
+                                </div>
+
+
+                                <div class="row g-2 mb-3">
+
+                                    <!-- TRANSACTION WITH METHOD -->
+                                    <div class="col-md-4">
+
+                                        <label class="fw-semibold">
+                                            Transaction With Method
+                                        </label>
+
+                                        <select
+                                            id="transaction_with_method"
+                                            name="transaction_with_method"
+                                            class="form-control">
+                                        </select>
+
+                                    </div>
+
+
+                                    <!-- TRANSACTION WITH GROUP -->
+                                    <div class="col-md-4">
+
+                                        <label class="fw-semibold">
+                                            Transaction With Group
+                                        </label>
+
+                                        <select
+                                            id="transaction_with"
+                                            class="form-control form-control-sm">
+                                        </select>
+
+                                    </div>
+
+
+                                    <!-- TRANSACTION WITH USER -->
+                                    <div class="col-md-4">
+
+                                        <label class="fw-semibold">
+                                            Transaction with user
+                                        </label>
+
+                                        <select
+                                            id="transaction_with_user"
+                                            name="transaction_with_user"
+                                            class="form-control form-control-sm transaction-with-user">
+                                        </select>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="row g-2 mb-3">
+
+                                    <!-- INVOICE -->
+                                    <div class="col-md-6">
+
+                                        <label class="fw-semibold">
+                                            Invoice No.
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="paymentinvoice"
+                                            class="form-control form-control-sm"
+                                            autocomplete="off">
+
+                                    </div>
+
+
+                                    <!-- PAYMENT METHOD -->
+                                    <div class="col-md-6">
+
+                                        <label class="fw-semibold">
+                                            Pay
+                                        </label>
+
+                                        <select
+                                            id="payment_method"
+                                            name="tran_method"
+                                            class="form-control form-control-sm">
+
+                                            <option value="cash">Cash</option>
+                                            <option value="bkash">Bkash</option>
+                                            <option value="nogod">Nogod</option>
+                                            <option value="rocket">Rocket</option>
+
+                                        </select>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- PRODUCT SEARCH -->
+                                <div class="row g-2 mb-3">
+
+                                    <select
+                                        id="productSearch"
+                                        class="form-select form-select-sm select2-product"
+                                        style="width: 100%;">
+
+                                        <option value="">
+                                            -- Start Typing Product ID / Name --
+                                        </option>
+
+                                    </select>
+
+
+                                    <div class="col-md-4">
+
+                                        <label class="fw-semibold">
+                                            ID
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            id="productid"
+                                            class="form-control form-control-sm"
+                                            readonly>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- QTY / CP / MRP / TOTAL -->
+                                <div class="row g-2 align-items-end">
+
+
+                                    <div class="col-md-2">
+
+                                        <label class="fw-semibold">
+                                            QTY
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            id="quantity"
+                                            class="form-control form-control-sm">
+
+                                    </div>
+
+
+                                    <div class="col-md-2">
+
+                                        <label class="fw-semibold">
+                                            CP
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            id="cp"
+                                            class="form-control form-control-sm">
+
+                                    </div>
+
+
+                                    <div class="col-md-2">
+
+                                        <label class="fw-semibold">
+                                            MRP
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            id="mrp"
+                                            class="form-control form-control-sm">
+
+                                    </div>
+
+
+                                    <div class="col-md-3">
+
+                                        <label class="fw-semibold">
+                                            Total
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            id="total"
+                                            class="form-control form-control-sm"
+                                            readonly>
+
+                                    </div>
+
+
+                                    <div class="col-md-3">
+
+                                        <button
+                                            type="button"
+                                            id="addProductBtn"
+                                            class="btn btn-success w-100">
+
+                                            Add
+
+                                        </button>
+
+                                    </div>
+
+
+                                    <!-- HIDDEN UNIT -->
+                                    <div class="col-md-3" style="display:none;">
+
+                                        <label class="fw-semibold">
+                                            Unit
+                                        </label>
+
+                                        <select id="unit" class="form-control-sm">
+
+                                            <option>PCS</option>
+                                            <option>Box</option>
+                                            <option>Strip</option>
+                                            <option>Bottle</option>
+
+                                        </select>
+
+                                    </div>
+
+
+                                    <!-- HIDDEN EXPIRY -->
+                                    <div class="col-md-3" style="display:none;">
+
+                                        <label class="fw-semibold">
+                                            Expiry Date
+                                        </label>
+
+                                        <input
+                                            type="date"
+                                            id="expiryDate"
+                                            class="form-control-sm">
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+        <!-- SELECTED PRODUCT LIST RIGHT -->
+        <div class="col-md-6">
+
+            <div class="card h-100 border shadow-sm">
+
+                <div class="card-header bg-success text-white py-2">
+                    <h6 class="mb-0">Selected Product List</h6>
+                </div>
+
+                <div class="card-body p-0">
+
+                    <div class="table-responsive">
+
+                        <table class="table table-bordered table-sm mb-0">
+
+                            <thead class="table-success">
+
+                                <tr>
+
+                                    <th>SL</th>
+
+                                    <th style="display:none;">
+                                        Product ID
+                                    </th>
+
+                                    <th>Name</th>
+
+                                    <th>QTY</th>
+
+                                    <th>Unit Price</th>
+
+                                    <th style="display:none;">
+                                        MRP
+                                    </th>
+
+                                    <th style="display:none;">
+                                        Expiry
+                                    </th>
+
+                                    <th>Total</th>
+
+                                    <th>Remove</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="selectedPaymentListPayment"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ====================================================== -->
+            <!-- 4. SELECTED LIST LEFT + INVOICE SUMMARY RIGHT -->
+            <!-- ====================================================== -->
+
+
+                    <div class="row g-4 justify-content-end mt-4">
+
+        <!-- INVOICE SUMMARY -->
+        <div class="col-md-7">
+
+            <div class="card p-3 shadow-sm h-100">
+
+                <h6 class="fw-bold mb-3 border-bottom pb-2">
+                    Invoice Summary
+                </h6>
+
+                <div class="row mb-2">
+
+                    <label class="col-md-4 fw-semibold">
+                        Invoice Amount
+                    </label>
+
+                    <div class="col-md-8">
+
+                        <input
+                            type="number"
+                            id="invoiceAmount"
+                            class="form-control"
+                            readonly>
+
+                    </div>
+
+                </div>
+
+
+                <div class="row mb-2">
+
+                    <label class="col-md-4 fw-semibold">
+                        Discount(%)
+                    </label>
+
+                    <div class="col-md-8">
+
+                        <input
+                            type="number"
+                            id="discount"
+                            class="form-control"
+                            value="0">
+
+                    </div>
+
+                </div>
+
+
+                <div class="row mb-2">
+
+                    <label class="col-md-4 fw-semibold">
+                        Net Amount
+                    </label>
+
+                    <div class="col-md-8">
+
+                        <input
+                            type="number"
+                            id="netAmount"
+                            class="form-control"
+                            readonly>
+
+                    </div>
+
+                </div>
+
+
+                <div class="row mb-2">
+
+                    <label class="col-md-4 fw-semibold">
+                        Advance
+                    </label>
+
+                    <div class="col-md-8">
+
+                        <input
+                            type="number"
+                            id="advanced"
+                            class="form-control">
+
+                    </div>
+
+                </div>
+
+
+                <div class="row mb-3">
+
+                    <label class="col-md-4 fw-semibold">
+                        Balance
+                    </label>
+
+                    <div class="col-md-8">
+
+                        <input
+                            type="number"
+                            id="balance"
+                            class="form-control"
+                            readonly>
+
+                    </div>
+
+                </div>
+
+
+                <div class="text-center">
+
+                    <button
+                        type="button"
+                        id="saveAllBtn"
+                        class="btn btn-primary px-5">
+
+                        Save
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ====================================================== -->
+<!-- TRANSACTION PREVIEW MODAL -->
+<!-- ====================================================== -->
+<div class="modal fade"
+     id="transactionPreviewModal"
+     tabindex="-1"
+     aria-labelledby="transactionPreviewModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+
+        <div class="modal-content border-0">
+
+            <!-- MODAL HEADER -->
+            <div class="modal-header bg-dark text-white">
+
+                <div>
+                    <h5 class="modal-title mb-0"
+                        id="transactionPreviewModalLabel">
+                        Diagnosis Transaction Preview
+                    </h5>
+
+                    <small id="previewTranIdText">
+                        Transaction ID: -
+                    </small>
+                </div>
+
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
+
+            </div>
+
+
+            <!-- MODAL BODY -->
+            <div class="modal-body bg-light p-4">
+
+                <div class="invoice-sheet mx-auto">
+
+                    <!-- TITLE -->
+                    <div class="invoice-title">
+                        <h3>Diagnosis Transaction Invoice</h3>
+                        <small>
+                            Transaction ID:
+                            <span id="previewTranId">-</span>
+                        </small>
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- TOP INFORMATION -->
+                    <!-- ================================================= -->
+                    <div class="invoice-info-section">
+
+                        <!-- INVOICE / DATE -->
+                        <div class="invoice-info-row">
+
+                            <div class="invoice-info-column">
+                                <span class="invoice-label">Invoice No</span>
+                                <span class="invoice-colon">:</span>
+
+                                <span id="previewInvoiceNo"
+                                      class="invoice-value">
+                                    -
+                                </span>
+                            </div>
+
+                            <div class="invoice-info-column">
+                                <span class="invoice-label">Invoice Date</span>
+                                <span class="invoice-colon">:</span>
+
+                                <span id="previewTranDate"
+                                      class="invoice-value">
+                                    -
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <!-- PATIENT / AGE -->
+                        <div class="invoice-info-row">
+
+                            <div class="invoice-info-column">
+                                <span class="invoice-label">Patient</span>
+                                <span class="invoice-colon">:</span>
+
+                                <span id="previewPatientName"
+                                      class="invoice-value">
+                                    -
+                                </span>
+                            </div>
+
+                            <div class="invoice-info-column">
+                                <span class="invoice-label">Age</span>
+                                <span class="invoice-colon">:</span>
+
+                                <span id="previewPatientAge"
+                                      class="invoice-value">
+                                    -
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <!-- CONTACT / GENDER -->
+                        <div class="invoice-info-row">
+
+                            <div class="invoice-info-column">
+                                <span class="invoice-label">Contact</span>
+                                <span class="invoice-colon">:</span>
+
+                                <span class="invoice-value">
+
+                                    <span id="previewPatientAddress">
+                                        -
+                                    </span>
+
+                                    <span class="ms-1">
+                                        [
+                                        <span id="previewPatientPhone">
+                                            -
+                                        </span>
+                                        ]
+                                    </span>
+
+                                </span>
+                            </div>
+
+                            <div class="invoice-info-column">
+                                <span class="invoice-label">Sex</span>
+                                <span class="invoice-colon">:</span>
+
+                                <span id="previewPatientGender"
+                                      class="invoice-value">
+                                    -
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <!-- CONSULTANT -->
+                        <div class="invoice-info-row">
+
+                            <div class="invoice-info-full">
+                                <span class="invoice-label">Consultant</span>
+                                <span class="invoice-colon">:</span>
+
+                                <span class="invoice-value">
+
+                                    <span id="previewDoctorName">
+                                        -
+                                    </span>
+
+                                    <span class="ms-1 text-muted">
+                                        [
+                                        <span id="previewDoctorId">
+                                            -
+                                        </span>
+                                        ]
+                                    </span>
+
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <!-- SPECIALITY / CHAMBER -->
+                        <div class="invoice-info-row">
+
+                            <div class="invoice-info-column">
+                                <span class="invoice-label">Speciality</span>
+                                <span class="invoice-colon">:</span>
+
+                                <span id="previewDoctorSpeciality"
+                                      class="invoice-value">
+                                    -
+                                </span>
+                            </div>
+
+                            <div class="invoice-info-column">
+                                <span class="invoice-label">Chamber</span>
+                                <span class="invoice-colon">:</span>
+
+                                <span id="previewDoctorChamber"
+                                      class="invoice-value">
+                                    -
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <!-- PATIENT ID / SR -->
+                        <div class="invoice-info-row">
+
+                            <div class="invoice-info-column">
+                                <span class="invoice-label">Patient ID</span>
+                                <span class="invoice-colon">:</span>
+
+                                <span id="previewPatientId"
+                                      class="invoice-value">
+                                    -
+                                </span>
+                            </div>
+
+                            <div class="invoice-info-column">
+                                <span class="invoice-label">SR</span>
+                                <span class="invoice-colon">:</span>
+
+                                <span class="invoice-value">
+
+                                    <span id="previewSrName">
+                                        -
+                                    </span>
+
+                                    <span class="ms-1 text-muted">
+                                        [
+                                        <span id="previewSrId">
+                                            -
+                                        </span>
+                                        ]
+                                    </span>
+
+                                </span>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- TRANSACTION META -->
+                    <!-- ================================================= -->
+                    <div class="transaction-meta-box">
+
+                        <div class="row">
+
+                            <div class="col-md-4 transaction-meta-item">
+                                <span class="transaction-meta-label">
+                                    Main Head:
+                                </span>
+
+                                <span id="previewMainHead">
+                                    -
+                                </span>
+                            </div>
+
+
+                            <div class="col-md-4 transaction-meta-item">
+                                <span class="transaction-meta-label">
+                                    Method:
+                                </span>
+
+                                <span id="previewTransactionMethod">
+                                    -
+                                </span>
+                            </div>
+
+
+                            <div class="col-md-4 transaction-meta-item">
+                                <span class="transaction-meta-label">
+                                    Group:
+                                </span>
+
+                                <span id="previewTransactionGroup">
+                                    -
+                                </span>
+                            </div>
+
+
+                            <div class="col-md-4 transaction-meta-item">
+                                <span class="transaction-meta-label">
+                                    With Method:
+                                </span>
+
+                                <span id="previewTransactionWithMethod">
+                                    -
+                                </span>
+                            </div>
+
+
+                            <div class="col-md-4 transaction-meta-item">
+                                <span class="transaction-meta-label">
+                                    Transaction With:
+                                </span>
+
+                                <span id="previewTransactionWith">
+                                    -
+                                </span>
+                            </div>
+
+
+                            <div class="col-md-4 transaction-meta-item">
+                                <span class="transaction-meta-label">
+                                    User:
+                                </span>
+
+                                <span id="previewTransactionUser">
+                                    -
+                                </span>
+                            </div>
+
+
+                            <div class="col-md-4 transaction-meta-item">
+                                <span class="transaction-meta-label">
+                                    Payment:
+                                </span>
+
+                                <span id="previewPaymentMethod">
+                                    -
+                                </span>
+                            </div>
+
+
+                            <div class="col-md-4 transaction-meta-item">
+                                <span class="transaction-meta-label">
+                                    Location:
+                                </span>
+
+                                <span id="previewLocation">
+                                    -
+                                </span>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- TRANSACTION DETAILS TABLE -->
+                    <!-- ================================================= -->
+                    <div class="invoice-product-section">
+
+                        <table class="table invoice-product-table">
+
+                            <thead>
+                                <tr>
+                                    <th style="width: 7%;">
+                                        SL
+                                    </th>
+
+                                    <th style="width: 15%;">
+                                        Product ID
+                                    </th>
+
+                                    <th>
+                                        Service / Product Description
+                                    </th>
+
+                                    <th style="width: 10%;"
+                                        class="text-center">
+                                        Qty
+                                    </th>
+
+                                    <th style="width: 15%;"
+                                        class="text-end">
+                                        MRP
+                                    </th>
+
+                                    <th style="width: 15%;"
+                                        class="text-end">
+                                        Total
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="previewTransactionRows">
+
+                                <tr>
+                                    <td colspan="6"
+                                        class="text-center text-muted py-3">
+                                        No transaction details found
+                                    </td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- REMARKS -->
+                    <!-- ================================================= -->
+                    <div class="invoice-remarks">
+                        <strong>Remarks :</strong>
+                        Diagnosis Payment Transaction
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- BOTTOM SECTION -->
+                    <!-- ================================================= -->
+                    <div class="invoice-bottom-section">
+
+                        <div class="row">
+
+                            <!-- LEFT BOTTOM -->
+                            <div class="col-md-6">
+
+                                <div class="invoice-bottom-left">
+
+                                    <div class="info-line">
+                                        <strong>Transaction ID :</strong>
+
+                                        <span id="previewBottomTranId">
+                                            -
+                                        </span>
+                                    </div>
+
+
+                                    <div class="info-line">
+                                        <strong>Patient :</strong>
+
+                                        <span id="previewBottomPatientName">
+                                            -
+                                        </span>
+                                    </div>
+
+
+                                    <div class="info-line">
+                                        <strong>Doctor :</strong>
+
+                                        <span id="previewBottomDoctorName">
+                                            -
+                                        </span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- RIGHT BILL SUMMARY -->
+                            <div class="col-md-6">
+
+                                <div class="invoice-summary-box">
+
+                                    <div class="summary-row">
+                                        <span class="summary-label">
+                                            Invoice Amount
+                                        </span>
+
+                                        <span class="summary-symbol">
+                                            :
+                                        </span>
+
+                                        <span id="previewInvoiceAmount"
+                                              class="summary-value">
+                                            0.00
+                                        </span>
+                                    </div>
+
+
+                                    <div class="summary-row">
+                                        <span class="summary-label">
+                                            Discount
+                                        </span>
+
+                                        <span class="summary-symbol">
+                                            [-]
+                                        </span>
+
+                                        <span id="previewDiscount"
+                                              class="summary-value">
+                                            0.00
+                                        </span>
+                                    </div>
+
+
+                                    <div class="summary-row summary-strong">
+                                        <span class="summary-label">
+                                            Net Amount
+                                        </span>
+
+                                        <span class="summary-symbol">
+                                            :
+                                        </span>
+
+                                        <span id="previewNetAmount"
+                                              class="summary-value">
+                                            0.00
+                                        </span>
+                                    </div>
+
+
+                                    <div class="summary-row">
+                                        <span class="summary-label">
+                                            Advance
+                                        </span>
+
+                                        <span class="summary-symbol">
+                                            [-]
+                                        </span>
+
+                                        <span id="previewAdvance"
+                                              class="summary-value">
+                                            0.00
+                                        </span>
+                                    </div>
+
+
+                                    <div class="summary-row summary-balance">
+                                        <span class="summary-label">
+                                            Balance
+                                        </span>
+
+                                        <span class="summary-symbol">
+                                            :
+                                        </span>
+
+                                        <span id="previewBalance"
+                                              class="summary-value">
+                                            0.00
+                                        </span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ====================================================== -->
+            <!-- MODAL FOOTER -->
+            <!-- ====================================================== -->
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Close
+                </button>
+
+                <button type="button"
+                        id="openPrintableInvoiceBtn"
+                        class="btn btn-primary">
+
+                    <i class="fas fa-print me-1"></i>
+                    Print / Download
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ==========================================
+     ADD MORE PRODUCT CONFIRMATION MODAL
+=========================================== -->
+<div
+    class="modal fade"
+    id="addMoreProductModal"
+    tabindex="-1"
+    aria-labelledby="addMoreProductModalLabel"
+    aria-hidden="true"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false"
+>
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5
+                    class="modal-title"
+                    id="addMoreProductModalLabel"
+                >
+                    Product Added
+                </h5>
+            </div>
+
+            <div class="modal-body text-center py-4">
+
+                <div class="mb-3">
+                    <span
+                        class="d-inline-flex align-items-center justify-content-center
+                               rounded-circle bg-success text-white"
+                        style="width: 50px; height: 50px; font-size: 26px;"
+                    >
+                        ✓
+                    </span>
+                </div>
+
+                <h6 class="mb-1">
+                    Product added successfully!
+                </h6>
+
+                <p class="text-muted mb-0">
+                    Do you want to add more products?
+                </p>
+
+            </div>
+
+            <div class="modal-footer justify-content-center">
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary px-4"
+                    id="addMoreNoBtn"
+                >
+                    No
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-primary px-4"
+                    id="addMoreYesBtn"
+                >
+                    Yes
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================
+     SAVE TRANSACTION CONFIRMATION MODAL
+=========================================== -->
+<div
+    class="modal fade"
+    id="saveTransactionConfirmModal"
+    tabindex="-1"
+    aria-labelledby="saveTransactionConfirmModalLabel"
+    aria-hidden="true"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false"
+>
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5
+                    class="modal-title"
+                    id="saveTransactionConfirmModalLabel"
+                >
+                    Confirm Transaction
+                </h5>
+            </div>
+
+            <div class="modal-body text-center py-4">
+
+                <div class="mb-3">
+                    <span
+                        class="d-inline-flex align-items-center justify-content-center
+                               rounded-circle bg-primary text-white"
+                        style="width: 50px; height: 50px; font-size: 25px;"
+                    >
+                        ?
+                    </span>
+                </div>
+
+                <h6 class="mb-1">
+                    Do you want to save this transaction?
+                </h6>
+
+                <p class="text-muted mb-0">
+                    Please confirm before saving.
+                </p>
+
+            </div>
+
+            <div class="modal-footer justify-content-center">
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary px-4"
+                    id="saveConfirmNoBtn"
+                >
+                    No
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-primary px-4"
+                    id="saveConfirmYesBtn"
+                >
+                    Yes
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+    window.APP_URLS = {
+        DIVISION_COMBO_URL: "{% url 'get_divisions_combo' %}",
+        SUPPLIER_COMBO_URL: "{% url 'get_supplier_combo_g' %}",
+        // STORE_COMBO_URL: "{% url 'get_store_combo' %}",
+        TRANSACTION_WITH_URL: "{% url 'get_transaction_with_combo_p' %}",
+        DOCTOR_AUTOCOMPLETE_URL: "{% url 'api_autocomplete_doctor' %}",
+        SR_AUTOCOMPLETE_URL: "{% url 'api_autocomplete_sr' %}",
+        PRODUCT_SEARCH_URL: "/diagnosis/product-search/"
+    };
+    window.EDIT_PAYMENT_DATA = { // codex change
+        is_edit: {% if edit_mode %}true{% else %}false{% endif %}, // codex change
+        transaction: {{ edit_transaction_json|default:"{}"|safe }}, // codex change
+        details: {{ edit_details_json|default:"[]"|safe }} // codex change
+    }; // codex change
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="{% static 'js/diagnosis/diagnosis_select2.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="{% static 'js/location/location_load_combo.js' %}"></script>
+<script src="{% static 'js/diagnosis/get_page_init_add_payment.js' %}?v=codex-edit-preload"></script> {# codex change #}
+<script src="{% static 'js/combo_load/transaction_main_heads_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_with_method_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_with_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_method_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_group_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_with_user_combo.js' %}"></script>
+<script src="{% static 'js/diagnosis/product_load.js' %}?v=codex-edit-preload"></script> {# codex change #}
+
+
+{% endblock %}

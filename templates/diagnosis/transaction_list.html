@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Diagnosis Payment List{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow" style="min-height: 85vh;">
+
+        <!-- HEADER -->
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+
+            <h5 class="mb-0">Diagnosis Payment List</h5>
+
+            <div>
+                <a href="{% url 'add_diagnosis_payment_page' %}?page_id=1020300007"
+                   class="btn btn-info text-white fw-bold"
+                   id="access_add_diagnosis_payment_page">
+                    + Add Payment - 1020300007
+                </a>
+
+                <a href="{% url 'add_payment_page' %}?page_id=1020300005"
+                   class="btn btn-info text-white fw-bold"
+                   id="access_add_payment_page">
+                    + Add Payment - 1020300005
+                </a>
+            </div>
+
+        </div>
+
+        <div class="card-body">
+
+            <!-- CASCADING FILTER -->
+            <div class="row mb-3">
+
+                <div class="col-md"> <!-- codex change -->
+                    <label class="fw-semibold">Transaction Main Head</label>
+                    <select id="transactionmainheads" class="form-select" disabled> <!-- codex change -->
+                        <option value="10" selected>Diagnosis</option> <!-- codex change -->
+                    </select>
+                </div>
+
+                <div class="col-md"> <!-- codex change -->
+                    <label class="fw-semibold">Doctor</label> <!-- codex change -->
+                    <select id="doctor_filter" class="form-select"> <!-- codex change -->
+                        <option value="">All Doctor</option> <!-- codex change -->
+                    </select>
+                </div>
+
+                <div class="col-md"> <!-- codex change -->
+                    <label class="fw-semibold">SR</label> <!-- codex change -->
+                    <select id="sr_filter" class="form-select"> <!-- codex change -->
+                        <option value="">All SR</option> <!-- codex change -->
+                    </select>
+                </div>
+
+                <div class="col-md"> <!-- codex change -->
+                    <label class="fw-semibold">Patient</label> <!-- codex change -->
+                    <select id="patient_filter" class="form-select"> <!-- codex change -->
+                        <option value="">All Patient</option> <!-- codex change -->
+                    </select>
+                </div>
+
+                <div class="col-md"> <!-- codex change -->
+                    <label class="fw-semibold">Transaction By</label> <!-- codex change -->
+                    <select id="tran_by_filter" class="form-select"> <!-- codex change -->
+                        <option value="">All Transaction By</option> <!-- codex change -->
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- OLD FILTER FORM -->
+            <form method="get" class="row g-2 align-items-end mb-3">
+
+                <div class="col-md-3">
+                    <label class="small fw-semibold">Search</label>
+                    <input type="text"
+                           id="supplierSearch"
+                           name="search"
+                           class="form-control"
+                           placeholder="Search by user / invoice / tran id"
+                           value="{{ search }}">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="small fw-semibold">Status</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">Status</option>
+                        <option value="1" {% if status_filter == '1' %}selected{% endif %}>Verified</option>
+                        <option value="0" {% if status_filter == '0' %}selected{% endif %}>Non Verified</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="small fw-semibold">Start Date</label>
+                    <input type="date"
+                           id="start_date"
+                           name="start_date"
+                           class="form-control"
+                           value="{{ start_date }}">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="small fw-semibold">End Date</label>
+                    <input type="date"
+                           id="end_date"
+                           name="end_date"
+                           class="form-control"
+                           value="{{ end_date }}">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="small fw-semibold">Per Page</label>
+                    <select id="perPage"
+                            name="per_page"
+                            class="form-select">
+                        {% for n in per_page_options %}
+                            <option value="{{ n }}"
+                                {% if per_page == n %}selected{% endif %}>
+                                {{ n }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-1 d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        Filter
+                    </button>
+                </div>
+
+            </form>
+
+            <!-- PAYMENT TABLE -->
+            <div class="card">
+
+                <div class="card-header bg-success text-white text-center">
+                    Payment List
+                </div>
+
+                <div class="table-responsive"
+                     style="max-height:400px; overflow-y:auto;">
+
+                    <table class="table table-bordered table-sm mb-0">
+
+                        <thead class="table-light sticky-top">
+
+                            <tr>
+                                <th>SL</th>
+                                <th>Tran ID</th>
+                                <th>Invoice Ref</th>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th>Doctor</th> <!-- codex change -->
+                                <th>SR</th> <!-- codex change -->
+                                <th>Patient</th> <!-- codex change -->
+                                <th>Transaction By</th> <!-- codex change -->
+                                <th class="text-end">Bill</th>
+                                <th class="text-end">Discount</th>
+                                <th class="text-end">Net</th>
+                                <th class="text-end">Advance</th>
+                                <th class="text-end">Due Col</th>
+                                <th class="text-end">Due Disc</th>
+                                <th class="text-end">Due</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="paymentListTableBody"></tbody>
+
+                    </table>
+
+                </div>
+
+                <!-- TOTAL + ACTION AREA -->
+                <div class="card-body border-top">
+
+                    <div class="row align-items-end">
+
+                        <div class="col-md-3">
+                            <label class="fw-semibold">Total Due</label>
+                            <input type="text"
+                                   id="total_due"
+                                   class="form-control"
+                                   readonly>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="fw-semibold">Payment</label>
+                            <input type="number"
+                                   id="fifo_payment"
+                                   class="form-control">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>&nbsp;</label>
+                            <button type="button"
+                                    class="btn btn-primary form-control"
+                                    id="fifo_pay_btn">
+                                Proceed
+                            </button>
+                        </div>
+
+                        <div class="col-md-4 text-end">
+                            <label>&nbsp;</label>
+                            <div>
+                                <button type="button"
+                                        id="saveAllBtn"
+                                        class="btn btn-primary px-5">
+                                    Save
+                                </button>
+
+                                <button type="button"
+                                        id="printReportBtn"
+                                        class="btn btn-dark px-4">
+                                    Print / Download PDF
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+window.APP_URLS = {
+    PAYMENT_LIST_URL: "{% url 'diagnosis_payment_list_load' %}",
+    PAYMENT_FORM_BASE_URL: "/diagnosis/payment-form/", // codex change
+    FIFO_PAYMENT_URL: "/diagnosis/party-payment/process-fifo-payment/", // codex change
+    // PAYMENT_REPORT_URL: "/payment/report/pdf/",
+    TRAN_MAIN_HEAD_URL: "{% url 'get_transaction_main_heads_combo' %}",
+    TRAN_WITH_METHOD_URL: "/combo_load/transaction-with-method-combo/",
+    TRAN_WITH_URL: "/combo_load/transaction-with-combo/",
+    TRAN_USERS_URL: "/combo_load/transaction-with-user-combo/",
+    DIAGNOSIS_DOCTOR_FILTER_URL: "{% url 'diagnosis_filter_doctor_combo' %}", // codex change
+    DIAGNOSIS_SR_FILTER_URL: "{% url 'diagnosis_filter_sr_combo' %}", // codex change
+    DIAGNOSIS_PATIENT_FILTER_URL: "{% url 'diagnosis_filter_patient_combo' %}", // codex change
+    DIAGNOSIS_TRAN_BY_FILTER_URL: "{% url 'diagnosis_filter_tran_by_combo' %}", // codex change
+    PAYMENT_REPORT_URL: "{% url 'diagnosis_payment_report_pdf' %}",
+    DIAGNOSIS_PAYMENT_REPORT_URL: "{% url 'diagnosis_payment_report_pdf' %}",
+};
+</script>
+
+<script src="{% static 'js/combo_load/transaction_main_heads_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_with_method_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_with_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_with_user_combo.js' %}"></script>
+
+<script src="{% static 'js/diagnosis/payment_list.js' %}"></script>
+<script src="{% static 'js/diagnosis/reports/diagnosis_report.js' %}"></script>
+
+{% endblock %}

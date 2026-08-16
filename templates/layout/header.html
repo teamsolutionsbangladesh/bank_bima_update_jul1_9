@@ -1,0 +1,21 @@
+{% load static %}
+
+<header class="header">
+    <div class="header-left">
+        <!-- Clickable logo div -->
+        <div class="header-logo-link" onclick="location.href='{% url 'dashboard' %}'" style="cursor: pointer;">
+            <img src="{% if request.session.company_logo %}{{ request.session.company_logo }}{% else %}{% static 'images/logo.png' %}{% endif %}" alt="ERP System" class="header-logo"> {# #codex #}
+        </div>
+        <!-- Heading next to logo -->
+        <h1 class="header-title">{{ request.session.company_name|default:"TEAM SOLUTIONS BANGLADESH" }}</h1> {# #codex #}
+    </div>
+
+    <div class="header-right">
+        <span class="header-user">Welcome, {{ request.session.user_name }}</span>
+        <button class="header-logout-btn" onclick="location.href='{% url 'logout' %}'">
+            Logout
+        </button>
+    </div>
+</header>
+
+

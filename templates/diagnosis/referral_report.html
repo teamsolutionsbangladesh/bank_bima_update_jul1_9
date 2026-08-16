@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Diagnosis Referral Report{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm"> <!-- #codex -->
+    <div class="card-header bg-primary text-white"> <!-- #codex -->
+        <h5 class="mb-0">Diagnosis Referral Report</h5> <!-- #codex -->
+    </div> <!-- #codex -->
+    <div class="card-body"> <!-- #codex -->
+        <div class="row g-2 align-items-end mb-3"> <!-- #codex -->
+            <div class="col-md-2"> <!-- #codex -->
+                <label class="fw-semibold">Report Type</label> <!-- #codex -->
+                <select id="refReportType" class="form-select form-select-sm"> <!-- #codex -->
+                    <option value="doctor">Doctor</option> <!-- #codex -->
+                    <option value="sr">SR</option> <!-- #codex -->
+                </select> <!-- #codex -->
+            </div> <!-- #codex -->
+            <div class="col-md-3"> <!-- #codex -->
+                <label class="fw-semibold">Doctor / SR</label> <!-- #codex -->
+                <select id="refProvider" class="form-select form-select-sm"> <!-- #codex -->
+                    <option value="">-- Select --</option> <!-- #codex -->
+                </select> <!-- #codex -->
+            </div> <!-- #codex -->
+            <div class="col-md-2"> <!-- #codex -->
+                <label class="fw-semibold">Start Date</label> <!-- #codex -->
+                <input type="date" id="refStartDate" class="form-control form-control-sm"> <!-- #codex -->
+            </div> <!-- #codex -->
+            <div class="col-md-2"> <!-- #codex -->
+                <label class="fw-semibold">End Date</label> <!-- #codex -->
+                <input type="date" id="refEndDate" class="form-control form-control-sm"> <!-- #codex -->
+            </div> <!-- #codex -->
+            <div class="col-md-2"> <!-- #codex -->
+                <button type="button" id="refFilterBtn" class="btn btn-sm btn-success w-100">Filter</button> <!-- #codex -->
+            </div> <!-- #codex -->
+            <div class="col-md-1"> <!-- #codex -->
+                <button type="button" id="refPdfBtn" class="btn btn-sm btn-dark w-100">PDF</button> <!-- #codex -->
+            </div> <!-- #codex -->
+        </div> <!-- #codex -->
+
+        <div class="table-responsive"> <!-- #codex -->
+            <table class="table table-bordered table-sm align-middle"> <!-- #codex -->
+                <thead class="table-dark"> <!-- #codex -->
+                    <tr> <!-- #codex -->
+                        <th>SL</th> <!-- #codex -->
+                        <th>Tran ID</th> <!-- #codex -->
+                        <th>Date</th> <!-- #codex -->
+                        <th>Group Name</th> <!-- #codex -->
+                        <th>Tran Head Name</th> <!-- #codex -->
+                        <th class="text-end">Test Tk</th> <!-- #codex -->
+                        <th class="text-end">Discount</th> <!-- #codex -->
+                        <th>Ref Type</th> <!-- #codex -->
+                        <th class="text-end">Ref Rate</th> <!-- #codex -->
+                        <th class="text-end">Referral</th> <!-- #codex -->
+                    </tr> <!-- #codex -->
+                </thead> <!-- #codex -->
+                <tbody id="refReportBody"> <!-- #codex -->
+                    <tr><td colspan="10" class="text-center text-muted py-4">Filter report</td></tr> <!-- #codex -->
+                </tbody> <!-- #codex -->
+                <tfoot class="table-light"> <!-- #codex -->
+                    <tr> <!-- #codex -->
+                        <th colspan="5" class="text-end">Total</th> <!-- #codex -->
+                        <th class="text-end" id="totalTestTk">0.00</th> <!-- #codex -->
+                        <th class="text-end" id="totalDiscount">0.00</th> <!-- #codex -->
+                        <th colspan="2"></th> <!-- #codex -->
+                        <th class="text-end" id="totalReferral">0.00</th> <!-- #codex -->
+                    </tr> <!-- #codex -->
+                </tfoot> <!-- #codex -->
+            </table> <!-- #codex -->
+        </div> <!-- #codex -->
+    </div> <!-- #codex -->
+</div> <!-- #codex -->
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/diagnosis/referral_report.js' %}"></script> <!-- #codex -->
+{% endblock %}

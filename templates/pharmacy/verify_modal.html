@@ -1,0 +1,198 @@
+<div class="modal-dialog modal-xl" style="max-width: 100%; height: 70vh;">
+  <div class="modal-content" style="height: 100%;">
+    <div class="modal-body" style="overflow-y: auto;">
+      <input type="hidden" id="edit_tran_id">
+
+      <h4 class="text-center mb-4">Verify Pharmacy Purchase</h4>
+
+      <div class="container-fluid">
+        <div class="row">
+
+          <!-- LEFT SIDE -->
+          <div class="col-md-6">
+
+            <!-- DATE / STORE / LOCATION -->
+             
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="fw-semibold">Location</label>
+                <input type="text" id="edit_location" class="form-control" placeholder="Enter location">
+              </div>
+
+              <div class="col-md-4">
+                <label class="fw-semibold">Store <span class="text-danger">*</span></label>
+               <select id="edit_store" class="form-select">
+                  {% for store in stores %}
+                      <option value="{{ store.id }}">{{ store.name }}</option>
+                  {% endfor %}
+              </select>
+
+              </div>
+
+              <div class="col-md-4">
+                <label class="fw-semibold">Date</label>
+                <input type="date" id="edit_date" class="form-control">
+              </div>
+            </div>
+
+            <!-- SUPPLIER -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="fw-semibold">Supplier Name</label>
+                <input type="text" id="edit_supplier" name="supplier" class="form-control" placeholder="Select Supplier">
+              </div>
+
+              <div class="col-md-6">
+                <label class="fw-semibold">Payment Method</label>
+                <select id="edit_payment_method" name="tran_method" class="form-control">
+                  <option value="" disabled selected>Select Payment Method</option>
+                  <option value="bkash">Bkash</option>
+                  <option value="nogod">Nogod</option>
+                  <option value="rocket">Rocket</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- PRODUCT SEARCH -->
+            <div class="mb-3">
+              <label class="fw-semibold">Product Name</label>
+              <input type="text" id="edit_productSearch" class="form-control form-control-sm" autocomplete="off">
+              <span class="text-danger small name_error"></span>
+            </div>
+
+            <!-- QTY / UNIT / EXPIRY -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="fw-semibold">QTY</label>
+                <input type="number" id="edit_quantity" class="form-control">
+              </div>
+
+              <div class="col-md-4">
+                <label class="fw-semibold">Unit</label>
+                <select id="edit_unit" class="form-select">
+                  <option>PCS</option>
+                  <option>Box</option>
+                  <option>Strip</option>
+                  <option>Bottle</option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="fw-semibold">Expiry Date</label>
+                <input type="date" id="edit_expiry" class="form-control">
+              </div>
+            </div>
+
+            <!-- CP / MRP / TOTAL -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="fw-semibold">CP</label>
+                <input type="number" id="edit_price" class="form-control">
+              </div>
+              <div class="col-md-4">
+                <label class="fw-semibold">MRP</label>
+                <input type="number" id="edit_mrp" class="form-control">
+              </div>
+              <div class="col-md-4">
+                <label class="fw-semibold">Total</label>
+                <input type="number" id="edit_total" class="form-control" readonly>
+              </div>
+            </div>
+
+            <!-- SELECTED MEDICINES TABLE -->
+            <div class="table-responsive mb-3">
+              <table class="table table-bordered table-sm">
+                <thead class="bg-success text-white">
+                  <tr>
+                    <th>SL</th>
+                    <th>Name</th>
+                    <th>QTY</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                    <th>Remove</th>
+                  </tr>
+                </thead>
+                <tbody id="edit_selectedMedicineList"></tbody>
+              </table>
+            </div>
+
+          </div>
+
+          <!-- RIGHT SIDE -->
+          <div class="col-md-6">
+
+            <!-- PRODUCT LIST -->
+            <div class="card mb-4">
+              <div class="card-header bg-success text-white text-center">
+                Product List
+              </div>
+              <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
+                <table class="table table-bordered table-sm">
+                  <thead class="table-success sticky-top">
+                    <tr>
+                      <th>Product Name</th>
+                      <th>Product Group</th>
+                      <th>Manufacture</th>
+                      <th>Form</th>
+                      <th>Qty</th>
+                      <th>CP</th>
+                      <th>MRP</th>
+                      <th>Select</th>
+                    </tr>
+                  </thead>
+                  <tbody id="edit_medicineListTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- INVOICE SUMMARY -->
+            <div class="invoice-summary">
+
+              <div class="row g-3 mb-2">
+                <label class="col-md-4 fw-semibold">Invoice Amount</label>
+                <div class="col-md-8">
+                  <input type="number" id="edit_invoiceAmount" name="bill_amount" class="form-control" readonly>
+                </div>
+              </div>
+
+              <div class="row g-3 mb-2">
+                <label class="col-md-4 fw-semibold">Discount(%)</label>
+                <div class="col-md-8">
+                  <input type="number" id="edit_discount" name="discount" class="form-control" value="0">
+                </div>
+              </div>
+
+              <div class="row g-3 mb-2">
+                <label class="col-md-4 fw-semibold">Net Amount</label>
+                <div class="col-md-8">
+                  <input type="number" id="edit_netAmount" name="net_amount" class="form-control" readonly>
+                </div>
+              </div>
+
+              <div class="row g-3 mb-2">
+                <label class="col-md-4 fw-semibold">Advance</label>
+                <div class="col-md-8">
+                  <input type="number" id="edit_advanced" name="payment" class="form-control">
+                </div>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <label class="col-md-4 fw-semibold">Balance</label>
+                <div class="col-md-8">
+                  <input type="number" id="edit_balance" name="due" class="form-control" readonly>
+                </div>
+              </div>
+
+              <div class="text-center">
+                <button type="button" id="EditVerifyBtn" class="btn btn-success px-5">Verify</button>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

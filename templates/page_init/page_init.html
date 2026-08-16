@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container py-4">
+    <div class="row">
+
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4">
+                <h3>Add Page Init</h3>
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <!-- PAGE ID -->
+                    <div class="mb-2">
+                        <label style="background-color:#e5ff1c; color:rgb(0, 5, 164); padding:5px 10px; border-radius:4px;">
+                            Page ID
+                        </label>
+                        <input type="number" name="page_id" id="page_id" class="form-control" required>
+                    </div>
+
+                    <br>
+                    <br>
+
+                    <!-- TRAN MAIN HEAD (DROPDOWN) -->
+                    <div class="mb-2">
+                        <label style="background-color:#0066ff; color:white; padding:5px 10px; border-radius:4px;">
+                            Transaction Main Head
+                        </label>
+                        <select name="transactionmainheads" id="transactionmainheads" class="form-control">
+
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="load_head_all" name="load_head_all">
+                            <label class="form-check-label" for="load_head_all">
+                                Load Head All
+                            </label>
+                        </div>
+                    </div>
+
+                    <br>
+                    <br>
+
+                    <div class="mb-2">
+                        <label style="background-color:#41e6ff; color:rgb(25, 0, 69); padding:5px 10px; border-radius:4px;">
+                            Transaction Group Method
+                        </label>
+                        <select name="transaction_method" id="transaction_method" class="form-control">
+
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label style="background-color:#41e6ff; color:rgb(25, 0, 69); padding:5px 10px; border-radius:4px;">
+                            Transaction Group
+                        </label>
+                        <select name="tran_group" id="tran_group" class="form-control">
+
+                        </select>
+                    </div>
+                    
+                    <br>
+                    <br>
+
+                    <!-- USER TRAN METHOD -->
+                    <div class="mb-2">
+                        <label style="background-color:#ffc15c; color:rgb(0, 5, 164); padding:5px 10px; border-radius:4px;">
+                            Transaction With Method
+                        </label>
+                        <select name="transaction_with_method" id="transaction_with_method" class="form-control">
+
+                        </select>
+                    </div>
+
+                    <!-- TRAN WITH (DROPDOWN) -->
+                    <div class="mb-2">
+                        <label style="background-color:#ffc15c; color:rgb(0, 5, 164); padding:5px 10px; border-radius:4px;">
+                            Transaction With
+                        </label>
+                        <select name="transaction_with" id="transaction_with" class="form-control">
+
+                        </select>
+                    </div> 
+
+                    <br>
+
+                    <div class="d-flex justify-content-center mt-3">
+                        <button type="submit" id="saveBtn" class="btn btn-primary me-2 px-4">
+                        💾 Save
+                        </button>
+
+                        <a href="{% url 'page_init' %}" class="btn btn-secondary">Back</a>
+
+                        <button id="cancelBtn" class="btn btn-primary me-2 px-4">
+                        💾 Cancel
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4">
+                <div class="table-responsive" style="max-height: 800px; overflow-y: auto;" id="tableContainerRight">
+                    <table class="table table-bordered table-striped table-hover table-sm custom-border full-width-table" id="staffTableRight">
+                        <thead class="table-dark" style="position: sticky; top: 0; z-index: 2;">
+                            <tr>
+                                <th>#</th>
+                                <th>Id</th>
+                                <th style="background-color:#e5ff1c; color:rgb(0, 5, 164); padding:5px 10px; border-radius:4px;">Page ID</th>
+                                <th class="bg-blue">Tran Main Head ID</th>
+                                <th class="bg-danger text-white">Tran Group Method</th>
+                                <th class="bg-danger text-white">Tran Group</th>
+                                <th class="bg-warning text-dark">Tran With Method</th>
+                                <th class="bg-warning text-dark">Tran With ID</th>
+                                <th>Status</th>
+                                <th>Action</th>
+
+                                <th class="bg-success text-white">Tran Group Method</th>
+                                <th class="bg-danger text-white">Tran Group Method</th>
+                                <th class="bg-warning text-dark">Tran Group Method</th>
+                                <th class="bg-info text-dark">Tran Group Method</th>
+                                <th class="bg-secondary text-white">Tran Group Method</th>
+                                <th class="bg-dark text-white">Tran Group Method</th>                            
+                            </tr>
+                        </thead>
+                        <tbody id="pageInitTableBody">
+                            <!-- Rows loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="{% static 'js/save_csrftoken.js' %}"></script>
+<script src="{% static 'js/page_init/page_init_generate_id.js' %}"></script>
+<script src="{% static 'js/page_init/page_init.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_main_heads_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_with_method_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_with_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_method_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_group_combo.js' %}"></script>
+<!-- <script src="{% static 'js/common-table-filter.js' %}"></script> -->
+{% endblock %}

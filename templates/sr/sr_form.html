@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}SR Entry Workspace Setup Workspace{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+      
+        <!-- LEFT PANEL FORM WORKSPACE -->
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4">
+                <h3 class="mb-3 text-secondary" id="formHeaderTitle">
+                    {% if edit_id %}
+                    <i class="fa-solid fa-user-pen text-warning"></i> Editing SR Profile...
+                    {% else %}
+                    New SR Registration....
+                    {% endif %}
+                </h3>
+                
+                <form id="addForm" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" id="sr_id" name="id" value="{{ edit_id|default:'' }}">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small mb-1">Representative Agent Full Name *</label>
+                        <input type="text" id="name" name="name" class="form-control text-dark" 
+                               value="{{ sr.name|default:'' }}" placeholder="Enter full name entry" required>
+                        <span class="text-danger small name_error"></span>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-7">
+                            <label class="form-label fw-semibold small mb-1">Corporate Brand Company Name</label>
+                            <input type="text" id="company_name" name="company_name" class="form-control text-dark" 
+                                   value="{{ sr.company_name|default:'' }}" placeholder="e.g. Incepta Pharmaceuticals">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-semibold small mb-1">Commission Target (%)</label>
+                            <input type="number" step="0.01" min="0" max="100" id="commission_percentage" name="commission_percentage" 
+                                   class="form-control text-dark font-monospace fw-bold text-end" 
+                                   value="{{ sr.commission_percentage|default:'0.00' }}">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-center mt-4">
+                        {% if edit_id %}
+                        <button type="submit" id="saveBtn" class="btn btn-warning me-2 px-4 fw-bold shadow-sm text-dark">
+                            💾 Update SR Record
+                        </button>
+                        {% else %}
+                        <button type="submit" id="saveBtn" class="btn btn-primary me-2 px-4 fw-bold shadow-sm">
+                            💾 Save SR Agent
+                        </button>
+                        {% endif %}
+                        <a href="{% url 'sr_list' %}" class="btn btn-success px-4">⬅️ Back to List</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL RUNNING DATA LOG SUMMARY MATRIX -->
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4">
+                <h4 class="mb-3 text-secondary border-bottom pb-2">Recently Registered SR Agents</h4>
+                <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+                    <table class="table table-bordered table-striped table-hover table-sm align-middle small">
+                        <thead class="table-dark" style="position: sticky; top: 0; z-index: 2;">
+                            <tr>
+                                <th>#</th>
+                                <th>SR Agent ID</th>
+                                <th>Full Name</th>
+                                <th>Company</th>
+                                <th>Rate</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="srTableBody">    
+                            {% for s in sr_agents %}
+                            <tr id="row{{ s.id }}">
+                                <td>{{ forloop.counter }}</td>
+                                <td><span class="badge bg-secondary">SR{{ s.id|stringformat:"010d" }}</span></td>
+                                <td><strong>{{ s.name }}</strong></td>
+                                <td>{{ s.company_name|default:"-" }}</td>
+                                <td><span class="text-success fw-bold">{{ s.commission_percentage }}%</span></td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-xs btn-warning py-0 px-2 inlineEditBtn" data-id="{{ s.id }}">
+                                        <i class="fa-solid fa-arrow-left"></i> Load
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr class="no-data-row"><td colspan="6" class="text-center py-3 text-muted">No real-time matrix available.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>  
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="{% static 'js/sr/sr_agents.js' %}"></script>
+<script>
+    $(document).ready(function() {
+        const activeEditId = $("#sr_id").val();
+        if (activeEditId) {
+            setTimeout(function() {
+                $(`.inlineEditBtn[data-id="${activeEditId}"]`).trigger('click');
+            }, 100);
+        }
+    });
+</script>
+{% endblock %}

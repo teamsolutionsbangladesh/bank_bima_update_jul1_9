@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<meta name="csrf-token" content="{{ csrf_token }}">
+
+<h3>Admin Details</h3>
+<button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addModal">
+    Add Admin
+</button>
+
+<div class="table-responsive">
+<table class="table table-bordered table-sm">
+    <thead class="table-dark">
+        <tr>
+            <th>SL</th>
+            <th>Admin ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Tran Type</th>
+            <th>Transaction With</th>
+            <th>Image</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="adminTableBody">
+        {% for a in admins %}
+        <tr data-id="{{ a.id }}"
+            data-tran-type-id="{{ a.tran_type_id|default:'' }}"
+            data-tran-with-id="{{ a.tran_with_id|default:'' }}">
+            <td>{{ forloop.counter }}</td>
+            <td class="ad-user-id">{{ a.user_id }}</td>
+            <td class="ad-name">{{ a.name }}</td>
+            <td class="ad-email">{{ a.email }}</td>
+            <td class="ad-phone">{{ a.phone }}</td>
+            <td class="ad-tran-type">{{ a.tran_type_name }}</td>
+            <td class="ad-tran-with">{{ a.tran_with_name }}</td>
+            <td class="ad-image">
+                {% if a.logo_url %}
+                    <img src="{{ a.logo_url }}" style="height:40px;">
+                {% else %}
+                    <span>No Image</span>
+                {% endif %}
+            </td>
+            <td>
+                <button class="btn btn-sm btn-info edit-btn" data-bs-toggle="modal" data-bs-target="#editModal">Edit</button>
+                <button class="btn btn-sm btn-danger delete-btn">Delete</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal fade" id="addModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content p-4">
+      <h5 class="mb-3">Add Admin</h5>
+
+      <div class="mb-2">
+        <label for="addName" class="form-label">Admin Name *</label>
+        <input id="addName" class="form-control" placeholder="Enter name">
+      </div>
+
+      <div class="mb-2">
+        <label for="addEmail" class="form-label">Email *</label>
+        <input id="addEmail" class="form-control" placeholder="Enter email">
+      </div>
+
+      <div class="mb-2">
+        <label for="addPhone" class="form-label">Phone *</label>
+        <input id="addPhone" class="form-control" placeholder="Enter phone">
+      </div>
+
+      <div class="mb-2">
+        <label for="addTranType" class="form-label">Tran Type *</label>
+        <select id="addTranType" class="form-control">
+          <option value="">Select Tran Type</option>
+          {% for h in tran_heads %}
+            <option value="{{ h.id }}">{{ h.type_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-2">
+        <label for="addTranWith" class="form-label">Transaction With *</label>
+        <select id="addTranWith" class="form-control">
+          <option value="">Select Transaction With</option>
+        </select>
+      </div>
+
+      <div class="mb-2">
+        <label for="addPassword" class="form-label">Password *</label>
+        <input type="password" id="addPassword" class="form-control" placeholder="Enter password">
+      </div>
+
+      <div class="mb-2">
+        <label for="addConfirmPassword" class="form-label">Confirm Password *</label>
+        <input type="password" id="addConfirmPassword" class="form-control" placeholder="Confirm password">
+      </div>
+
+      <div class="mb-3">
+        <label for="addImage" class="form-label">Image</label>
+        <input type="file" id="addImage" class="form-control">
+      </div>
+
+      <button id="addSaveBtn" class="btn btn-success">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal fade" id="editModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content p-4">
+      <h5 class="mb-3">Edit Admin</h5>
+
+      <input type="hidden" id="editId">
+
+      <div class="mb-2">
+        <label for="editName" class="form-label">Admin Name *</label>
+        <input id="editName" class="form-control">
+      </div>
+
+      <div class="mb-2">
+        <label for="editEmail" class="form-label">Email *</label>
+        <input id="editEmail" class="form-control">
+      </div>
+
+      <div class="mb-2">
+        <label for="editPhone" class="form-label">Phone *</label>
+        <input id="editPhone" class="form-control">
+      </div>
+
+      <div class="mb-2">
+        <label for="editTranType" class="form-label">Tran Type *</label>
+        <select id="editTranType" class="form-control">
+          <option value="">Select Tran Type</option>
+          {% for h in tran_heads %}
+            <option value="{{ h.id }}">{{ h.type_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-2">
+        <label for="editTranWith" class="form-label">Transaction With *</label>
+        <select id="editTranWith" class="form-control">
+          <option value="">Select Transaction With</option>
+        </select>
+      </div>
+
+      <div class="mb-2">
+        <label for="editPassword" class="form-label">Password</label>
+        <input type="password" id="editPassword" class="form-control" placeholder="Enter new password if changing">
+      </div>
+
+      <div class="mb-2">
+        <label for="editConfirmPassword" class="form-label">Confirm Password</label>
+        <input type="password" id="editConfirmPassword" class="form-control" placeholder="Confirm new password">
+      </div>
+
+      <div class="mb-3">
+        <label for="editImage" class="form-label">Image</label>
+        <input type="file" id="editImage" class="form-control">
+      </div>
+
+      <button id="editSaveBtn" class="btn btn-primary">Update</button>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'js/users/admin.js' %}"></script>
+{% endblock %}
+
+{% endblock %}

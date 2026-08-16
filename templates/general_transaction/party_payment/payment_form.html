@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Party Payment Form{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow">
+
+        <!-- HEADER -->
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Payment Entry Form</h5>
+        </div>
+
+        <div class="card-body">
+
+            <!-- TRANSACTION INFO -->
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+                    <label>Transaction ID</label>
+                    <input type="text" class="form-control" value="{{ transaction.tran_id }}" readonly>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Invoice Ref</label>
+                    <input type="text" class="form-control"
+                        value="{{ transaction.invoice_ref }}"
+                        readonly>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Date</label>
+                    <input type="text" class="form-control" value="{{ transaction.tran_date }}" readonly>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Transaction With</label>
+                    <input type="text" class="form-control" value="{{ transaction.tran_type_with }}" readonly>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Transaction User</label>
+                    <input type="text" class="form-control" value="{{ transaction.tran_user }}" readonly>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Bill Amount</label>
+                    <input type="text" class="form-control" value="{{ transaction.bill_amount }}" readonly>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Discount</label>
+                    <input type="text" class="form-control" value="{{ transaction.discount }}" readonly>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Net Amount</label>
+                    <input type="text" class="form-control" value="{{ transaction.net_amount }}" readonly>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Advance</label>
+                    <input type="text" class="form-control" value="{{ transaction.payment }}" readonly>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Due Collection</label>
+                    <input type="text" class="form-control" value="{{ transaction.due_col }}" readonly>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Due Discount</label>
+                    <input type="text" class="form-control" value="{{ transaction.due_disc }}" readonly>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Current Due</label>
+                    <input type="text" id="current_due" class="form-control text-danger fw-bold"
+                           value="{{ transaction.due }}" readonly>
+                </div>
+
+            </div>
+
+            <hr>
+
+            <!-- PAYMENT INPUT -->
+            <div class="row">
+              
+                <div class="col-md-6 mb-3">
+                    <label class="fw-semibold">Payment Amount</label>
+                    <input type="number"
+                           id="pay_amount"
+                           class="form-control"
+                           placeholder="Enter amount to pay">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="fw-semibold">Discount Amount</label>
+                    <input type="number"
+                           id="due_discount"
+                           class="form-control"
+                           placeholder="Enter due discount amount">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="fw-semibold">Balance Amount</label>
+                    <input type="number"
+                           id="balance"
+                           class="form-control">
+                </div>
+
+            </div>
+
+            <!-- ACTION -->
+            <div class="text-end mt-3">
+
+                <button class="btn btn-secondary"
+                        onclick="history.back()">
+                    Back
+                </button>
+
+                <button class="btn btn-success"
+                        id="proceedPaymentBtn">
+                    Proceed Payment
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+    window.TRANSACTION_ID = "{{ transaction.id }}";
+</script>
+
+<script>
+
+    $("#pay_amount, #due_discount").on("input", function () {
+
+        const currentDue = parseFloat($("#current_due").val()) || 0;
+        const payAmount = parseFloat($("#pay_amount").val()) || 0;
+        const dueDiscount = parseFloat($("#due_discount").val()) || 0;
+        let balance = currentDue - payAmount - dueDiscount;
+
+        $("#balance").val(balance.toFixed(2));
+    });
+
+    $("#proceedPaymentBtn").on("click", function () {
+
+        const currentDue = parseFloat($("#current_due").val()) || 0;
+        const payAmount = parseFloat($("#pay_amount").val()) || 0;
+        // let newDue = currentDue - payAmount;
+        const dueDiscount = parseFloat($("#due_discount").val()) || 0;
+        const balance = parseFloat($("#balance").val());
+        const id = window.TRANSACTION_ID;
+
+
+        if (!payAmount || payAmount <= 0) {
+            alert("Enter valid payment amount");
+            return;
+        }
+        if (balance < 0) {
+            alert("Enter valid payment / discount amount");
+            return;
+        }
+        // if (dueDiscount > (currentDue - payAmount)) {
+        //     alert("Enter valid discount amount");
+        //     return;
+        // }
+
+        $("#balance").val(currentDue - payAmount - dueDiscount);
+
+        $.ajax({
+            url: `/general/party-payment/process/${id}/`,
+            method: "POST",
+            data: {
+                pay_amount: payAmount,
+                due_discount: dueDiscount
+            },
+
+            success: function (res) {
+
+                if (res.success) {
+                    alert("Payment Successful!");
+                    window.location.href = res.redirect_url;
+                } else {
+                    alert(res.error || "Payment failed");
+                }
+            },
+
+            error: function (err) {
+                console.log(err.responseText);
+                alert(err.responseJSON?.error || "Payment failed");
+            }
+        });
+    });
+
+</script>
+
+{% endblock %}

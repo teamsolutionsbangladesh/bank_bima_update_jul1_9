@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="card">
+
+    <!-- TOP BAR -->
+    <div class="card-header">
+        <div class="row align-items-center">
+            <!-- Left : Add -->
+            <div class="col-md-4">
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
+                    + Add Bank Details
+                </button>
+            </div>
+
+            <!-- Right : Search -->
+            <div class="col-md-8 text-end">
+                <input type="text" id="searchBank" class="form-control w-50 d-inline"
+                       placeholder="Search...">
+            </div>
+        </div>
+    </div>
+
+    <!-- CENTER HEADER -->
+    <div class="card-body pt-3">
+
+        <h4 class="text-center mb-4 fw-semibold">Bank Details</h4>
+
+        <!-- TABLE -->
+        <table class="table table-bordered table-hover">
+            <thead>
+
+                        <tr>
+                            <th>SL</th>
+                            <th>Bank Id</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Location</th>
+                            <th>Address</th>
+                            <th>Action</th>
+                        </tr>
+                       <tr class="filter-row">
+                            <th></th>
+                            <th><input class="form-control column-filter" data-col="1" placeholder="Search ID"></th>
+                            <th><input class="form-control column-filter" data-col="2" placeholder="Search Name"></th>
+                            <th><input class="form-control column-filter" data-col="3" placeholder="Search Email"></th>
+                            <th><input class="form-control column-filter" data-col="4" placeholder="Search Phone"></th>
+                            <th><input class="form-control column-filter" data-col="5" placeholder="Search Location"></th>
+                            <th><input class="form-control column-filter" data-col="6" placeholder="Search Address"></th>
+                            <th></th>
+                        </tr>
+
+                        
+
+
+            </thead>
+            <tbody id="bankTable">
+                {% for b in banks %}
+                <tr id="row{{b.id}}">
+                    <td>{{forloop.counter}}</td>
+                    <td>{{b.user_id}}</td>
+                    <td>{{b.name}}</td>
+                    <td>{{b.email}}</td>
+                    <td>{{b.phone}}</td>
+                    <td>
+                        {% if b.loc %}
+                            {{ b.loc.division }} - {{ b.loc.district }} - {{ b.loc.upazila }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>{{b.address}}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary editBtn" data-id="{{b.id}}">Edit</button>
+                        <button class="btn btn-sm btn-danger deleteBtn" data-id="{{b.id}}">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal fade" id="addModal">
+<div class="modal-dialog modal-lg">
+<form id="addForm">{% csrf_token %}
+<div class="modal-content">
+<div class="modal-header"><h5>Add Bank Details</h5></div>
+<div class="modal-body">
+    <div class="row g-2">
+        <div class="col-md-4">
+            <label>Bank Name *</label>
+            <input name="name" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+            <label>Email *</label>
+            <input name="email" class="form-control" type="email" required>
+        </div>
+        <div class="col-md-4">
+            <label>Phone *</label>
+            <input name="phone" class="form-control" required>
+        </div>
+    </div>
+
+    <div class="row g-2 mt-2">
+        <div class="col-md-4">
+            <label>Division *</label>
+            <select id="divisionSelect" class="form-control" required>
+                <option value="">Select Division</option>
+                {% for loc in locations %}
+                    <option value="{{ loc.division }}">{{ loc.division }}</option>
+                {% endfor %}
+            </select>
+
+        </div>
+        <div class="col-md-4">
+            <label>Location *</label>
+            <select name="loc" class="form-control" required>
+                <option value="">Select Location</option>
+                {% for loc in locations %}
+                    <option value="{{loc.id}}">{{loc.division}} - {{loc.district}} - {{loc.upazila}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label>Address *</label>
+            <input name="address" class="form-control" required>
+        </div>
+    </div>
+
+</div>
+<div class="modal-footer">
+<button class="btn btn-success">Save</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal fade" id="editModal">
+<div class="modal-dialog modal-lg">
+<form id="editForm">{% csrf_token %}
+<input type="hidden" name="id" id="edit_id">
+<div class="modal-content">
+<div class="modal-header"><h5>Edit Bank Details</h5></div>
+<div class="modal-body">
+    <div class="row g-2">
+        <div class="col-md-4">
+            <label>Bank Name *</label>
+            <input id="edit_name" name="name" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+            <label>Email *</label>
+            <input id="edit_email" name="email" class="form-control" type="email" required>
+        </div>
+        <div class="col-md-4">
+            <label>Phone *</label>
+            <input id="edit_phone" name="phone" class="form-control" required>
+        </div>
+    </div>
+
+    <div class="row g-2 mt-2">
+        <div class="col-md-4">
+            <label>Division *</label>
+            <select id="edit_division" class="form-control" required>
+                <option value="">Select Division</option>
+                {% for loc in locations %}
+                    <option value="{{ loc.division }}">{{ loc.division }}</option>
+                {% endfor %}
+            </select>
+
+        </div>
+        <div class="col-md-4">
+            <label>Location *</label>
+            <select id="edit_loc" name="loc" class="form-control" required>
+                <option value="">Select Location</option>
+                {% for loc in locations %}
+                    <option value="{{loc.id}}">{{loc.division}} - {{loc.district}} - {{loc.upazila}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label>Address *</label>
+            <input id="edit_address" name="address" class="form-control" required>
+        </div>
+    </div>
+
+</div>
+<div class="modal-footer">
+<button class="btn btn-primary">Update</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+
+<!-- jQuery + Toastr -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<!-- External JS -->
+<script src="{% static 'js/bank/bank_info.js' %}"></script>
+<script src="{% static 'js/common-table-filter.js' %}"></script>
+
+{% endblock %}

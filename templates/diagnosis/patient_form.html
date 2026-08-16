@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}New Patient Entry{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+    <div class="row">
+      
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4">
+                <h3 class="mb-3 text-secondary" id="formHeaderTitle">New Patient Registration....</h3>
+                <form id="addForm" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" id="patient_id" name="id" value="">
+
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold small mb-1">Patient Full Name *</label>
+                        <input type="text" id="patient_name" name="patient_name" class="form-control" placeholder="Enter full name" required>
+                        <span class="text-danger small name_error"></span>
+                    </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small mb-1">Father/Husband Name</label>
+                            <input type="text" id="father_husband_name" name="father_husband_name" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small mb-1">Mother Name</label>
+                            <input type="text" id="mother_name" name="mother_name" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small mb-1">DOB</label>
+                            <input type="date" id="dob" name="dob" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small mb-1">Age</label>
+                            <input type="number" id="age" name="age" class="form-control" placeholder="Years">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small mb-1">Gender</label>
+                            <select id="gender" name="gender" class="form-select">
+                                <option value="">Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small mb-1">Blood Group</label>
+                            <input type="text" id="blood_group" name="blood_group" class="form-control" placeholder="e.g. O+">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small mb-1">Religion</label>
+                            <input type="text" id="religion" name="religion" class="form-control" placeholder="e.g. Islam">
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small mb-1">Mobile Number *</label>
+                            <input type="text" id="present_mobile" name="present_mobile" class="form-control" placeholder="Enter mobile no" required>
+                            <span class="text-danger small mobile_error"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small mb-1">Email Address</label>
+                            <input type="email" id="present_email" name="present_email" class="form-control" placeholder="name@domain.com">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small mb-1">Present Address</label>
+                        <textarea id="present_address" name="present_address" class="form-control" rows="2" placeholder="Full residential location"></textarea>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small mb-1">Weight (kg)</label>
+                            <input type="number" step="0.1" id="weight" name="weight" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small mb-1">Height (cm)</label>
+                            <input type="number" step="0.1" id="height" name="height" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small mb-1">BMI</label>
+                            <input type="number" step="0.01" id="bmi" name="bmi" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small mb-1">Reason / Cause of Visit</label>
+                        <textarea id="cause_visit_dcc" name="cause_visit_dcc" class="form-control" rows="2" placeholder="Primary diagnostic complaints..."></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-center mt-4">
+                        <button type="submit" id="saveBtn" class="btn btn-primary me-2 px-4">
+                            💾 Save Patient
+                        </button>
+                        <a href="{% url 'diagnosis_patient_list' %}" class="btn btn-success px-4">
+                            ⬅️ Back to List
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4">
+                <h4 class="mb-3 text-secondary border-bottom pb-2">Recently Registered Patients</h4>
+                <div class="table-responsive" style="max-height: 700px; overflow-y: auto;" id="tableContainerRight">
+                    <table class="table table-bordered table-striped table-hover table-sm align-middle small" id="staffTableRight">
+                        <thead class="table-dark" style="position: sticky; top: 0; z-index: 2;">
+                            <tr>
+                                <th>#</th>
+                                <th>Custom ID</th>
+                                <th>Patient Name</th>
+                                <th>Gender</th>
+                                <th>Mobile</th>
+                                <th>Blood</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="livePatientTableBodyRight">    
+                            {% for p in patients %}
+                            <tr id="rightRow{{ p.id }}">
+                                <td>{{ forloop.counter }}</td>
+                                <td><span class="badge bg-secondary">{{ p.user_info_id|default:"-" }}</span></td>
+                                <td><strong>{{ p.patient_name }}</strong></td>
+                                <td>{{ p.gender|default:"-" }}</td>
+                                <td>{{ p.present_mobile|default:"-" }}</td>
+                                <td><span class="text-danger fw-bold">{{ p.blood_group|default:"-" }}</span></td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-xs btn-warning py-0 px-1 inlineEditBtn" data-id="{{ p.id }}" title="Load profile">
+                                        <i class="fa-solid fa-arrow-left"></i> Load
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr class="no-data-row-right"><td colspan="7" class="text-center py-3 text-muted">No real-time matrix available.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>  
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="{% static 'js/save_csrftoken.js' %}"></script>
+<script src="{% static 'js/diagnosis/diagnosis_patients.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Add Pharmacy Purchase{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Add Pharmacy Purchase</h5>
+
+                <a href="{% url 'medicine-list' %}" 
+                    class="btn btn-light btn-sm">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <!-- LEFT SIDE -->
+                <div class="col-md-6">
+
+                    <!-- DATE / STORE / LOCATION -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="fw-semibold">Location</label>
+                            <select name="location" class="form-control location-select"></select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="fw-semibold">Store <span class="text-danger">*</span></label>
+                            <select name="store" class="form-control store-select"></select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="fw-semibold">Date</label>
+                            <input type="date" id="date" class="form-control">
+                        </div>
+                    </div>
+
+                    <!-- SUPPLIER -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="fw-semibold">Supplier Name</label>
+                            <select name="supplier" class="form-control supplier-select"></select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="fw-semibold">Payment Method</label>
+                            <select id="payment_method" name="tran_method" class="form-control">
+                                <option value="cash">Cash</option>
+                                <option value="bkash">Bkash</option>
+                                <option value="nogod">Nogod</option>
+                                <option value="rocket">Rocket</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- PRODUCT SEARCH -->
+                    <div class="mb-3">
+                        <label class="fw-semibold">Product Name</label>
+                        <input type="text" id="productSearch" class="form-control form-control-sm" autocomplete="off">
+                    </div>
+
+                    <!-- QTY / UNIT / EXPIRY -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="fw-semibold">QTY</label>
+                            <input type="number" id="quantity" class="form-control">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="fw-semibold">Unit</label>
+                            <select id="unit" class="form-select">
+                                <option>PCS</option>
+                                <option>Box</option>
+                                <option>Strip</option>
+                                <option>Bottle</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="button" id="addProductBtn" class="btn btn-success w-100">Add</button>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="fw-semibold">Expiry Date</label>
+                            <input type="date" id="expiry" class="form-control">
+                        </div>
+                    </div>
+
+                    <!-- PRICE -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="fw-semibold">CP</label>
+                            <input type="number" id="cp" class="form-control">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="fw-semibold">MRP</label>
+                            <input type="number" id="mrp" class="form-control">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="fw-semibold">Total</label>
+                            <input type="number" id="total" class="form-control" readonly>
+                        </div>
+                    </div>
+
+                    <!-- SELECTED TABLE -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-success">
+                                <tr>
+                                    <th>SL</th>
+                                    <th>Name</th>
+                                    <th>QTY</th>
+                                    <th>Unit Price</th>
+                                    <th>Total</th>
+                                    <th>Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody id="selectedMedicineList"></tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT SIDE -->
+                <div class="col-md-6">
+
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white text-center">
+                            Product List
+                        </div>
+
+                        <div class="table-responsive" style="max-height:300px; overflow-y:auto;">
+                            <table class="table table-bordered table-sm">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Name</th>
+                                        <th>Generic</th>
+                                        <th>Manufacture</th>
+                                        <th>Form</th>
+                                        <th>Qty</th>
+                                        <th>CP</th>
+                                        <th>MRP</th>
+                                        <th>Select</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="medicineListTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- INVOICE SUMMARY -->
+                    <div class="card p-3 shadow-sm">
+                        <div class="row mb-2">
+                            <label class="col-md-4 fw-semibold">Invoice Amount</label>
+                            <div class="col-md-8">
+                                <input type="number" id="invoiceAmount" class="form-control" readonly>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <label class="col-md-4 fw-semibold">Discount(%)</label>
+                            <div class="col-md-8">
+                                <input type="number" id="discount" class="form-control" value="0">
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <label class="col-md-4 fw-semibold">Net Amount</label>
+                            <div class="col-md-8">
+                                <input type="number" id="netAmount" class="form-control" readonly>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <label class="col-md-4 fw-semibold">Advance</label>
+                            <div class="col-md-8">
+                                <input type="number" id="advanced" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label class="col-md-4 fw-semibold">Balance</label>
+                            <div class="col-md-8">
+                                <input type="number" id="balance" class="form-control" readonly>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary px-5">Submit</button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    window.APP_URLS = {
+        DIVISION_COMBO_URL: "{% url 'get_divisions_combo' %}",
+        SUPPLIER_COMBO_URL: "{% url 'get_supplier_combo' %}",
+        STORE_COMBO_URL: "{% url 'get_store_combo' %}"
+    };
+</script>
+
+<script src="{% static 'js/location/location_load_combo.js' %}"></script>
+<script src="{% static 'js/supplier_load_combo.js' %}"></script>
+<script src="{% static 'js/store/store_load_combo.js' %}"></script>
+<script src="{% static 'js/product_load.js' %}"></script>
+{% endblock %}

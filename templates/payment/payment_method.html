@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<h3>Payment Method Details</h3>
+
+<div class="d-flex justify-content-between mb-3">
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">+ Add Payment Method</button>
+    <input type="text" class="form-control w-25" placeholder="Search...">
+</div>
+
+<table class="table table-bordered">
+<thead>
+<tr>
+    <th style="width:10%">SL</th>
+    <th style="width:75%">Method Name</th>
+    <th style="width:15%">Action</th>
+</tr>
+
+<tr class="filter-row">
+    <th></th>
+    <th>
+        <input class="form-control column-filter" data-col="1" placeholder="Search Method">
+    </th>
+    <th></th>
+</tr>
+</thead>
+<tbody>
+{% for m in methods %}
+<tr id="row{{ m.id }}">
+    <td>{{ forloop.counter }}</td>
+    <td>{{ m.name }}</td>
+    <td>
+        <button class="btn btn-sm btn-warning editBtn" data-id="{{ m.id }}">Edit</button>
+        <button class="btn btn-sm btn-danger deleteBtn" data-id="{{ m.id }}">Delete</button>
+    </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<!-- ADD MODAL -->
+<div class="modal fade" id="addModal">
+<div class="modal-dialog">
+<form id="addForm" class="modal-content">
+{% csrf_token %}
+<div class="modal-header"><h5>Add Payment Method</h5></div>
+<div class="modal-body">
+    <label>Method Name *</label>
+    <input type="text" name="name" class="form-control" required>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary">Submit</button>
+</div>
+</form>
+</div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal fade" id="editModal">
+<div class="modal-dialog">
+<form id="editForm" class="modal-content">
+{% csrf_token %}
+<input type="hidden" name="id" id="edit_id">
+<div class="modal-header"><h5>Edit Payment Method</h5></div>
+<div class="modal-body">
+    <label>Method Name *</label>
+    <input type="text" name="name" id="edit_name" class="form-control" required>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary">Submit</button>
+</div>
+</form>
+</div>
+</div>
+
+{% endblock %}
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="{% static 'js/payment/payment_method.js' %}"></script>
+<script src="{% static 'js/common-table-filter.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<h3>Transaction Main Head Details</h3>
+
+<input type="text" class="form-control w-25 mb-3" placeholder="Search...">
+
+<table class="table table-bordered">
+<thead>
+<tr>
+    <th style="width:10%">SL</th>
+    <th style="width:75%">Type Name</th>
+    <th style="width:15%">Action</th>
+</tr>
+<tr class="filter-row">
+    <th></th>
+    <th>
+        <input class="form-control column-filter" data-col="1" placeholder="Search Type">
+    </th>
+    <th></th>
+</tr>
+</thead>
+<tbody>
+{% for h in heads %}
+<tr id="row{{ h.id }}">
+    <td>{{ forloop.counter }}</td>
+    <td>{{ h.type_name }}</td>
+    <td>
+        <button class="btn btn-sm btn-warning editBtn" data-id="{{ h.id }}">Edit</button>
+        <button class="btn btn-sm btn-danger deleteBtn" data-id="{{ h.id }}">Delete</button>
+    </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<!-- EDIT MODAL -->
+<div class="modal fade" id="editModal">
+<div class="modal-dialog">
+<form id="editForm" class="modal-content">
+{% csrf_token %}
+<input type="hidden" name="id" id="edit_id">
+<div class="modal-header"><h5>Edit Main Head</h5></div>
+<div class="modal-body">
+    <label>Type Name *</label>
+    <input type="text" name="type_name" id="edit_name" class="form-control" required>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary">Submit</button>
+</div>
+</form>
+</div>
+</div>
+
+{% endblock %}
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="{% static 'js/transaction_main_heads/transaction_main_heads.js' %}"></script>
+<script src="{% static 'js/common-table-filter.js' %}"></script>
+{% endblock %}

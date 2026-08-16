@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="d-flex justify-content-between mb-3">
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">+ Add Corporate</button>
+    <input type="text" id="search" placeholder="Search..." class="form-control w-25">
+</div>
+
+<h4 class="text-center mb-3">Corporate Price</h4>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>SL</th>
+            <th>Corporate Name</th>
+            <th>Discount Rate</th>
+            <th>Action</th>
+        </tr>
+
+    <tr class="filter-row">
+        <th></th>
+        
+            <th><input class="form-control column-filter" data-col="1" placeholder="Search Corporate Name"></th>
+            <th><input class="form-control column-filter" data-col="2" placeholder="Search Discount Rate"></th>
+        <th></th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for corp in corporates %}
+        <tr id="row{{ corp.id }}">
+            <td>{{ forloop.counter }}</td>
+            <td>{{ corp.name }}</td>
+            <td>{{ corp.discount }}</td>
+            <td>
+                <button class="btn btn-warning btn-sm editBtn" data-id="{{ corp.id }}">Edit</button>
+                <button class="btn btn-danger btn-sm deleteBtn" data-id="{{ corp.id }}">Delete</button>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form id="addForm">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add Corporate</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2">
+            <label>Corporate Name *</label>
+            <input type="text" class="form-control" name="name" required>
+          </div>
+          <div class="mb-2">
+            <label>Discount *</label>
+            <input type="number" step="0.01" class="form-control" name="discount" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form id="editForm">
+      {% csrf_token %}
+      <input type="hidden" id="edit_id" name="id">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Corporate</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2">
+            <label>Corporate Name *</label>
+            <input type="text" class="form-control" id="edit_name" name="name" required>
+          </div>
+          <div class="mb-2">
+            <label>Discount *</label>
+            <input type="number" step="0.01" class="form-control" id="edit_discount" name="discount" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Update</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<script src="{% static 'js/corporates/corporate_info.js' %}"></script>
+<script src="{% static 'js/common-table-filter.js' %}"></script>
+{% endblock %}

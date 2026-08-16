@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="card">
+
+<!-- Top Bar -->
+<div class="card-header">
+<div class="d-flex justify-content-between align-items-center">
+
+<!-- Left Add Button -->
+<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
++ Add Location
+</button>
+
+<!-- Right Search -->
+<input type="text" id="searchInput" class="form-control w-25" placeholder="Search...">
+
+</div>
+
+<!-- Center Title -->
+<h5 class="text-center mt-3 mb-0">Location Details</h5>
+</div>
+
+
+<div class="card-body">
+
+<table class="table table-bordered table-hover">
+<thead class="text-center">
+<tr>
+<th width="60">SL</th>
+<th width="30%">Division</th>
+<th width="30%">District</th>
+<th width="30%">Upazila</th>
+<th width="120">Action</th>
+</tr>
+<tr class="filter-row">
+    <th></th>
+    <th><input class="form-control column-filter" data-col="1" placeholder="Search Division"></th>
+    <th><input class="form-control column-filter" data-col="2" placeholder="Search District"></th>
+    <th><input class="form-control column-filter" data-col="3" placeholder="Search Upazila"></th>
+    <th></th>
+</tr>
+</thead>
+
+<tbody id="locationTable" class="text-center">
+{% for l in locations %}
+<tr id="row{{l.id}}">
+<td>{{forloop.counter}}</td>
+<td>{{l.division}}</td>
+<td>{{l.district}}</td>
+<td>{{l.upazila}}</td>
+<td>
+<button class="btn btn-sm btn-primary editBtn" data-id="{{l.id}}">Edit</button>
+<button class="btn btn-sm btn-danger deleteBtn" data-id="{{l.id}}">Delete</button>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+
+</table>
+</div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal fade" id="addModal">
+<div class="modal-dialog modal-md">
+<form id="addForm">{% csrf_token %}
+<div class="modal-content">
+<div class="modal-header"><h5>Add Location</h5></div>
+
+<div class="modal-body">
+<div class="row g-2">
+<div class="col-md-4">
+<input name="division" class="form-control" placeholder="Division" required>
+</div>
+<div class="col-md-4">
+<input name="district" class="form-control" placeholder="District" required>
+</div>
+<div class="col-md-4">
+<input name="upazila" class="form-control" placeholder="Upazila" required>
+</div>
+</div>
+</div>
+
+<div class="modal-footer">
+<button class="btn btn-success">Save</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal fade" id="editModal">
+<div class="modal-dialog modal-md">
+<form id="editForm">{% csrf_token %}
+<input type="hidden" id="edit_id" name="id">
+<div class="modal-content">
+<div class="modal-header"><h5>Edit Location</h5></div>
+
+<div class="modal-body">
+<div class="row g-2">
+<div class="col-md-4">
+<input id="edit_division" name="division" class="form-control" required>
+</div>
+<div class="col-md-4">
+<input id="edit_district" name="district" class="form-control" required>
+</div>
+<div class="col-md-4">
+<input id="edit_upazila" name="upazila" class="form-control" required>
+</div>
+</div>
+</div>
+
+<div class="modal-footer">
+<button class="btn btn-primary">Update</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="{% static 'js/location/location_info.js' %}"></script>
+<script src="{% static 'js/common-table-filter.js' %}"></script>
+
+{% endblock %}
+
+{% endblock %}

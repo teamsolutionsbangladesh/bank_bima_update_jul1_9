@@ -1,0 +1,228 @@
+{% load static %}
+
+
+<div class="modal-dialog modal-xl" style="max-width: 100%; height: 70vh;">
+  <div class="modal-content" style="height: 100%;">
+    <div class="modal-body" style="overflow-y: auto;">
+      
+
+      <h4 class="text-center mb-4"> - Add Pharmacy Purchase - </h4>
+
+      <div class="container-fluid">
+        <div class="row">
+
+          <!-- LEFT SIDE -->
+          <div class="col-md-6">
+
+            <!-- DATE / STORE / LOCATION -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="fw-semibold">Location</label>                
+                <select name="location" class="form-control location-select">
+                    <!-- {% for t in teacher %}
+                        <option value="{{ t.id }}">{{ t.name }}</option>
+                    {% endfor %} -->
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="fw-semibold">Store <span class="text-danger">*</span></label>
+                <!-- <input type="hidden" id="edit_tran_id"> -->
+                <select name="store" class="form-control store-select">
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="fw-semibold">Date</label>
+                <input type="date" id="date" class="form-control">
+                
+              </div>
+            </div>
+
+            <!-- SUPPLIER -->
+            <!-- SUPPLIER AND PAYMENT METHOD ROW -->
+            <div class="row mb-3">
+              <!-- Supplier Name -->
+              <div class="col-md-6">
+                <label class="fw-semibold">Supplier Name</label>
+                <input type="text" id="supplier2" name="supplier2" class="form-control" placeholder="Select Supplier" hidden>
+                <select name="supplier" class="form-control supplier-select"></select>
+
+
+              </div>
+
+              <!-- Payment Method -->
+              <div class="col-md-6">
+                <label class="fw-semibold">Payment Method</label>
+                <select id="payment_method" name="tran_method" class="form-control">
+                  <option value="" disabled selected>Select Payment Method</option>
+                  <option value="bkash" selected>Cash</option>
+                  <option value="bkash">Bkash</option>
+                  <option value="nogod">Nogod</option>
+                  <option value="rocket">Rocket</option>
+                </select>
+              </div>
+            </div>
+
+
+            <!-- PRODUCT -->
+            <div class="mb-3">
+              <label class="fw-semibold">Product Name</label>
+              <input type="text" id="productSearch" class="form-control form-control-sm" autocomplete="off">
+              <span class="text-danger small name_error"></span>
+            </div>
+
+            <!-- QTY / UNIT / EXPIRY -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="fw-semibold">QTY</label>
+                <input type="number" id="quantity" class="form-control">
+              </div>
+
+              <div class="col-md-4">
+                <label class="fw-semibold">Unit</label>
+                <select id="unit" class="form-select">
+                  <option>PCS</option>
+                  <option>Box</option>
+                  <option>Strip</option>
+                  <option>Bottle</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="fw-semibold"></label>
+                <button type="button" id="addProductBtn" class="btn btn-success w-100">Add</button>
+              </div>
+
+              <div class="col-md-4">
+                <label class="fw-semibold">Expiry Date</label>
+                <input type="date" id="expiry" class="form-control">
+              </div>
+            </div>
+
+            <!-- CP / MRP / TOTAL -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="fw-semibold">CP</label>
+                <input type="number" id="price" class="form-control">
+              </div>
+              <div class="col-md-4">
+                <label class="fw-semibold">MRP</label>
+                <input type="number" id="mrp" class="form-control">
+              </div>
+              <div class="col-md-4">
+                <label class="fw-semibold">Total</label>
+                <input type="number" id="total" class="form-control" readonly>
+              </div>
+            </div>
+
+            <!-- SELECTED MEDICINES TABLE -->
+            <div class="table-responsive mb-3">
+              <table class="table table-bordered table-sm">
+                <thead class="bg-success text-white">
+                  <tr>
+                    <th>SL</th>
+                    <th>Name</th>
+                    <th>QTY</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                    <th>Remove</th>
+                  </tr>
+                </thead>
+                <tbody id="selectedMedicineList"></tbody>
+              </table>
+            </div>
+
+          </div>
+
+          <!-- RIGHT SIDE -->
+          <div class="col-md-6">
+
+            <!-- PRODUCT LIST -->
+            <div class="card mb-4">
+              <div class="card-header bg-success text-white text-center">
+                Product List
+              </div>
+              <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
+                <table class="table table-bordered table-sm">
+                  <thead class="table-success sticky-top">
+                    <tr>
+                      <th>Name</th>
+                      <th>Generic Name</th>
+                      <th>Manufacture</th>
+                      <th>Form</th>
+                      <th>Qty</th>
+                      <th>CP</th>
+                      <th>MRP</th>
+                      <th>Select</th>
+                    </tr>
+                  </thead>
+                  <tbody id="medicineListTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- INVOICE SUMMARY -->
+            <div class="invoice-summary">
+
+              <div class="row g-3 mb-2">
+                <label class="col-md-4 fw-semibold">Invoice Amount</label>
+                <div class="col-md-8">
+                  <input type="number" id="invoiceAmount" name="bill_amount" class="form-control" readonly>
+                </div>
+              </div>
+
+              <div class="row g-3 mb-2">
+                <label class="col-md-4 fw-semibold">Discount(%)</label>
+                <div class="col-md-8">
+                  <input type="number" id="discount" name="discount" class="form-control" value="0">
+                </div>
+              </div>
+
+              <div class="row g-3 mb-2">
+                <label class="col-md-4 fw-semibold">Net Amount</label>
+                <div class="col-md-8">
+                  <input type="number" id="netAmount" name="net_amount"class="form-control" readonly>
+                </div>
+              </div>
+
+              <div class="row g-3 mb-2">
+                <label class="col-md-4 fw-semibold">Advance</label>
+                <div class="col-md-8">
+                  <input type="number" id="advanced" name="payment"class="form-control">
+                </div>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <label class="col-md-4 fw-semibold">Balance</label>
+                <div class="col-md-8">
+                  <input type="number" id="balance" name="due"class="form-control" readonly>
+                </div>
+              </div>
+
+              <div class="text-center">
+                <button type="submit" id="SubmitBtn" class="btn btn-primary px-5">Submit</button>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- {% block extra_js %}
+<script>
+    const DIVISION_COMBO_URL = "{% url 'get_divisions_combo' %}";
+    const SUPPLIER_COMBO_URL = "{% url 'get_supplier_combo' %}";
+    const STORE_COMBO_URL = "{% url 'get_store_combo' %}";
+</script> 
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="{% static 'js/location/location_load_combo.js' %}"></script>
+<script src="{% static 'js/supplier_load_combo.js' %}"></script>
+<script src="{% static 'js/store_load_combo.js' %}"></script>
+<script src="{% static 'js/product_load.js' %}"></script>
+
+{% endblock %} -->

@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<h3>Company Details</h3>
+<button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addModal">
+    Add Company
+</button>
+
+<div class="table-responsive">
+<table class="table table-bordered table-sm">
+    <thead class="table-dark">
+        <tr>
+            <th>SL</th>
+            <th>Company ID</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Domain</th>
+            <th>Logo</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="companyTableBody">
+        {% for d in details %}
+        <tr data-id="{{ d.id }}">
+            <td>{{ forloop.counter }}</td>
+            <td class="cd-company-id">{{ d.company_id }}</td>
+            <td class="cd-name">{{ d.company_name }}</td>
+            <td class="cd-type" data-type-id="{{ d.company_type.id }}">
+                {{ d.company_type.name }}
+            </td>
+            <td class="cd-email">{{ d.company_email }}</td>
+            <td class="cd-phone">{{ d.company_phone }}</td>
+            <td class="cd-address">{{ d.address }}</td>
+            <td class="cd-domain">{{ d.domain }}</td>
+            <td class="cd-logo">
+                {% if d.logo %}
+                    <img src="{{ d.logo.url }}" alt="Logo" style="height:40px;">
+                {% endif %}
+            </td>
+
+            <td>
+                <button class="btn btn-sm btn-info edit-btn" data-bs-toggle="modal" data-bs-target="#editModal">Edit</button>
+                <button class="btn btn-sm btn-danger delete-btn">Delete</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal fade" id="addModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content p-4">
+      <h5 class="mb-3">Add Company</h5>
+
+      <div class="mb-2">
+        <label for="addName" class="form-label">Company Name</label>
+        <input id="addName" class="form-control" placeholder="Enter company name">
+      </div>
+
+      <div class="mb-2">
+        <label for="addEmail" class="form-label">Email</label>
+        <input id="addEmail" class="form-control" placeholder="Enter email">
+      </div>
+
+      <div class="mb-2">
+        <label for="addPhone" class="form-label">Phone</label>
+        <input id="addPhone" class="form-control" placeholder="Enter phone">
+      </div>
+
+      <div class="mb-2">
+        <label for="addType" class="form-label">Company Type</label>
+        <select id="addType" class="form-select">
+          <option value="">Select Type</option>
+          {% for t in types %}
+            <option value="{{ t.id }}">{{ t.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-2">
+        <label for="addAddress" class="form-label">Address</label>
+        <input id="addAddress" class="form-control" placeholder="Enter address">
+      </div>
+
+      <div class="mb-2">
+        <label for="addDomain" class="form-label">Domain</label>
+        <input id="addDomain" class="form-control" placeholder="Enter domain">
+      </div>
+
+      <div class="mb-3">
+        <label for="addLogo" class="form-label">Logo</label>
+        <input type="file" id="addLogo" class="form-control">
+      </div>
+
+      <button id="addSaveBtn" class="btn btn-success">Save</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- EDIT MODAL -->
+<div class="modal fade" id="editModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content p-4">
+      <h5 class="mb-3">Edit Company</h5>
+
+      <input type="hidden" id="editId">
+
+      <div class="mb-2">
+        <label for="editName" class="form-label">Company Name</label>
+        <input id="editName" class="form-control">
+      </div>
+
+      <div class="mb-2">
+        <label for="editEmail" class="form-label">Email</label>
+        <input id="editEmail" class="form-control">
+      </div>
+
+      <div class="mb-2">
+        <label for="editPhone" class="form-label">Phone</label>
+        <input id="editPhone" class="form-control">
+      </div>
+
+      <div class="mb-2">
+        <label for="editType" class="form-label">Company Type</label>
+        <select id="editType" class="form-select">
+          {% for t in types %}
+            <option value="{{ t.id }}">{{ t.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-2">
+        <label for="editAddress" class="form-label">Address</label>
+        <input id="editAddress" class="form-control">
+      </div>
+
+      <div class="mb-2">
+        <label for="editDomain" class="form-label">Domain</label>
+        <input id="editDomain" class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label for="editLogo" class="form-label">Logo</label>
+        <input type="file" id="editLogo" class="form-control">
+      </div>
+
+      <button id="editSaveBtn" class="btn btn-primary">Update</button>
+    </div>
+  </div>
+</div>
+
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'js/company_details.js' %}"></script>
+
+{% endblock %}
+
+{% endblock %}

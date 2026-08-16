@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<meta name="csrf-token" content="{{ csrf_token }}">
+
+<h3>Super Admin Details</h3>
+<button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addModal">
+    Add Super Admin
+</button>
+
+<div class="table-responsive">
+<table class="table table-bordered table-sm">
+    <thead class="table-dark">
+        <tr>
+            <th>SL</th>
+            <th>Super Admin ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Company</th> {# #codex #}
+            <th>Location</th> {# #codex #}
+            <th>Image</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="superAdminTableBody">
+        {% for sa in super_admins %}
+        <tr data-id="{{ sa.id }}">
+            <td>{{ forloop.counter }}</td>
+            <td class="sa-user-id">{{ sa.user_id }}</td>
+            <td class="sa-name">{{ sa.name }}</td> {# #codex #}
+            <td class="sa-email">{{ sa.email }}</td> {# #codex #}
+            <td class="sa-phone">{{ sa.phone }}</td> {# #codex #}
+            <td class="sa-company" data-company-id="{{ sa.company_id }}">{{ sa.company_name|default:"-" }}</td> {# #codex #}
+            <td class="sa-location" data-location-id="{{ sa.location_id }}">{{ sa.location_name|default:"-" }}</td> {# #codex #}
+            <td class="sa-image">
+                {% if sa.logo_url %} {# #codex #}
+                    <img src="{{ sa.logo_url }}" style="height:40px;"> {# #codex #}
+                {% else %}
+                    <span>No Image</span>
+                {% endif %}
+            </td>
+            <td>
+                <button class="btn btn-sm btn-info edit-btn" data-bs-toggle="modal" data-bs-target="#editModal">Edit</button>
+                <button class="btn btn-sm btn-danger delete-btn">Delete</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal fade" id="addModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content p-4">
+      <h5 class="mb-3">Add Super Admin</h5>
+
+      <div class="mb-2">
+        <label for="addName" class="form-label">Super Admin Name *</label>
+        <input id="addName" class="form-control" placeholder="Enter name">
+      </div>
+
+      <div class="mb-2">
+        <label for="addEmail" class="form-label">Email *</label>
+        <input id="addEmail" class="form-control" placeholder="Enter email">
+      </div>
+
+      <div class="mb-2">
+        <label for="addPhone" class="form-label">Phone *</label>
+        <input id="addPhone" class="form-control" placeholder="Enter phone">
+      </div>
+
+      <div class="mb-2"> {# #codex #}
+        <label for="addCompany" class="form-label">Company *</label> {# #codex #}
+        <select id="addCompany" class="form-select"> {# #codex #}
+          <option value="">Select Company</option> {# #codex #}
+          {% for company in companies %} {# #codex #}
+            <option value="{{ company.company_id }}">{{ company.company_name }}</option> {# #codex #}
+          {% endfor %} {# #codex #}
+        </select> {# #codex #}
+      </div> {# #codex #}
+
+      <div class="mb-2"> {# #codex #}
+        <label for="addLocation" class="form-label">Location *</label> {# #codex #}
+        <select id="addLocation" class="form-select"> {# #codex #}
+          <option value="">Select Location</option> {# #codex #}
+          {% for location in locations %} {# #codex #}
+            <option value="{{ location.id }}">{{ location.division }} - {{ location.district }} - {{ location.upazila }}</option> {# #codex #}
+          {% endfor %} {# #codex #}
+        </select> {# #codex #}
+      </div> {# #codex #}
+
+      <div class="mb-2">
+        <label for="addPassword" class="form-label">Password *</label>
+        <input type="password" id="addPassword" class="form-control" placeholder="Enter password">
+      </div>
+
+      <div class="mb-2">
+        <label for="addConfirmPassword" class="form-label">Confirm Password *</label>
+        <input type="password" id="addConfirmPassword" class="form-control" placeholder="Confirm password">
+      </div>
+
+      <div class="mb-3">
+        <label for="addImage" class="form-label">Image</label>
+        <input type="file" id="addImage" class="form-control">
+      </div>
+
+      <button id="addSaveBtn" class="btn btn-success">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal fade" id="editModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content p-4">
+      <h5 class="mb-3">Edit Super Admin</h5>
+
+      <input type="hidden" id="editId">
+
+      <div class="mb-2">
+        <label for="editName" class="form-label">Super Admin Name *</label>
+        <input id="editName" class="form-control">
+      </div>
+
+      <div class="mb-2">
+        <label for="editEmail" class="form-label">Email *</label>
+        <input id="editEmail" class="form-control">
+      </div>
+
+      <div class="mb-2">
+        <label for="editPhone" class="form-label">Phone *</label>
+        <input id="editPhone" class="form-control">
+      </div>
+
+      <div class="mb-2"> {# #codex #}
+        <label for="editCompany" class="form-label">Company *</label> {# #codex #}
+        <select id="editCompany" class="form-select"> {# #codex #}
+          <option value="">Select Company</option> {# #codex #}
+          {% for company in companies %} {# #codex #}
+            <option value="{{ company.company_id }}">{{ company.company_name }}</option> {# #codex #}
+          {% endfor %} {# #codex #}
+        </select> {# #codex #}
+      </div> {# #codex #}
+
+      <div class="mb-2"> {# #codex #}
+        <label for="editLocation" class="form-label">Location *</label> {# #codex #}
+        <select id="editLocation" class="form-select"> {# #codex #}
+          <option value="">Select Location</option> {# #codex #}
+          {% for location in locations %} {# #codex #}
+            <option value="{{ location.id }}">{{ location.division }} - {{ location.district }} - {{ location.upazila }}</option> {# #codex #}
+          {% endfor %} {# #codex #}
+        </select> {# #codex #}
+      </div> {# #codex #}
+
+      <div class="mb-2">
+        <label for="editPassword" class="form-label">Password</label>
+        <input type="password" id="editPassword" class="form-control" placeholder="Enter new password if changing">
+      </div>
+
+      <div class="mb-2">
+        <label for="editConfirmPassword" class="form-label">Confirm Password</label>
+        <input type="password" id="editConfirmPassword" class="form-control" placeholder="Confirm new password">
+      </div>
+
+      <div class="mb-3">
+        <label for="editImage" class="form-label">Image</label>
+        <input type="file" id="editImage" class="form-control">
+      </div>
+
+      <button id="editSaveBtn" class="btn btn-primary">Update</button>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'js/users/super_admin.js' %}"></script>
+{% endblock %}
+
+{% endblock %}

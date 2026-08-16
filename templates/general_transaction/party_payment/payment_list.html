@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Party Payment{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow" style="min-height: 85vh;">
+
+        <!-- HEADER -->
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Party Payment</h5>
+        </div>
+
+        <div class="card-body">
+
+            <!-- 🔥 CASCADING FILTER (NEW) -->
+            <div class="row mb-3">
+
+                <div class="col-md-4">
+                    <label class="fw-semibold">Transaction Main Head....</label>
+                    <select id="transactionmainheads" class="form-select">
+                        <option value="">Select Main Head</option>
+                    </select>
+                </div>
+
+                <!-- WITH METHOD -->
+                <div class="col-md-4">
+                    <label class="fw-semibold">Transaction With Method</label>
+                    <select id="transaction_with_method" name="transaction_with_method" class="form-control">
+
+                    </select>
+                </div>
+                
+                <div class="col-md-4">
+                    <label class="fw-semibold">Transaction With Group</label>
+                    <select id="transaction_with" class="form-select">
+                        <option value="">Select With</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="fw-semibold">Transaction With User</label>
+                    <select id="transaction_with_user" class="form-select">
+                        <option value="">Select Supplier</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- 🔥 OLD FILTER FORM (KEPT AS IT IS) -->
+            <form method="get" class="row g-2 align-items-end mb-3">
+
+                <div class="col-md-3">
+                    <input type="text" name="search"
+                           class="form-control"
+                           placeholder="Search by user"
+                           value="{{ search }}">
+                </div>
+
+                <div class="col-md-2">
+                    <select name="status" class="form-select">
+                        <option value="">Status</option>
+                        <option value="1" {% if status_filter == '1' %}selected{% endif %}>Verified</option>
+                        <option value="0" {% if status_filter == '0' %}selected{% endif %}>Non Verified</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="small fw-semibold">Start Date</label>
+                    <input type="date" id="start_date"
+                           name="start_date"
+                           class="form-control"
+                           value="{{ start_date }}">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="small fw-semibold">End Date</label>
+                    <input type="date" id="end_date"
+                           name="end_date"
+                           class="form-control"
+                           value="{{ end_date }}">
+                </div>
+
+                <div class="col-md-2">
+                    <select id="perPage"
+                            name="per_page"
+                            class="form-select">
+                        {% for n in per_page_options %}
+                            <option value="{{ n }}"
+                                {% if per_page == n %}selected{% endif %}>
+                                {{ n }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-1 d-grid">
+                    <button class="btn btn-primary">
+                        Filter
+                    </button>
+                </div>
+
+            </form>
+
+            <!-- 🔥 PAYMENT TABLE -->
+            <div class="card">
+
+                <div class="card-header bg-success text-white text-center">
+                    Payment List
+                </div>
+
+                <div class="table-responsive"
+                     style="max-height:400px; overflow-y:auto;">
+
+                    <table class="table table-bordered table-sm">
+
+                        <thead class="table-light sticky-top">
+
+                            <tr>
+                                <th>SL</th>
+                                <th>Tran ID</th>
+                                <th>Invoice Ref</th>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th>Tran User</th>
+                                <th class="text-end">Bill</th>
+                                <th class="text-end">Discount</th>
+                                <th class="text-end">Net</th>
+                                <th class="text-end">Advance</th>
+                                <th class="text-end">Due Col</th>
+                                <th class="text-end">Due Disc</th>
+                                <th class="text-end">Due</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="paymentListTableBody">
+                        </tbody>
+
+                    </table>
+                    <div class="row mt-3">
+
+                        <div class="col-md-3">
+                            <label>Total Due</label>
+                            <input type="text"
+                                id="total_due"
+                                class="form-control"
+                                readonly>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Payment</label>
+                            <input type="number"
+                                id="fifo_payment"
+                                class="form-control">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>&nbsp;</label>
+                            <button class="btn btn-primary form-control"
+                                    id="fifo_pay_btn">
+                                Proceed
+                            </button>
+                        </div>
+                          <div class="text-center">
+                            <button type="button" id="saveAllBtn" class="btn btn-primary px-5">Save</button>
+                            <button id="printReportBtn" class="btn btn-dark px-4">
+                                Print / Download PDF
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.APP_URLS = {
+    PARTY_PAYMENT_LIST_URL: "{% url 'party_payment_list_load' %}",
+    TRAN_MAIN_HEAD_URL: "{% url 'get_transaction_main_heads_combo' %}",
+    TRAN_WITH_METHOD_URL: "/combo_load/transaction-with-method-combo/",
+    TRAN_WITH_URL: "/combo_load/transaction-with-combo/",
+    TRAN_USERS_URL: "/combo_load/transaction-with-user-combo/"
+};
+</script>
+<!-- <script src="{% static 'js/location/location_load_combo.js' %}"></script> -->
+<!-- <script src="{% static 'js/general transaction/payment/get_page_init_add_payment.js' %}"></script> -->
+<script src="{% static 'js/combo_load/transaction_main_heads_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_with_method_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_with_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_with_user_combo.js' %}"></script>
+<script src="{% static 'js/general transaction/party_payment/payment_list.js' %}"></script>
+<script src="{% static 'js/general transaction/party_payment/party_payment_report.js' %}"></script>
+<!-- <script src="{% static 'js/combo_load/transaction_method_combo.js' %}"></script> -->
+<!-- <script src="{% static 'js/combo_load/transaction_group_combo.js' %}"></script> -->
+<!-- <script src="{% static 'js/general transaction/payment/product_load.js' %}"></script> -->
+
+<!-- <script src="{% static 'js/combo_load/transaction_main_heads_combo.js' %}"></script>
+<script src="{% static 'js/general transaction/party_payment/party_payment.js' %}"></script> -->
+
+
+{% endblock %}

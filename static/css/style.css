@@ -1,0 +1,628 @@
+/* ====================================
+   GLOBAL & HTML BASE STYLES
+   ==================================== */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f4f6f9;
+    min-height: 100vh; /* Full viewport height */
+}
+
+/* ====================================
+   LAYOUT STYLES
+   ==================================== */
+
+/* -------------------------------
+   HEADER
+--------------------------------- */
+/* -------------------------------
+   HEADER
+--------------------------------- */
+.header {
+    height: 80px;
+    background-color: #2c3e50;
+    color: #fff;
+    display: flex;
+    justify-content: center; /* center content horizontally */
+    align-items: center;     /* center content vertically */
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* LEFT: logo + heading */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Logo styling */
+.header-logo-link {
+    display: inline-block;
+}
+
+.header-logo {
+    height: 60px;          /* smaller than header height */
+    width: 60px;           /* make it square for perfect circle */
+    border-radius: 50%;    /* makes logo round */
+    border: 2px solid #ffffff; /* white border */
+    object-fit: cover;     /* keep image aspect ratio */
+    display: block;
+}
+
+/* Header text styling */
+.header-title {
+    font-size: 24px;
+    margin: 0;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* RIGHT: user info and logout button */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: absolute; /* keep on right */
+    right: 20px;
+}
+
+.header-user {
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.header-logout-btn {
+    background-color: transparent;
+    border: 2px solid #ffffff;
+    color: #ffffff;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.header-logout-btn:hover {
+    background-color: #ffffff;
+    color: #2c3e50;
+    border-color: #ffffff;
+}
+
+
+/* -------------------------------
+   FOOTER
+--------------------------------- */
+.footer {
+    height: 57px;
+    padding-top: 1px;
+    background-color: #2c3e50;
+    color: #fff;
+    text-align: center;
+    line-height: 40px; /* Vertical alignment */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* -------------------------------
+   MAIN CONTAINER
+--------------------------------- */
+.main-container {
+    display: flex;
+    min-height: calc(100vh - 117px); /* 100vh - header - footer */
+}
+
+/* -------------------------------
+   CONTENT AREA
+--------------------------------- */
+.content {
+    flex: 1;
+    padding: 20px;
+    background-color: #ffffff;
+}
+
+/* ====================================
+   SIDEBAR MENU
+   ==================================== */
+.sidebar {
+    width: 250px;
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    font-family: Arial, sans-serif;
+    min-height: 100%;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    padding-top: 10px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+.menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-item {
+    border-bottom: 1px solid #34495e;
+}
+
+.menu-item:last-child {
+    border-bottom: none;
+}
+
+.menu-item a {
+    display: block;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: #ecf0f1;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.menu-item a:hover {
+    background-color: #3498db;
+    color: #ffffff;
+}
+
+/* Submenu toggle and arrow */
+.submenu-toggle { cursor: pointer; font-weight: bold; }
+.menu-item.open > .submenu-toggle { background-color: #2980b9; }
+.menu-item.active-branch > .submenu-toggle { background-color: #1f6f9f; color: #ffffff; } /* #codex */
+.menu-item a.active-sidebar-link { background-color: #16a085 !important; color: #ffffff !important; font-weight: 700; border-left: 4px solid #f1c40f; padding-left: 11px; } /* #codex */
+.submenu .menu-item a.active-sidebar-link { background-color: #168f78 !important; padding-left: 26px; } /* #codex */
+.submenu .child-menu .menu-item a.active-sidebar-link { background-color: #168f78 !important; padding-left: 41px; } /* #codex */
+
+.arrow {
+    float: right;
+    display: inline-block;
+    transition: transform 0.2s ease;
+    font-size: 1.2em;
+    line-height: 1;
+}
+
+.has-submenu.open > a .arrow {
+    transform: rotate(90deg);
+}
+
+/* Submenu collapse/expand */
+.submenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: #34495e;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.menu-item.open > .submenu {
+    max-height: 1000px;
+    transition: max-height 0.3s ease-in-out;
+}
+
+/* Submenu levels */
+.submenu .menu-item a { padding-left: 30px; font-weight: normal; background-color: #34495e; }
+.submenu .menu-item a:hover { background-color: #3a536b; }
+
+.submenu .child-menu { margin-left: 10px; }
+.submenu .child-menu .menu-item a { padding-left: 45px; background-color: #3a536b; }
+.submenu .child-menu .menu-item a:hover { background-color: #466079; }
+
+/* ====================================
+   AUTHENTICATION FORM
+   ==================================== */
+.auth-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.auth-container {
+    background: #fff;
+    padding: 40px 30px;
+    border-radius: 8px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+}
+
+.auth-container input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.auth-container button {
+    width: 100%;
+    padding: 12px;
+    background-color: #2c3e50;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.auth-container button:hover {
+    background-color: #1a252f;
+}
+
+/* Messages */
+.msg-box {
+    margin-top: 15px;
+    padding: 12px;
+    background-color: #f8d7da;
+    color: #721c24;
+    border-radius: 6px;
+    border: 1px solid #f5c6cb;
+}
+
+/* ====================================
+   TABLE STYLING
+   ==================================== */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    vertical-align: middle !important;
+    font-size: 0.85rem;
+    padding: 6px 8px;
+}
+
+.table th:nth-child(1),
+.table td:nth-child(1) { width: 50px; } /* SL */
+.table th:nth-child(2),
+.table td:nth-child(2) { width: 120px; } /* Company Id */
+.table th:nth-child(4),
+.table td:nth-child(4) { width: 140px; } /* Type Name */
+.table th:nth-child(5),
+.table td:nth-child(5) { width: 180px; } /* Email */
+.table th:nth-child(6),
+.table td:nth-child(6) { width: 120px; } /* Phone */
+.table th:nth-child(7),
+.table td:nth-child(7) { width: 180px; } /* Address */
+.table th:nth-child(8),
+.table td:nth-child(8) { width: 140px; } /* Domain */
+.table th:nth-child(9),
+.table td:nth-child(9) { width: 100px; } /* Logo */
+.table th:nth-child(10),
+.table td:nth-child(10) { width: 140px; } /* Action */
+
+.table-responsive { overflow-x: auto; }
+
+/* Table hover */
+#companyDetailTableBody tr {
+    transition: background-color 0.2s ease;
+}
+#companyDetailTableBody tr.selected-row {
+    background-color: #d1e7ff !important;
+    font-weight: bold;
+}
+
+/* ====================================
+   MODAL STYLING
+   ==================================== */
+.modal-header.bg-primary {
+    background-color: #3498db;
+    color: white;
+}
+
+.modal-xl {
+    max-width: 95%;
+}
+
+.modal-xl input, .modal-xl select {
+    font-size: 0.85rem;
+}
+
+/* FORM ELEMENTS IN MODAL */
+input, select {
+    padding: 6px 10px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+}
+
+/* ====================================
+   BUTTON STYLING
+   ==================================== */
+.btn {
+    font-size: 0.85rem;
+}
+
+.btn-primary { background-color: #3498db; border-color: #3498db; }
+.btn-primary:hover { background-color: #2980b9; border-color: #2980b9; }
+
+.btn-info { background-color: #17a2b8; border-color: #17a2b8; }
+.btn-warning { background-color: #ffc107; border-color: #ffc107; }
+.btn-danger { background-color: #dc3545; border-color: #dc3545; }
+
+/* ====================================
+   TEXT ALIGNMENT
+   ==================================== */
+.text-end { text-align: right !important; }
+.text-center { text-align: center !important; }
+
+/* ====================================
+   RESPONSIVE FIXES
+   ==================================== */
+@media (max-width: 768px) {
+    .table-responsive { font-size: 0.8rem; overflow-x: auto; }
+    .btn { font-size: 0.8rem; }
+    .content { margin-left: 0; padding: 10px; }
+}
+
+#edit_medicineListTableBody tr.selected-row td{
+    background:#ffe08a !important;
+    color:#000 !important;
+    font-weight:800 !important;
+    border-color:#e6b800 !important;
+}
+
+
+
+.main-container.no-sidebar .sidebar {
+    display: none;
+}
+.main-container.no-sidebar .content {
+    flex: 1;
+}
+
+/* Hover & selection for JS-driven table */
+#medicineListTableBody tr {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#medicineListTableBody tr.selected-row {
+    background-color: #d1e7ff !important;
+    font-weight: bold;
+}
+
+/* Pagination Styling */
+.pagination .page-item .page-link {
+    border-radius: 0.25rem;
+    margin: 0 2px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #3498db;
+    border-color: #3498db;
+    color: #fff;
+}
+
+/* ====================================
+   MODAL STYLING
+   ==================================== */
+.modal-header.bg-primary {
+    background-color: #3498db;
+    color: white;
+}
+
+.modal-xl {
+    max-width: 95%;
+}
+
+/* FORM ELEMENTS IN MODAL */
+input, select {
+    padding: 6px 10px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+}
+
+/* BUTTON STYLING */
+.btn-primary {
+    background-color: #3498db;
+    border-color: #3498db;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+    border-color: #2980b9;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+/* TEXT ALIGNMENT */
+.text-end {
+    text-align: right !important;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+/* ====================================
+   SELECTED ITEMS LIST (JS) STYLING
+   ==================================== */
+#selectedMedicineList tr td {
+    vertical-align: middle;
+}
+
+.remove-item {
+    font-size: 0.85rem;
+    padding: 2px 6px;
+}
+
+/* SMALL RESPONSIVE FIX */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.85rem;
+    }
+    .btn {
+        font-size: 0.85rem;
+    }
+}
+
+#edit_medicineListTableBody tr.selected-row td{
+    background:#ffe08a !important;
+    color:#000 !important;
+    font-weight:800 !important;
+    border-color:#e6b800 !important;
+}
+
+.table-active-row {
+    background-color: #0d6efd !important;
+    color: white;
+}
+
+.bg-blue {
+    background-color: #0d6efd;
+    color: white;
+}
+
+
+/* Select2 product result width */
+.select2-container {
+    width: 100% !important;
+}
+
+/* Product search dropdown একটু wide রাখা */
+.select2-container--open .select2-dropdown {
+    min-width: 650px;
+}
+
+/* Header-এর মতো product row */
+.product-search-row {
+    display: grid;
+    grid-template-columns:
+        minmax(180px, 2fr)
+        minmax(160px, 1.5fr)
+        80px
+        100px;
+
+    align-items: center;
+    column-gap: 12px;
+
+    width: 100%;
+    padding: 5px 4px;
+}
+
+/* Product Name */
+.product-search-name {
+    font-weight: 600;
+    color: #212529;
+
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* Generic Name */
+.product-search-generic {
+    color: #6c757d;
+
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* Quantity */
+.product-search-qty {
+    text-align: center;
+    font-weight: 600;
+    color: #198754;
+}
+
+/* MRP */
+.product-search-mrp {
+    text-align: right;
+    font-weight: 600;
+    color: #0d6efd;
+}
+
+/* Dropdown result spacing */
+.select2-results__option {
+    padding: 6px 10px !important;
+}
+
+/* Selected/highlighted row text */
+.select2-container--default
+.select2-results__option--highlighted[aria-selected] 
+.product-search-name,
+
+.select2-container--default
+.select2-results__option--highlighted[aria-selected] 
+.product-search-generic,
+
+.select2-container--default
+.select2-results__option--highlighted[aria-selected] 
+.product-search-qty,
+
+.select2-container--default
+.select2-results__option--highlighted[aria-selected] 
+.product-search-mrp {
+    color: inherit;
+}
+
+/* Smaller screen adjustment */
+@media (max-width: 768px) {
+
+    .select2-container--open .select2-dropdown {
+        min-width: 100%;
+    }
+
+    .product-search-row {
+        grid-template-columns: 1fr;
+        row-gap: 3px;
+    }
+
+    .product-search-qty,
+    .product-search-mrp {
+        text-align: left;
+    }
+}
+
+.product-search-header {
+    display: grid;
+    grid-template-columns:
+        minmax(180px, 2fr)
+        minmax(160px, 1.5fr)
+        80px
+        100px;
+
+    column-gap: 12px;
+    align-items: center;
+
+    padding: 9px 14px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    color: #212529;
+    background: #f1f3f5;
+
+    border-bottom: 1px solid #ced4da;
+
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.product-search-header > div:nth-child(3) {
+    text-align: center;
+}
+
+.product-search-header > div:nth-child(4) {
+    text-align: right;
+}

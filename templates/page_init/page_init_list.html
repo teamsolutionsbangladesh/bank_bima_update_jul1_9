@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<h3>Page Init Details</h3>
+
+<div class="d-flex justify-content-between mb-3">
+    <a href="{% url 'add_page_init' %}" class="btn btn-primary">
+        + Add Page Init
+    </a>
+    <input type="text" class="form-control w-25" placeholder="Search...">
+</div>
+
+<table class="table table-bordered">
+
+    <thead>
+        <tr>
+            <th>SL</th>
+            <th>Page ID</th>
+            <th>Location ID</th>
+            <th>Company ID</th>
+            <th>Tran Main Head ID</th>
+            <th>User Tran Method</th>
+            <th>User Tran With ID</th>
+            <th>Tran Method</th>
+            <th>Tran Group ID</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+
+        <tr class="filter-row">
+            <th></th>
+
+            <th><input type="text" class="form-control column-filter" data-col="1" placeholder="Search..."></th>
+            <th><input type="text" class="form-control column-filter" data-col="2" placeholder="Search..."></th>
+            <th><input type="text" class="form-control column-filter" data-col="3" placeholder="Search..."></th>
+            <th><input type="text" class="form-control column-filter" data-col="4" placeholder="Search..."></th>
+            <th><input type="text" class="form-control column-filter" data-col="5" placeholder="Search..."></th>
+            <th><input type="text" class="form-control column-filter" data-col="6" placeholder="Search..."></th>
+            <th><input type="text" class="form-control column-filter" data-col="7" placeholder="Search..."></th>
+            <th><input type="text" class="form-control column-filter" data-col="8" placeholder="Search..."></th>
+            <th><input type="text" class="form-control column-filter" data-col="9" placeholder="Search..."></th>
+
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for item in data %}
+            <tr id="row{{ item.id }}">
+
+                <td>{{ forloop.counter }}</td>
+
+                <td>{{ item.page_id }}</td>
+                <td>{{ item.location_id }}</td>
+                <td>{{ item.company_id }}</td>
+                <td>{{ item.tran_main_head_id }}</td>
+                <td>{{ item.user_tran_method }}</td>
+                <td>{{ item.user_tran_with_id }}</td>
+                <td>{{ item.tran_method }}</td>
+                <td>{{ item.tran_group_id }}</td>
+                <td>{{ item.status }}</td>
+
+                <td>
+                    <button class="btn btn-sm btn-warning">Edit</button>
+                    <button class="btn btn-sm btn-danger">Delete</button>
+                </td>
+
+            </tr>
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'js/common-table-filter.js' %}"></script>
+{% endblock %}

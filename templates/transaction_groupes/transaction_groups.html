@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<h3>Transaction Groupe Details</h3>
+
+<div class="d-flex justify-content-between mb-3">
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">+ Add Transaction Groupe</button>
+    <input type="text" class="form-control w-25" placeholder="Search...">
+</div>
+
+<table class="table table-bordered">
+<thead>
+<tr>
+    <th>SL</th>
+    <th>Transaction Groupe Name</th>
+    <th>Transaction Groupe Type</th>
+    <th>Transaction Method</th>
+    <th>Company Id</th>
+    <th>Action</th>
+</tr>
+<tr class="filter-row">
+    <th></th>
+
+    <!-- NAME search -->
+    <th>
+        <input type="text" class="form-control column-filter" data-col="1" placeholder="Search...">
+    </th>
+
+    <!-- TYPE select -->
+    <th>
+        <select class="form-control column-filter-select" data-col="2">
+            <option value="">-- Select --</option>
+            {% for h in heads %}
+                <option value="{{ h.type_name }}">{{ h.type_name }}</option>
+            {% endfor %}
+        </select>
+    </th>
+
+    <!-- METHOD select -->
+    <th>
+        <select class="form-control column-filter-select" data-col="3">
+            <option value="">-- Select --</option>
+            {% for m in methods %}
+                <option value="{{ m }}">{{ m }}</option>
+            {% endfor %}
+        </select>
+    </th>
+
+    <!-- COMPANY search -->
+    <th>
+        <input type="text" class="form-control column-filter" data-col="4" placeholder="Search...">
+    </th>
+
+    <th></th>
+</tr>
+
+</thead>
+<tbody>
+{% for g in groupes %}
+<tr id="row{{ g.id }}">
+    <td>{{ forloop.counter }}</td>
+    <td>{{ g.tran_groupe_name }}</td>
+    <td>{{ g.tran_groupe_type.type_name }}</td>
+    <td>{{ g.tran_method }}</td>
+    <td>{{ g.company.company_id }}</td>
+    <td>
+        <button class="btn btn-sm btn-warning editBtn" data-id="{{ g.id }}">Edit</button>
+        <button class="btn btn-sm btn-danger deleteBtn" data-id="{{ g.id }}">Delete</button>
+    </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<!-- ADD MODAL -->
+<div class="modal fade" id="addModal">
+<div class="modal-dialog">
+<form id="addForm" class="modal-content">
+{% csrf_token %}
+<div class="modal-header"><h5>Add Transaction Groupe</h5></div>
+<div class="modal-body">
+    <label>Transaction Groupe Name *</label>
+    <input type="text" name="tran_groupe_name" class="form-control mb-2" required>
+
+    <label>Transaction Groupe Type *</label>
+    <select name="tran_groupe_type" class="form-control mb-2" required>
+        <option value="">Select Type</option>
+        {% for h in heads %}
+            <option value="{{ h.id }}">{{ h.type_name }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- <label>Transaction Method *</label>
+    <input type="text" name="tran_method" class="form-control mb-2" required> -->
+
+    <label class="form-label fw-semibold">Transaction Method</label>
+    <select name="tran_method" class="form-select">
+        <option value="">Select Status</option>
+        <option value="Receive">Receive</option>
+        <option value="Payment">Payment</option>
+        <option value="Both">Both</option>
+    </select>
+    <span class="text-danger small status_error"></span>
+
+    <label>Company *</label>
+    <select name="company" class="form-control mb-2">
+        <option value="">Select Company</option>
+        {% for c in companies %}
+            <option value="{{ c.company_id }}">{{ c.company_id }}</option>
+        {% endfor %}
+    </select>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary">Submit</button>
+</div>
+</form>
+</div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal fade" id="editModal">
+<div class="modal-dialog">
+<form id="editForm" class="modal-content">
+{% csrf_token %}
+<input type="hidden" name="id" id="edit_id">
+<div class="modal-header"><h5>Edit Transaction Groupe</h5></div>
+<div class="modal-body">
+    <label>Transaction Groupe Name *</label>
+    <input type="text" name="tran_groupe_name" id="edit_name" class="form-control mb-2" required>
+
+    <label>Transaction Groupe Type *</label>
+    <select name="tran_groupe_type" id="edit_type" class="form-control mb-2" required>
+        <option value="">Select Type</option>
+        {% for h in heads %}
+            <option value="{{ h.id }}">{{ h.type_name }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- <label>Transaction Method *</label>
+    <input type="text" name="tran_method" id="edit_method" class="form-control mb-2" required> -->
+
+
+    <label class="form-label fw-semibold">Transaction Method</label>
+    <select name="tran_method" class="form-select">
+        <option value="">Select Status</option>
+        <option value="Receive">Receive</option>
+        <option value="Payment">Payment</option>
+        <option value="Both">Both</option>
+    </select>
+    <span class="text-danger small status_error"></span>
+
+
+    <label>Company *</label>
+    <select name="company" id="edit_company" class="form-control mb-2">
+        <option value="">Select Company</option>
+        {% for c in companies %}
+            <option value="{{ c.company_id }}">{{ c.company_id }}</option>
+        {% endfor %}
+    </select>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary">Submit</button>
+</div>
+</form>
+</div>
+</div>
+
+{% endblock %}
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="{% static 'js/transaction_groupes/transaction_groupes.js' %}"></script>
+<script src="{% static 'js/common-table-filter.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}New Doctor Entry Workspace{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+    <div class="row">
+      
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4">
+                <h3 class="mb-3 text-secondary" id="formHeaderTitle">
+                    {% if edit_id %}
+                    <i class="fa-solid fa-user-pen text-warning"></i> Editing Doctor Record...
+                    {% else %}
+                    New Doctor Registration....
+                    {% endif %}
+                </h3>
+                
+                <form id="addForm" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" id="doctor_id" name="id" value="{{ edit_id|default:'' }}">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small mb-1">Doctor Full Name *</label>
+                        <input type="text" id="name" name="name" class="form-control text-dark" 
+                               value="{{ doctor.name|default:'' }}" placeholder="Enter full provider name" required>
+                        <span class="text-danger small name_error"></span>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small mb-1">Clinical Specialization Field</label>
+                            <input type="text" id="specialization" name="specialization" class="form-control text-dark" 
+                                   value="{{ doctor.specialization|default:'' }}" placeholder="e.g. Cardiologist">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small mb-1">Tag Classification System *</label>
+                            <select id="doctor_type" name="doctor_type" class="form-select fw-bold text-primary">
+                                <option value="diagnosis" {% if doctor.doctor_type == 'diagnosis' %}selected{% endif %}>Diagnosis Specialist</option>
+                                <option value="hospital" {% if doctor.doctor_type == 'hospital' %}selected{% endif %}>Hospital Consultant</option>
+                            </select>
+                            <span class="text-danger small type_error"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small mb-1">Chamber Facility Location Logs</label>
+                        <input type="text" id="chamber" name="chamber" class="form-control text-dark" 
+                               value="{{ doctor.chamber|default:'' }}" placeholder="e.g. Room 402, Phase 2, Main Complex Block">
+                    </div>
+
+                    <div class="d-flex justify-content-center mt-4">
+                        {% if edit_id %}
+                        <button type="submit" id="saveBtn" class="btn btn-warning me-2 px-4 fw-bold shadow-sm text-dark">
+                            💾 Update Doctor Profile
+                        </button>
+                        {% else %}
+                        <button type="submit" id="saveBtn" class="btn btn-primary me-2 px-4 fw-bold shadow-sm">
+                            💾 Save Doctor
+                        </button>
+                        {% endif %}
+                        <a href="{% url 'doctor_list' %}" class="btn btn-success px-4">
+                            ⬅️ Back to List
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4">
+                <h4 class="mb-3 text-secondary border-bottom pb-2">Recently Registered Doctors</h4>
+                <div class="table-responsive" style="max-height: 700px; overflow-y: auto;" id="tableContainerRight">
+                    <table class="table table-bordered table-striped table-hover table-sm align-middle small" id="staffTableRight">
+                        <thead class="table-dark" style="position: sticky; top: 0; z-index: 2;">
+                            <tr>
+                                <th>#</th>
+                                <th>Doctor ID</th>
+                                <th>Doctor Name</th>
+                                <th>Specialization</th>
+                                <th>Classification</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="doctorTableBody">    
+                            {% for d in doctors %}
+                            <tr id="row{{ d.id }}">
+                            <td>{{ forloop.counter }}</td>
+                            <td><span class="badge bg-secondary">DOC{{ d.id|stringformat:"09d" }}</span></td>
+                            <td><strong>{{ d.name }}</strong></td>
+                                <td>{{ d.specialization|default:"-" }}</td>
+                                <td>
+                                    {% if d.doctor_type == 'diagnosis' %}
+                                    <span class="badge bg-info text-dark">Diagnosis Unit</span>
+                                    {% else %}
+                                    <span class="badge bg-purple text-white">Hospital Desk</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-xs btn-warning py-0 px-2 inlineEditBtn" data-id="{{ d.id }}" title="Load profile">
+                                        <i class="fa-solid fa-arrow-left"></i> Load
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr class="no-data-row"><td colspan="6" class="text-center py-3 text-muted">No real-time matrix available.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>  
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+<script src="{% static 'js/doctors/doctors.js' %}"></script>
+
+<script>
+    // 🔥 Inline Direct Action Matrix Loop Trigger for Initial Edit Parameters Loads 
+    $(document).ready(function() {
+        const checkEditId = $("#doctor_id").val();
+        if (checkEditId) {
+            // Trigger script operations runtime automatic profile load parsing
+            setTimeout(function() {
+                $(`.inlineEditBtn[data-id="${checkEditId}"]`).trigger('click');
+            }, 100);
+        }
+    });
+</script>
+{% endblock %}

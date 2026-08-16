@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Add Payment{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow" style="min-height: 85vh;">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Add Payment</h5>
+            <div class="d-flex gap-2">
+                <a href="{% url 'add_payment_page' %}?page_id=1020300001" 
+                    class="btn btn-info text-white fw-bold"
+                    id="access_add_payment_page">
+                    + Add Payment - 1020300001
+                </a>
+
+                <a href="{% url 'add_payment_page' %}?page_id=1020300005" 
+                    class="btn btn-info text-white fw-bold"
+                    id="access_add_payment_page">
+                    + Add Payment - 1020300005
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body">
+
+            <!-- CASCADING FILTER -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label class="fw-semibold">Transaction Main Head....</label>
+                    <select id="transactionmainheads" name="transactionmainheads" form="paymentFilterForm" class="form-select"> {# #codex #}
+                        <option value="">Select Main Head</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="fw-semibold">Transaction With Method</label>
+                    <select id="transaction_with_method" name="transaction_with_method" form="paymentFilterForm" class="form-control"> {# #codex #}
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="fw-semibold">Transaction With Group</label>
+                    <select id="transaction_with" name="transaction_with" form="paymentFilterForm" class="form-select"> {# #codex #}
+                        <option value="">Select With</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="fw-semibold">Transaction With User</label>
+                    <select id="transaction_with_user" name="transaction_with_user" form="paymentFilterForm" class="form-select"> {# #codex #}
+                        <option value="">Select Supplier</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- FILTER FORM -->
+            <form method="get" id="paymentFilterForm" class="row g-2 align-items-end mb-3">
+                <div class="col-md-3">
+                    <input type="text" id="paymentSearch"
+                           name="search"
+                           class="form-control"
+                           placeholder="Search by user"
+                           value="{{ search }}">
+                </div>
+
+                <div class="col-md-2">
+                    <select id="statusFilter" name="status" class="form-select">
+                        <option value="">Status</option>
+                        <option value="1" {% if status_filter == '1' %}selected{% endif %}>Verified</option>
+                        <option value="0" {% if status_filter == '0' %}selected{% endif %}>Non Verified</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="small fw-semibold">Start Date</label>
+                    <input type="date" id="start_date"
+                           name="start_date"
+                           class="form-control"
+                           value="{{ start_date }}">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="small fw-semibold">End Date</label>
+                    <input type="date" id="end_date"
+                           name="end_date"
+                           class="form-control"
+                           value="{{ end_date }}">
+                </div>
+
+                <div class="col-md-2">
+                    <select id="perPage"
+                            name="per_page"
+                            class="form-select">
+                        {% for n in per_page_options %}
+                            <option value="{{ n }}"
+                                {% if per_page == n %}selected{% endif %}>
+                                {{ n }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-1 d-grid">
+                    <button type="submit" id="paymentFilterBtn" class="btn btn-primary">
+                        Filter
+                    </button>
+                </div>
+            </form>
+
+            <!-- PAYMENT TABLE -->
+            <div class="card">
+                <div class="card-header bg-success text-white text-center">
+                    Payment List
+                </div>
+
+                <div class="table-responsive"
+                     style="max-height:400px; overflow-y:auto;">
+
+                    <table class="table table-bordered table-sm">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>SL</th>
+                                <th>Tran ID</th>
+                                <th>Invoice Ref</th>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th>Tran User</th>
+                                <th class="text-end">Bill</th>
+                                <th class="text-end">Discount</th>
+                                <th class="text-end">Net</th>
+                                <th class="text-end">Advance</th>
+                                <th class="text-end">Due Col</th>
+                                <th class="text-end">Due Disc</th>
+                                <th class="text-end">Due</th>
+                                <th class="text-center">Action</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="paymentListTableBody">
+                        </tbody>
+                    </table>
+
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <label>Total Due</label>
+                            <input type="text"
+                                id="total_due"
+                                class="form-control"
+                                readonly>
+                        </div>
+
+                        <!-- <div class="col-md-3">
+                            <label>Payment</label>
+                            <input type="number"
+                                id="fifo_payment"
+                                class="form-control">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>&nbsp;</label>
+                            <button class="btn btn-primary form-control"
+                                    id="fifo_pay_btn">
+                                Proceed
+                            </button>
+                        </div> -->
+
+                        <div class="text-center">
+                            <button id="printReportBtn" class="btn btn-dark px-4">
+                                Print / Download PDF
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- <div class="text-center">
+                <button type="submit" class="btn btn-primary px-5">Submit</button>
+            </div> -->
+
+            <!-- <div class="text-center">
+                <button type="button" id="saveAllBtn" class="btn btn-primary px-5">Save</button>
+                <button id="printReportBtn" class="btn btn-dark px-4">
+                    Print / Download PDF
+                </button>
+            </div> -->
+
+        </div>
+    </div>
+
+</div>
+
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    window.APP_URLS = {
+        PAYMENT_LIST_URL: "{% url 'payment_list_load' %}",
+        PAYMENT_REPORT_PDF_URL: "{% url 'payment_report_pdf' %}",
+        PAYMENT_EDIT_URL: "/general/payment/edit/",
+        TRAN_MAIN_HEAD_URL: "{% url 'get_transaction_main_heads_combo' %}",
+        TRAN_WITH_METHOD_URL: "/combo_load/transaction-with-method-combo/",
+        TRAN_WITH_URL: "/combo_load/transaction-with-combo/",
+        TRAN_USERS_URL: "/combo_load/transaction-with-user-combo/",
+        TRAN_WITHS_API_URL: "{% url 'get_tran_withs' %}",
+        TRAN_USERS_API_URL: "{% url 'get_tran_users' %}"
+    };
+</script>
+
+<!-- <script src="{% static 'js/access.js' %}"></script> -->
+<script src="{% static 'js/combo_load/transaction_main_heads_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_with_method_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_with_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_with_user_combo.js' %}"></script>
+<script src="{% static 'js/general transaction/payment/payment_list.js' %}?v=202607201625"></script> {# #codex #}
+
+{% endblock %}

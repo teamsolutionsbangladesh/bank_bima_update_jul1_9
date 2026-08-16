@@ -1,0 +1,633 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Pharmacy Purchase{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pharmacy.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- TOP BAR -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <button class="btn btn-info text-white fw-bold" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
+            + Add Pharmacy Purchase
+        </button>
+        <a href="{% url 'add_purchase_page' %}" 
+            class="btn btn-info text-white fw-bold">
+            + Add Pharmacy Purchase
+        </a>
+
+
+        <!-- FILTER FORM -->
+        <form method="get" class="row g-2 align-items-end mb-2">
+
+            <div class="col-md-3">
+                <input type="text" name="search" class="form-control" placeholder="Search by user" value="{{ search }}">
+            </div>
+
+            <div class="col-md-2">
+                <select name="status" class="form-select">
+                    <option value="">Status</option>
+                    <option value="1" {% if status_filter == '1' %}selected{% endif %}>Verified</option>
+                    <option value="0" {% if status_filter == '0' %}selected{% endif %}>Non Verified</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="small fw-semibold">Start Date</label>
+                <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
+            </div>
+
+            <div class="col-md-2">
+                <label class="small fw-semibold">End Date</label>
+                <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
+            </div>
+
+            <div class="col-md-2">
+                <select id="perPage" name="per_page" class="form-select">
+                    {% for n in per_page_options %}
+                        <option value="{{ n }}" {% if per_page == n %}selected{% endif %}>{{ n }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-1 d-grid">
+                <button class="btn btn-primary">Filter</button>
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive mt-2">
+        <table id="medicineTable" class="table table-bordered table-hover text-center">
+            <thead class="table-info">
+                <tr>
+                    <th>SL</th>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Total</th>
+                    <th>Discount</th>
+                    <th>Net Total</th>
+                    <th>Advance</th>
+                    <th>Due Col</th>
+                    <th>Due Discount</th>
+                    <th>Due</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if data  %}
+                    {% for row in data %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ row.tran_id }}</td>
+                        <td>{{ row.user_name }}</td>
+                        <td>{{ row.bill_amount|default:"0" }}</td>
+                        <td>{{ row.discount|default:"0" }}</td>
+                        <td>{{ row.net_amount|default:"0" }}</td>
+                        <td>{{ row.payment|default:"0" }}</td>
+                        <td>{{ row.due_col|default:"0" }}</td>
+                        <td>{{ row.due_disc|default:"0" }}</td>
+                        <td>{{ row.due|default:"0" }}</td>
+                        <td>
+                            {% if row.status != 0 %}
+                                <button class="btn btn-sm btn-primary editBtn" data-tran-id="{{ row.tran_id }}">Edit</button>
+                            {% else %}
+                                <button class="btn btn-sm btn-success" disabled>Verified</button>
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+
+                {% else %}
+                    <tr class="no-data">
+                        <td colspan="11" class="text-center text-muted">No Data Found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ADD MEDICINE MODAL -->
+    <div class="modal fade" id="addMedicineModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5>Add New Pharmacy Purchase</h5>
+                    <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    {% include 'pharmacy/add.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    ADD MEDICINE MODAL - 2
+    <div class="modal fade" id="addMedicineModal-2" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5>Add New Pharmacy Purchase</h5>
+                    <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    {% include 'pharmacy/add_2.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<!-- VERIFY MODAL -->
+<div class="modal fade" id="verifyModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      {% include 'pharmacy/verify_modal.html' %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/save_csrftoken.js' %}"></script>
+<script src="{% static 'js/product_load.js' %}"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+
+<script>
+$(document).ready(function () {
+
+    // -------------------------
+    // SUBMIT NEW TRANSACTION
+    // -------------------------
+    $("#SubmitBtn").on("click", function (e) {
+        e.preventDefault();
+        
+    let store    = $("#store").val();
+    let location = $("#location").val().trim();
+    let supplier = $("#supplier").val().trim();
+    let method   = $("#payment_method").val();
+
+    let invoice  = parseFloat($("#invoiceAmount").val()) || 0;
+    let discount = parseFloat($("#discount").val()) || 0;
+    let net      = parseFloat($("#netAmount").val()) || 0;
+    let advance  = parseFloat($("#advanced").val()) || 0;
+    let balance  = parseFloat($("#balance").val()) || 0;
+
+        if(!store){
+        alert("Please select a store.");
+        return;
+    }
+
+    if(!location){
+        alert("Please enter location.");
+        $("#location").focus();
+        return;
+    }
+    if(!supplier){
+        alert("Please enter supplier.");
+        $("#supplier").focus();
+        return;
+    }
+
+    if(!method){
+        alert("Please select payment method.");
+        return;
+    }
+
+    if(invoice <= 0){
+        alert("Invoice amount must be greater than 0.");
+        return;
+    }
+
+    if(discount < 0 || discount > 100){
+        alert("Discount must be between 0–100%");
+        return;
+    }
+
+    if(net <= 0){
+        alert("Net amount is invalid.");
+        return;
+    }
+
+    if(advance < 0){
+        alert("Advance cannot be negative.");
+        return;
+    }
+
+    if(balance < 0){
+        alert("Balance cannot be negative.");
+        return;
+    }
+
+        const data = {
+            store_id: $("#store").val(),
+            location: $("#location").val(),
+            supplier: $("#supplier").val(),
+            tran_type: 1,
+            tran_method: $("#payment_method").val(),
+            bill_amount: $("#invoiceAmount").val(),
+            discount: $("#discount").val(),
+            net_amount: $("#netAmount").val(),
+            payment: $("#advanced").val(),
+            due: $("#balance").val(),
+            csrfmiddlewaretoken: "{{ csrf_token }}"
+        };
+
+        $.ajax({
+            url: "/transaction/temp/create/",  // ALWAYS create
+            type: "POST",
+            data: data,
+            success: function(res){
+                if(res.success){
+                    alert("Transaction Created!\nTran ID: " + res.tran_id);
+                    $('#addMedicineModal').modal('hide');
+                    $('#addMedicineForm')[0].reset();
+                    location.reload();  
+                } else {
+                    alert(res.message || "Something went wrong!");
+                }
+            },
+            error: function(xhr){
+                console.error(xhr.responseText);
+                alert("Something went wrong!");
+            }
+        });
+    });
+
+$("#addProductBtn").on("click", function(e){
+    e.preventDefault();
+
+    let pname = $("#productSearch").val().trim();
+    let price = parseFloat($("#price").val()) || 0;
+    let qty   = parseFloat($("#quantity").val()) || 0;
+    let total = price * qty;
+
+    if(!pname){
+        alert("Please select a product.");
+        return;
+    }
+
+    if(price <= 0 || qty <= 0){
+        alert("Price and quantity must be greater than 0.");
+        return;
+    }
+
+    // Append to selected medicines table
+    $("#selectedMedicineList").append(`
+        <tr>
+            <td>${$("#selectedMedicineList tr").length + 1}</td>
+            <td>${pname}</td>
+            <td>${qty}</td>
+            <td>${price.toFixed(2)}</td>
+            <td>${total.toFixed(2)}</td>
+            <td><button class="btn btn-danger btn-sm remove-item">Remove</button></td>
+        </tr>
+    `);
+
+    // Reset product input
+    $("#productSearch").val("");
+    $("#quantity").val("");
+    $("#price").val("");
+    $("#productSearch").focus();
+
+    updateInvoiceSummary(); // recalc invoice
+});
+
+    let editProducts = [];
+    let editCurrentIndex = -1;
+    let editOffset = 0;
+    let editQuery = "";
+
+    // ===========================
+    // OPEN MODAL & SETUP
+    // ===========================
+$(document).on("click", ".editBtn", function() {
+    let tranId = $(this).data("tran-id");
+    $("#edit_tran_id").val(tranId);
+
+    $("#verifyModal").modal("show");
+
+    $("#verifyModal").one("shown.bs.modal", function () {   // IMPORTANT
+        loadEditProducts();
+        fetchTransaction(tranId);
+    });
+});
+    // ===========================
+    // FETCH TRANSACTION DETAILS
+    // ===========================
+function fetchTransaction(tranId) {
+    $.get(`/transaction/get/${tranId}/`, function(res) {
+        if(!res.success) return alert("Transaction not found!");
+
+        let d = res.data;
+
+        // 🔹 Basic fields
+        $("#edit_location").val(d.location);
+        $("#edit_store").val(d.store_id);
+
+        $("#edit_date").val(d.tran_date);
+
+        $("#edit_payment_method").val(d.tran_method);
+        $("#edit_discount").val(d.discount);
+        $("#edit_advanced").val(d.payment);
+        $("#edit_invoiceAmount").val(d.bill_amount);
+        $("#edit_netAmount").val(d.net_amount);
+        $("#edit_balance").val(d.due);
+
+        // 🔹 Store
+        if(d.store_id) $("#edit_store").val(d.store_id).trigger("change");
+
+        // 🔹 Supplier (input field)
+        $("#edit_supplier").val(d.supplier);
+
+        // 🔹 Selected products
+        $("#edit_selectedMedicineList").empty();
+        if(d.details && d.details.length > 0){
+            d.details.forEach((p, idx) => {
+                let row = `
+                    <tr data-id="${p.id}">
+                        <td>${idx+1}</td>
+                        <td>${p.name}</td>
+                        <td>${p.qty}</td>
+                        <td>${p.cp}</td>
+                        <td>${p.total}</td>
+                        <td><button type="button" class="btn btn-sm btn-danger remove-item">Remove</button></td>
+                    </tr>
+                `;
+                $("#edit_selectedMedicineList").append(row);
+            });
+        }
+
+        // 🔹 Update invoice summary
+        updateEditInvoiceSummary();
+    });
+}
+
+
+
+
+
+
+
+
+
+    // ===========================
+    // LOAD SUPPLIERS
+    // ===========================
+function loadEditSuppliers(selectedName){
+    $.get("/get-suppliers/", function(res){
+        let html = '<option value="">Select Supplier</option>';
+        res.suppliers.forEach(s => {
+            html += `<option value="${s.id}" ${s.manufacturer_name == selectedName ? "selected" : ""}>${s.manufacturer_name}</option>`;
+        });
+        $("#edit_supplier").html(html);
+    });
+}
+
+
+
+
+    // ===========================
+    // LOAD PRODUCTS
+    // ===========================
+    function loadEditProducts(q = "", newOffset = 0, append = false) {
+        $.ajax({
+            url: "/product-search/",
+            method: "GET",
+            data: { q: q, offset: newOffset, limit: 50 },
+            success: function(response) {
+                let fetched = response.results || [];
+                if (append) editProducts = editProducts.concat(fetched);
+                else editProducts = fetched;
+
+                editOffset = newOffset;
+                if (!append) editCurrentIndex = 0;
+
+                renderEditTable();
+                highlightEditRow();
+            }
+        });
+    }
+
+function renderEditTable() {
+    let html = "";
+    editProducts.forEach((p, i) => {
+        html += `
+        <tr class="edit-row" data-index="${i}">
+            <td>${p.name}</td>
+            <td>${p.generic || ""}</td>
+            <td>${p.manufacturer}</td>
+            <td>${p.form}</td>
+            <td>${p.quantity}</td>
+            <td>${p.cp}</td>
+            <td>${p.mrp}</td>
+            <td><button type="button" class="btn btn-sm btn-success selectEditBtn">Select</button></td>
+        </tr>`;
+    });
+    $("#edit_medicineListTableBody").html(html);
+}
+
+
+function highlightEditRow() {
+    let rows = $("#edit_medicineListTableBody tr");
+    rows.removeClass("selected-row");
+
+    if (editCurrentIndex >= 0 && editCurrentIndex < rows.length) {
+        let row = $(rows[editCurrentIndex]);
+        row.addClass("selected-row");
+        row[0].scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+}
+
+    // ===========================
+    // PRODUCT SEARCH
+    // ===========================
+    $("#edit_productSearch").on("input", function() {
+        editQuery = $(this).val();
+        editOffset = 0;
+        loadEditProducts(editQuery, editOffset);
+    });
+
+    // ===========================
+    // KEYBOARD NAVIGATION
+    // ===========================
+$(document).on("keydown", "#verifyModal", function(e){
+
+    if(!$("#verifyModal").is(":visible")) return;
+
+    let rows=$("#edit_medicineListTableBody tr");
+    if(!rows.length) return;
+
+    if(e.key==="ArrowDown"){
+        e.preventDefault();
+        editCurrentIndex=Math.min(editCurrentIndex+1,rows.length-1);
+        highlightEditRow();
+    }
+
+    if(e.key==="ArrowUp"){
+        e.preventDefault();
+        editCurrentIndex=Math.max(editCurrentIndex-1,0);
+        highlightEditRow();
+    }
+
+    // ENTER → select OR add
+    if(e.key==="Enter"){
+        e.preventDefault();
+
+        // Step–1 : Select product
+        if(!$("#edit_quantity").is(":focus")){
+            let p=editProducts[editCurrentIndex];
+            if(!p) return;
+            $("#edit_productSearch").val(p.name);
+            $("#edit_price").val(p.cp);
+            $("#edit_quantity").focus();
+            return;
+        }
+
+        // Step–2 : Add into selected list
+        let qty=parseFloat($("#edit_quantity").val());
+        let price=parseFloat($("#edit_price").val());
+        if(!qty||!price) return;
+
+        let total=qty*price;
+        let pname=$("#edit_productSearch").val();
+
+        let row=`
+        <tr>
+            <td>${$("#edit_selectedMedicineList tr").length+1}</td>
+            <td>${pname}</td>
+            <td>${qty}</td>
+            <td>${price}</td>
+            <td>${total.toFixed(2)}</td>
+            <td><button class="btn btn-sm btn-danger remove-item">Remove</button></td>
+        </tr>`;
+
+        $("#edit_selectedMedicineList").append(row);
+
+        $("#edit_productSearch,#edit_price,#edit_quantity,#edit_total").val("");
+    }
+});
+
+
+
+    // ===========================
+    // CLICK ROW
+    // ===========================
+    $(document).on("click", "#edit_medicineListTableBody tr", function() {
+        let index = $(this).data("index");
+        editCurrentIndex = index;
+        highlightEditRow();
+        selectEditProduct(editProducts[index]);
+    });
+
+    function selectEditProduct(product) {
+        $("#edit_productSearch").val(product.name);
+        $("#edit_price").val(product.cp);
+        $("#edit_quantity").focus();
+    }
+
+    // ===========================
+    // ADD TO SELECTED LIST
+    // ===========================
+$("#edit_quantity").on("keydown", function (e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        e.stopPropagation(); // VERY IMPORTANT to prevent conflicts
+
+        // Get values directly from inputs
+        let pname = $("#edit_productSearch").val().trim();
+        let price = parseFloat($("#edit_price").val()) || 0;
+        let qty   = parseFloat($("#edit_quantity").val()) || 0;
+        let total = parseFloat($("#edit_total").val()) || 0;
+        let unit  = $("#edit_unit").val() || "";
+
+        $("#edit_productSearch").focus();
+
+        if(!pname || price <= 0 || qty <= 0 || total <= 0){
+            alert("Please select a product and enter quantity correctly.");
+            return;
+        }
+
+        addToEditSelectedList(pname, price, qty, total, unit);
+    }
+});
+
+
+
+    $("#edit_quantity,#edit_price").on("input",function(){
+    let q=parseFloat($("#edit_quantity").val())||0;
+    let p=parseFloat($("#edit_price").val())||0;
+    $("#edit_total").val((q*p).toFixed(2));
+});
+
+function addToEditSelectedList(pname, price, qty, total, unit, productId="") {
+    let row = `
+        <tr data-id="${productId}">
+            <td>${$("#edit_selectedMedicineList tr").length + 1}</td>
+            <td>${pname}</td>
+            <td>${qty}</td>
+            <td>${price}</td>
+            <td>${total.toFixed(2)}</td>
+            <td>
+                <button type="button" class="btn btn-sm btn-danger remove-item">Remove</button>
+            </td>
+        </tr>
+    `;
+    $("#edit_selectedMedicineList").append(row);
+
+    $("#edit_productSearch,#edit_price,#edit_quantity,#edit_total").val("");
+    $("#edit_unit").val("PCS");
+
+    updateEditInvoiceSummary();
+}
+
+
+
+    // ===========================
+    // REMOVE ITEM
+    // ===========================
+    $(document).on("click", ".remove-item", function() {
+        $(this).closest("tr").remove();
+        updateEditInvoiceSummary();
+    });
+
+    // ===========================
+    // INVOICE SUMMARY UPDATE
+    // ===========================
+function updateEditInvoiceSummary() {
+    let invoiceAmount = 0;
+    $("#edit_selectedMedicineList tr").each(function() {
+        let total = parseFloat($(this).find("td:eq(4)").text()) || 0;
+        invoiceAmount += total;
+    });
+
+    let discount = parseFloat($("#edit_discount").val()) || 0;
+    let advance = parseFloat($("#edit_advanced").val()) || 0;
+
+    let discountAmount = (invoiceAmount * discount) / 100;
+    let netAmount = invoiceAmount - discountAmount;
+    if(netAmount < 0) netAmount = 0;
+
+    let balance = netAmount - advance;
+    if(balance < 0) balance = 0;
+
+    $("#edit_invoiceAmount").val(invoiceAmount.toFixed(2));
+    $("#edit_netAmount").val(netAmount.toFixed(2));
+    $("#edit_balance").val(balance.toFixed(2));
+}
+
+});
+</script>
+
+
+
+{% endblock %}

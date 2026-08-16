@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Diagnosis Party Payment Form{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow">
+
+        <!-- HEADER -->
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Diagnosis Party Payment Entry Form</h5> {# codex change #}
+        </div>
+
+        <div class="card-body">
+
+            <!-- TRANSACTION INFO -->
+            <div class="row"> {# codex change #}
+
+                <div class="col-md-8"> {# codex change #}
+                    <div class="row"> {# codex change #}
+
+                        <div class="col-md-6 mb-3"> {# codex change #}
+                            <label>Transaction ID</label>
+                            <input type="text" class="form-control" value="{{ transaction.tran_id }}" readonly>
+                        </div>
+
+                        <div class="col-md-6 mb-3"> {# codex change #}
+                            <label>Invoice Ref</label>
+                            <input type="text" class="form-control" value="{{ transaction.invoice_ref }}" readonly>
+                        </div>
+
+                        <div class="col-md-6 mb-3"> {# codex change #}
+                            <label>Date</label>
+                            <input type="text" class="form-control" value="{{ transaction.tran_date }}" readonly>
+                        </div>
+
+                        <div class="col-md-6 mb-3"> {# codex change #}
+                            <label>Transaction With</label>
+                            <input type="text" class="form-control" value="{{ transaction.tran_type_with }}" readonly>
+                        </div>
+
+                        <div class="col-md-6 mb-3"> {# codex change #}
+                            <label>Transaction User</label>
+                            <input type="text" class="form-control" value="{{ transaction.user_name|default:transaction.tran_user }}" readonly>
+                        </div>
+
+                        <div class="col-md-6 mb-3"> {# codex change #}
+                            <label>Bill Amount</label>
+                            <input type="text" class="form-control" value="{{ transaction.bill_amount }}" readonly>
+                        </div>
+
+                        <div class="col-md-6 mb-3"> {# codex change #}
+                            <label>Discount</label>
+                            <input type="text" class="form-control" value="{{ transaction.discount }}" readonly>
+                        </div>
+
+                        <div class="col-md-6 mb-3"> {# codex change #}
+                            <label>Net Amount</label>
+                            <input type="text" class="form-control" value="{{ transaction.net_amount }}" readonly>
+                        </div>
+
+                        <div class="col-md-6 mb-3"> {# codex change #}
+                            <label>Advance</label>
+                            <input type="text" class="form-control" value="{{ transaction.payment }}" readonly>
+                        </div>
+
+                        <div class="col-md-6 mb-3"> {# codex change #}
+                            <label>Due Collection</label>
+                            <input type="text" class="form-control" value="{{ transaction.due_col }}" readonly>
+                        </div>
+
+                        <div class="col-md-6 mb-3"> {# codex change #}
+                            <label>Due Discount</label>
+                            <input type="text" class="form-control" value="{{ transaction.due_disc }}" readonly>
+                        </div>
+
+                        <div class="col-md-6 mb-3"> {# codex change #}
+                            <label>Current Due</label>
+                            <input type="text" id="current_due" class="form-control text-danger fw-bold" value="{{ transaction.due }}" readonly>
+                        </div>
+
+                    </div> {# codex change #}
+                </div>
+
+                <div class="col-md-4"> {# codex change #}
+                    <div class="border rounded p-3 bg-light h-100"> {# codex change #}
+                        <h6 class="fw-bold mb-3">Patient Info</h6> {# codex change #}
+                        <p class="mb-2"><strong>ID:</strong> {{ transaction.patient_id|default:"-" }}</p> {# codex change #}
+                        <p class="mb-2"><strong>Name:</strong> {{ transaction.patient_name|default:"-" }}</p> {# codex change #}
+                        <p class="mb-2"><strong>Age:</strong> {{ transaction.patient_age|default:"-" }}</p> {# codex change #}
+                        <p class="mb-2"><strong>Gender:</strong> {{ transaction.patient_gender|default:"-" }}</p> {# codex change #}
+                        <p class="mb-2"><strong>Blood Group:</strong> {{ transaction.patient_blood_group|default:"-" }}</p> {# codex change #}
+                        <p class="mb-2"><strong>Mobile:</strong> {{ transaction.patient_mobile|default:"-" }}</p> {# codex change #}
+                        <p class="mb-0"><strong>Address:</strong> {{ transaction.patient_address|default:"-" }}</p> {# codex change #}
+                    </div> {# codex change #}
+                </div> {# codex change #}
+
+            </div>
+
+            <hr>
+
+            <!-- PAYMENT INPUT -->
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label class="fw-semibold">Payment Amount</label>
+                    <input type="number" id="pay_amount" class="form-control" placeholder="Enter amount to pay">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="fw-semibold">Discount Amount</label>
+                    <input type="number" id="due_discount" class="form-control" placeholder="Enter due discount amount">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="fw-semibold">Balance Amount</label>
+                    <input type="number" id="balance" class="form-control">
+                </div>
+
+            </div>
+
+            <!-- ACTION -->
+            <div class="text-end mt-3">
+
+                <button class="btn btn-secondary" onclick="history.back()">
+                    Back
+                </button>
+
+                <button class="btn btn-success" id="proceedPaymentBtn">
+                    Proceed Payment
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+    window.TRANSACTION_ID = "{{ transaction.id }}"; // codex change
+    window.PARTY_PAYMENT_PROCESS_URL = "/diagnosis/party-payment/process/{{ transaction.id }}/"; // codex change
+</script>
+
+<script>
+    $("#pay_amount, #due_discount").on("input", function () {
+        const currentDue = parseFloat($("#current_due").val()) || 0;
+        const payAmount = parseFloat($("#pay_amount").val()) || 0;
+        const dueDiscount = parseFloat($("#due_discount").val()) || 0;
+        const balance = currentDue - payAmount - dueDiscount;
+
+        $("#balance").val(balance.toFixed(2));
+    });
+
+    $("#proceedPaymentBtn").on("click", function () {
+        const currentDue = parseFloat($("#current_due").val()) || 0;
+        const payAmount = parseFloat($("#pay_amount").val()) || 0;
+        const dueDiscount = parseFloat($("#due_discount").val()) || 0;
+        const balance = currentDue - payAmount - dueDiscount;
+
+        if (!payAmount || payAmount <= 0) {
+            alert("Enter valid payment amount");
+            return;
+        }
+
+        if (balance < 0) {
+            alert("Enter valid payment / discount amount");
+            return;
+        }
+
+        $("#balance").val(balance.toFixed(2));
+
+        $.ajax({
+            url: window.PARTY_PAYMENT_PROCESS_URL, // codex change
+            method: "POST",
+            data: {
+                pay_amount: payAmount,
+                due_discount: dueDiscount
+            },
+            success: function (res) {
+                if (res.success) {
+                    alert("Payment Successful!");
+                    window.location.href = res.redirect_url;
+                } else {
+                    alert(res.error || "Payment failed");
+                }
+            },
+            error: function (err) {
+                console.log(err.responseText);
+                alert(err.responseJSON?.error || "Payment failed");
+            }
+        });
+    });
+</script>
+
+{% endblock %}
