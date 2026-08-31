@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Transaction Category{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row">
+    
+    <!-- Left: Add/Update Transaction Category Form -->
+    <div class="col-md-5">
+      <div class="card shadow-sm p-4">
+        <h2 class="mb-4">Transaction Category</h2>
+        <form id="addCategoryForm" method="POST">
+          {% csrf_token %}
+
+          <!-- Hidden Input for Object/Category ID update cycle -->
+          {% comment %} <input type="hidden" id="category_id" name="category_id">             {% endcomment %}
+
+          <input id="category_id"> 
+          
+          <!-- 1. Transaction Main Heads -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Transaction Main Head</label>
+            <select id="transactionmainheads" name="transactionmainheads" class="form-control" required>
+              <option value="">Select Main Head</option>
+            </select>
+          </div>
+
+          <!-- 2. Transaction Group -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Transaction Group</label>
+            <select id="tran_group" name="tran_group" class="form-control" required>
+              <option value="">Select Group</option>
+            </select>
+          </div>              
+
+          <!-- 3. Category Entry Input Box -->
+          <div class="mb-3">
+              <label for="category_name" class="form-label fw-semibold">Category Name</label>
+              <input type="text" 
+                     class="form-control" 
+                     id="category_name" 
+                     name="category_name" 
+                     placeholder="Enter category name" 
+                     required>
+              <span class="text-danger small category_error"></span>
+          </div>
+
+          <!-- Status Field -->
+          <div class="mb-3" style="display:none;">
+            <label class="form-label fw-semibold">Status</label>
+            <select name="status" class="form-select">
+              <option value="Active" selected>Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="d-flex justify-content-start mt-4">
+            <button type="submit" id="saveBtn" class="btn btn-primary me-2 px-4">
+              💾 Save Category
+            </button>
+            <button type="button" class="btn btn-secondary px-4" onclick="history.back()">
+              ⬅️ Back
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- Right: Category Data Table View -->
+    <div class="col-md-7">
+      <div class="card shadow-sm p-4">
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Filter by Main Head</label>
+          <select class="form-control" id="tableFilterMainHead">
+             <option value="">All Main Heads</option>
+          </select>
+        </div>          
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Search Category Name</label>
+          <input type="text" id="search_category" class="form-control" placeholder="Search category...">
+        </div>
+
+        <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+          <table class="table table-bordered table-striped table-hover table-sm" id="categoryTable">
+            <thead class="table-dark" style="position: sticky; top: 0; z-index: 2;">
+              <tr>
+                  <th>#</th>
+                  <th>Transaction Main Head ID</th>
+                  <th>Group ID</th>
+                  <th>Category Name</th>
+                  <th>Status</th>
+                  <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="categoryTableBody"> 
+                 <!-- AJAX/JS Data dynamically rendered here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>  
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="{% static 'js/save_csrftoken.js' %}"></script>
+
+<!-- Existing combo files -->
+<script src="{% static 'js/combo_load/transaction_main_heads_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_group_combo_on_main_head.js' %}"></script>
+{% comment %} <script src="{% static 'js/combo_load/transaction_group_combo.js' %}"></script> {% endcomment %}
+
+<!-- Extra JavaScript File Connection -->
+<script src="{% static 'js/transaction_category/transaction_category.js' %}"></script>
+{% endblock %}

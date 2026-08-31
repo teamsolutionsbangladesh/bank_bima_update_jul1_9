@@ -57,6 +57,29 @@ $(document).ready(function () {
     }, 150);
 }
 
+    function focusProductNameAfterDuplicateAlert() {
+    const $productSearch = $("#productSearch");
+
+    $("#addProductBtn").blur();
+    $("#productid").val("");
+    $productSearch.val(null).trigger("change");
+
+    setTimeout(function () {
+        if (!$productSearch.data("select2")) return;
+
+        $productSearch.select2("open");
+
+        setTimeout(function () {
+            const searchField = document.querySelector(".select2-container--open .select2-search__field");
+
+            if (searchField) {
+                searchField.focus();
+                searchField.select();
+            }
+        }, 150);
+    }, 100);
+}
+
     function focusProductBoxOnly() {
         let productBox = $("#productSearch")
             .next(".select2-container")
@@ -82,6 +105,31 @@ $(document).ready(function () {
         }, 100);
     }
 
+    function focusFast(selector) { // codex change
+        const applyFocus = function () { // codex change
+            const el = document.querySelector(selector); // codex change
+            if (!el) { return; } // codex change
+            el.focus({ preventScroll: true }); // codex change
+            if (typeof el.select === "function") { // codex change
+                el.select(); // codex change
+            } // codex change
+        }; // codex change
+
+        applyFocus(); // codex change
+        requestAnimationFrame(applyFocus); // codex change
+        setTimeout(applyFocus, 0); // codex change
+    } // codex change
+
+    function isReadyToFocusAddButton() { // codex change
+        return Boolean(($("#doc_lookup").val() || $("#doc_id").val()) && ($("#productSearch").val() || $("#productid").val())); // codex change
+    } // codex change
+
+    function focusAddButtonIfReady() { // codex change
+        if (!isReadyToFocusAddButton()) { return false; } // codex change
+        $("#addProductBtn").focus(); // codex change
+        return true; // codex change
+    } // codex change
+
     // =========================
     // PAGE LOAD FOCUS
     // =========================
@@ -104,6 +152,7 @@ $("#pat_name")
     .on("keydown.keyboardFlow", function (e) {
         if (e.key === "Enter") {
             e.preventDefault();
+            if (focusAddButtonIfReady()) { return; } // codex change
             $("#pat_age_y").focus().select();
         }
     });
@@ -153,14 +202,16 @@ $("#pat_phone")
         }
     });
 
-$("#pat_address")
-    .off("keydown.keyboardFlow")
-    .on("keydown.keyboardFlow", function (e) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            openSelect2Search("#doc_lookup");
-        }
-    });
+	$("#pat_address")
+	    .off("keydown.keyboardFlow")
+		    .on("keydown.keyboardFlow", function (e) {
+		        if (e.key === "Enter") {
+		            e.preventDefault();
+		            if (focusAddButtonIfReady()) { return; } // codex change
+		            if ($("#doc_lookup").val()) { openSelect2Search("#sr_lookup"); return; } // codex change
+		            openSelect2Search("#doc_lookup"); // codex change
+		        }
+	    });
 
 // Doctor select → SR
 $("#doc_lookup")
@@ -302,8 +353,7 @@ $("#sr_lookup")
         });
 
         if (duplicate) {
-            alert("❌ This product is already selected!");
-            openProductSearch();
+            showDuplicateProductModal();
             return;
         }
 
@@ -386,7 +436,70 @@ $("#sr_lookup")
                 }
             );
     }
+function showDuplicateProductModal() {
+    const modalElement = document.getElementById("duplicateProductModal");
 
+    if (!modalElement) {
+        openProductSearch();
+        return;
+    }
+
+    let duplicateModal = bootstrap.Modal.getInstance(modalElement);
+
+    if (!duplicateModal) {
+        duplicateModal = new bootstrap.Modal(modalElement, {
+            backdrop: "static",
+            keyboard: false,
+            focus: true
+        });
+    }
+
+    $(modalElement)
+        .off("shown.bs.modal.duplicateProduct")
+        .one("shown.bs.modal.duplicateProduct", function () {
+            $("#duplicateProductOkBtn").focus();
+        });
+
+    duplicateModal.show();
+}
+
+$("#duplicateProductOkBtn")
+    .off("click.duplicateProduct")
+    .on("click.duplicateProduct", function () {
+
+        const modalElement = document.getElementById("duplicateProductModal");
+        const duplicateModal = bootstrap.Modal.getInstance(modalElement);
+
+        $(modalElement)
+            .off("hidden.bs.modal.duplicateProduct")
+            .one("hidden.bs.modal.duplicateProduct", function () {
+
+                $("#addProductBtn").blur();
+                $("#productid").val("");
+                $("#productSearch").val(null).trigger("change");
+
+                setTimeout(function () {
+
+                    $("#productSearch").select2("open");
+
+                    setTimeout(function () {
+                        const searchField = document.querySelector(
+                            ".select2-container--open .select2-search__field"
+                        );
+
+                        if (searchField) {
+                            searchField.focus();
+                            searchField.select();
+                        }
+                    }, 150);
+
+                }, 150);
+            });
+
+        if (duplicateModal) {
+            duplicateModal.hide();
+        }
+    });
     // ==========================================
 // ADD MORE MODAL BUTTON EVENTS
 // ==========================================
@@ -523,6 +636,17 @@ $("#addMoreNoBtn")
 // =========================
 // ADVANCE → SAVE BUTTON FOCUS
 // =========================
+function validateAdvanceAmountOnEnter() { // codex change
+    const advance = parseFloat($("#advanced").val()) || 0; // codex change
+    const netAmount = parseFloat($("#netAmount").val()) || 0; // codex change
+    if (advance > netAmount) { // codex change
+        alert("⚠️ Advance amount cannot exceed balance/net amount!"); // codex change
+        $("#advanced").focus().select(); // codex change
+        return false; // codex change
+    } // codex change
+    return true; // codex change
+} // codex change
+
 $("#advanced")
     .off("keydown.advanceToSave")
     .on("keydown.advanceToSave", function (e) {
@@ -532,6 +656,8 @@ $("#advanced")
         }
 
         e.preventDefault();
+
+        if (!validateAdvanceAmountOnEnter()) { return; } // codex change
 
         $("#saveAllBtn").focus();
     });
@@ -1147,37 +1273,57 @@ $("#saveConfirmYesBtn, #saveConfirmNoBtn")
     // INVOICE SUMMARY
     // =========================
     function updateInvoiceSummary() {
-        let invoiceAmount = 0;
 
-        $("#selectedPaymentListPayment tr").each(function () {
-            let rowTotal =
-                parseFloat($(this).find("td:eq(7)").text()) || 0;
+    let invoiceAmount = 0;
 
-            invoiceAmount += rowTotal;
-        });
+    $("#selectedPaymentListPayment tr").each(function () {
+        let rowTotal = parseFloat($(this).find("td:eq(7)").text()) || 0;
+        invoiceAmount += rowTotal;
+    });
 
-        let discountPercent = parseFloat($("#discount").val()) || 0;
-        let advance = parseFloat($("#advanced").val()) || 0;
+    let discountAmount = parseFloat($("#discount").val()) || 0; // codex change
+    let advance = parseFloat($("#advanced").val()) || 0;
 
-        let discountAmount =
-            (invoiceAmount * discountPercent) / 100;
+    let netAmount = invoiceAmount - discountAmount; // codex change
 
-        let netAmount = invoiceAmount - discountAmount;
-
-        if (netAmount < 0) {
-            netAmount = 0;
-        }
-
-        let balance = netAmount - advance;
-
-        if (balance < 0) {
-            balance = 0;
-        }
-
-        $("#invoiceAmount").val(invoiceAmount.toFixed(2));
-        $("#netAmount").val(netAmount.toFixed(2));
-        $("#balance").val(balance.toFixed(2));
+    if (netAmount < 0) {
+        netAmount = 0;
     }
+
+    let balance;
+
+    // ============================
+    // EDIT MODE
+    // ============================
+    if (window.EDIT_PAYMENT_DATA &&
+        window.EDIT_PAYMENT_DATA.is_edit &&
+        window.EDIT_PAYMENT_DATA.transaction) {
+
+        let t = window.EDIT_PAYMENT_DATA.transaction;
+
+        let dueCol = parseFloat(t.due_col) || 0;
+        let dueDisc = parseFloat(t.due_disc) || 0;
+
+        balance = netAmount - advance - dueCol - dueDisc;
+
+    }
+    // ============================
+    // ADD MODE
+    // ============================
+    else {
+
+        balance = netAmount - advance;
+
+    }
+
+    if (balance < 0) {
+        balance = 0;
+    }
+
+    $("#invoiceAmount").val(invoiceAmount.toFixed(2));
+    $("#netAmount").val(netAmount.toFixed(2));
+    $("#balance").val(balance.toFixed(2));
+}
 
     function updateGrandTotal() {
         let total = 0;
@@ -1289,6 +1435,19 @@ $("#saveConfirmYesBtn, #saveConfirmNoBtn")
     setTimeout(initEditPaymentForm, 500); // codex change
 
 $(document)
+    .off("keydown.selectedDoctorToSr", ".select2-search__field") // codex change
+    .on("keydown.selectedDoctorToSr", ".select2-search__field", function (e) { // codex change
+        if (e.key !== "Enter" || $(this).val()) { return; } // codex change
+        const $docLookup = $("#doc_lookup"); // codex change
+        if (!$docLookup.length || !$docLookup.data("select2") || !$docLookup.data("select2").isOpen() || !$docLookup.val()) { return; } // codex change
+        e.preventDefault(); // codex change
+        e.stopPropagation(); // codex change
+        e.stopImmediatePropagation(); // codex change
+        $docLookup.select2("close"); // codex change
+        setTimeout(function () { openSelect2Search("#sr_lookup"); }, 100); // codex change
+    }); // codex change
+
+$(document)
     .off("keydown.optionalSr", ".select2-search__field")
     .on("keydown.optionalSr", ".select2-search__field", function (e) {
 
@@ -1398,6 +1557,42 @@ function showTransactionPreview(response, payload, paymentList) {
         return amount.toFixed(2);
     }
 
+    function doctorLabelOnly(text) { // codex change
+        const raw = (text || "").trim(); // codex change
+        if (!raw) { // codex change
+            return "-"; // codex change
+        } // codex change
+        const parts = raw.split(" - "); // codex change
+        return (parts.length > 1 ? parts.slice(1).join(" - ") : raw) || "-"; // codex change
+    } // codex change
+
+    function setInvoiceBarcode($target, invoiceValue, barcodeSvg) { // codex change
+        if (!barcodeSvg) { // codex change
+            $target.text(safeText(invoiceValue)); // codex change
+            return; // codex change
+        } // codex change
+        $target.html(barcodeSvg); // codex change
+    } // codex change
+
+    function setPreviewTextOrBarcode(selector, plainSelector, value, svg) { // codex change
+        const $bar = $(selector); // codex change
+        if ($bar.length) { // codex change
+            setInvoiceBarcode($bar, value, svg); // codex change
+        } // codex change
+        $(plainSelector).text(safeText(value)); // codex change
+    } // codex change
+
+    function setPaymentStatus(balance) { // codex change
+        const amount = parseFloat(balance) || 0; // codex change
+        const isPaid = amount <= 0; // codex change
+        const $box = $("#previewPaymentStatusBox"); // codex change
+        $box
+            .text(isPaid ? "PAID" : "DUE") // codex change
+            .removeClass("status-paid status-due") // codex change
+            .addClass(isPaid ? "status-paid" : "status-due"); // codex change
+    } // codex change
+
+
     $("#previewTranId").text(
         safeText(response.tran_id)
     );
@@ -1438,9 +1633,12 @@ function showTransactionPreview(response, payload, paymentList) {
         selectedText("#payment_method")
     );
 
-    $("#previewInvoiceNo").text(
-        safeText(payload.invoice)
-    );
+    setPreviewTextOrBarcode( // codex change
+        "#previewInvoiceNoBarcode", // codex change
+        "#previewInvoiceNoText", // codex change
+        response.invoice_ref || payload.invoice || response.tran_id, // codex change
+        response.invoice_barcode_svg || payload.invoice_barcode_svg // codex change
+    ); // codex change
 
     $("#previewLocation").text(
         selectedText(".location-select")
@@ -1449,6 +1647,12 @@ function showTransactionPreview(response, payload, paymentList) {
     $("#previewPatientId").text(
         safeText(response.patient_id)
     );
+    setPreviewTextOrBarcode( // codex change
+        "#previewPatientIdBarcode", // codex change
+        "#previewPatientId", // codex change
+        response.patient_id || payload.patient_id, // codex change
+        response.patient_barcode_svg || payload.patient_barcode_svg // codex change
+    ); // codex change
 
     $("#previewPatientName").text(
         safeText(payload.patient_name)
@@ -1481,30 +1685,33 @@ function showTransactionPreview(response, payload, paymentList) {
     );
 
     $("#previewDoctorName").text(
-        selectedText("#doc_lookup")
-    );
-
-    $("#previewDoctorSpeciality").text(
-        safeText($("#doc_speciality").val())
-    );
-
-    $("#previewDoctorChamber").text(
-        safeText($("#doc_chamber").val())
+        doctorLabelOnly(selectedText("#doc_lookup")) // codex change
     );
 
     $("#previewSrId").text(
         safeText(response.sr_id)
     );
 
-    let srName = $("#sr_name_display").val();
+    let srName = ($("#sr_name_display").val() || "").trim();
+    let srId = response.sr_id || "";
 
-    if (!srName || !srName.trim()) {
-        srName = selectedText("#sr_lookup");
+    if (!srName) {
+        const selectedSrValue = $("#sr_lookup").val();
+        const selectedSrText =
+            ($("#sr_lookup option:selected").text() || "").trim();
+
+        if (
+            selectedSrValue &&
+            selectedSrText &&
+            !selectedSrText.includes("Start Typing") &&
+            selectedSrText !== "-"
+        ) {
+            srName = selectedSrText;
+        }
     }
 
-    $("#previewSrName").text(
-        safeText(srName)
-    );
+    $("#previewSrName").text(srName);
+    $("#previewSrId").text(srId);
 
     let rowsHtml = "";
 
@@ -1551,16 +1758,8 @@ function showTransactionPreview(response, payload, paymentList) {
 
     $("#previewTransactionRows").html(rowsHtml);
 
-    $("#previewBottomTranId").text(
-        safeText(response.tran_id)
-    );
-
     $("#previewBottomPatientName").text(
         safeText(payload.patient_name)
-    );
-
-    $("#previewBottomDoctorName").text(
-        selectedText("#doc_lookup")
     );
 
     $("#previewInvoiceAmount").text(
@@ -1579,9 +1778,18 @@ function showTransactionPreview(response, payload, paymentList) {
         money(payload.payment)
     );
 
+    $("#previewDueCollection").text(
+        money(response.due_col ?? payload.due_col)
+    );
+
+    $("#previewDueDiscount").text(
+        money(response.due_disc ?? payload.due_disc)
+    );
+
     $("#previewBalance").text(
         money(payload.due)
     );
+    setPaymentStatus($("#previewBalance").text());
 
     const modalElement =
         document.getElementById("transactionPreviewModal");
@@ -1608,4 +1816,91 @@ function showTransactionPreview(response, payload, paymentList) {
     }
 
     previewModal.show();
+
+    $("#openPrintableInvoiceBtn").on("click", function () {
+
+    // পুরো preview HTML
+    let previewHtml = $("#transactionPreviewModal").prop("outerHTML");
+
+    // বর্তমান page-এর CSS copy করা
+    let styles = "";
+
+    $("link[rel='stylesheet']").each(function () {
+        styles += `<link rel="stylesheet" href="${$(this).attr("href")}">`;
+    });
+
+    $("style").each(function () {
+        styles += `<style>${$(this).html()}</style>`;
+    });
+
+    let printWindow = window.open("", "_blank");
+
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Invoice</title>
+
+            ${styles}
+
+            <style>
+
+                body{
+                    background:#fff;
+                    margin:20px;
+                }
+
+                @page{
+                    size:A4;
+                    margin:10mm;
+                }
+
+                @media print{
+
+                    body{
+                        margin:0;
+                    }
+
+                    .modal,
+                    .modal-backdrop,
+                    .btn,
+                    button{
+                        display:none !important;
+                    }
+
+                    #transactionPreviewModal{
+                        display:block !important;
+                        visibility:visible !important;
+                        position:static !important;
+                        width:100% !important;
+                        box-shadow:none !important;
+                        border:none !important;
+                    }
+
+                }
+
+            </style>
+
+        </head>
+
+        <body>
+
+            ${previewHtml}
+
+        </body>
+
+        </html>
+    `);
+
+    printWindow.document.close();
+
+    printWindow.focus();
+
+    setTimeout(function () {
+
+        printWindow.print();
+
+    }, 500);
+
+});
 }

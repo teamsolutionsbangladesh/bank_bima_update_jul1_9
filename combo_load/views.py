@@ -98,6 +98,99 @@ def transaction_group_combo(request):
         "transaction_group_combo": data
     })
 
+
+def transaction_group_combo_on_main_head(request):
+    tran_main_head_id = request.GET.get('tran_main_head_id')
+
+    if not tran_main_head_id:
+        return JsonResponse({"transaction_group_combo_on_main_head": []})
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT
+                id,
+                tran_groupe_name
+            FROM transaction__groupes
+            WHERE tran_groupe_type = %s
+              AND status = 1
+            ORDER BY tran_groupe_name
+            """,
+            [tran_main_head_id],
+        )
+        data = [
+            {"id": row[0], "name": row[1]}
+            for row in cursor.fetchall()
+        ]
+
+    return JsonResponse({
+        "transaction_group_combo_on_main_head": data
+    })
+
+
+def transaction_category_combo(request):
+    tran_main_head_id = request.GET.get('tran_main_head_id')
+    tran_group_id = request.GET.get('tran_group_id')
+
+    if not tran_main_head_id or not tran_group_id:
+        return JsonResponse({"transaction_category_combo": []})
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT id, name
+            FROM transaction__category
+            WHERE tran_main_head_id = %s
+              AND group_id = %s
+              AND status = 1
+            ORDER BY name
+            """,
+            [tran_main_head_id, tran_group_id],
+        )
+        data = [
+            {"id": row[0], "name": row[1]}
+            for row in cursor.fetchall()
+        ]
+
+    return JsonResponse({"transaction_category_combo": data})
+
+
+def transaction_head_combo(request):
+    tran_main_head_id = request.GET.get('tran_main_head_id')
+    tran_group_id = request.GET.get('tran_group_id')
+    category_id = request.GET.get('category_id')
+
+    if not tran_main_head_id:
+        return JsonResponse({"transaction_head_combo": []})
+
+    where_sql = ["tran_main_head_id = %s"]
+    params = [tran_main_head_id]
+
+    if tran_group_id:
+        where_sql.append("groupe_id = %s")
+        params.append(tran_group_id)
+
+    if category_id:
+        where_sql.append("category_id = %s")
+        params.append(category_id)
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f"""
+            SELECT id, tran_head_name
+            FROM transaction__heads
+            WHERE {' AND '.join(where_sql)}
+            ORDER BY tran_head_name
+            """,
+            params,
+        )
+        data = [
+            {"id": row[0], "name": row[1]}
+            for row in cursor.fetchall()
+        ]
+
+    return JsonResponse({"transaction_head_combo": data})
+
 def transaction_with_combo(request):
     tran_main_head_id = request.GET.get('tran_main_head_id')
     tran_with_method = request.GET.get('tran_with_method')

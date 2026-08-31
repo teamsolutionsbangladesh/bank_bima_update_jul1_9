@@ -34,6 +34,23 @@ urlpatterns = [
     path('referral/report/data/', views.referral_report_data, name='diagnosis_referral_report_data'),  # #codex
     path('referral/report/pdf/', views.referral_report_pdf, name='diagnosis_referral_report_pdf'),  # #codex
 
+    # lab report generation
+    
+    path('lab-report/setup/', views.lab_parameter_setup_page, name='diagnosis_lab_parameter_setup'),  # #codex
+    path('lab-report/categories/', views.lab_parameter_categories, name='diagnosis_lab_parameter_categories'),  # #codex
+    path('lab-report/heads/', views.lab_parameter_heads, name='diagnosis_lab_parameter_heads'),  # #codex
+    path('lab-report/parameters/load/', views.lab_parameter_list, name='diagnosis_lab_parameter_list'),  # #codex
+    path('lab-report/parameters/save/', views.lab_parameter_save, name='diagnosis_lab_parameter_save'),  # #codex
+    path('lab-report/parameters/update/', views.lab_parameter_update, name='diagnosis_lab_parameter_update'),  # #codex
+    path('lab-report/parameters/delete/', views.lab_parameter_delete, name='diagnosis_lab_parameter_delete'),  # #codex
+    path('lab-report/biochemistry/', views.biochemistry_result_page, name='diagnosis_biochemistry_result'),  # #codex
+    path('lab-report/biochemistry/add/', views.biochemistry_result_add_page, name='diagnosis_biochemistry_result_add'),  # #codex
+    path('lab-report/biochemistry/invoice-search/', views.biochemistry_invoice_autocomplete, name='diagnosis_biochemistry_invoice_autocomplete'),  # #codex
+    path('lab-report/biochemistry/load-invoice/', views.biochemistry_invoice_load, name='diagnosis_biochemistry_invoice_load'),  # #codex
+    path('lab-report/biochemistry/save/', views.biochemistry_result_save, name='diagnosis_biochemistry_result_save'),  # #codex
+    path('lab-report/biochemistry/list/', views.biochemistry_result_list, name='diagnosis_biochemistry_result_list'),  # #codex
+    path('lab-report/biochemistry/preview/<int:invoice_id>/', views.biochemistry_result_preview, name='diagnosis_biochemistry_result_preview'),  # #codex
+    path('lab-report/biochemistry/pdf/<int:invoice_id>/', views.biochemistry_result_pdf, name='diagnosis_biochemistry_result_pdf'),  # #codex
 
 
 
@@ -74,7 +91,7 @@ urlpatterns = [
     path('party-payment/process/<int:id>/', tran_views.process_diagnosis_party_payment, name='process_diagnosis_party_payment'),  # codex change
     path('party-payment/process-fifo-payment/', tran_views.process_diagnosis_party_fifo_payment, name='process_diagnosis_party_fifo_payment'),  # codex change
     path('reports/party-payment/', tran_views.diagnosis_party_payment_report_pdf, name='diagnosis_party_payment_report_pdf'),  # codex change
-
+    path("party-payment/preview/<int:transaction_id>/",tran_views.diagnosis_party_payment_preview,name="diagnosis_party_payment_preview"),
 
     path('api/autocomplete/doctor/', views.autocomplete_doctor, name='api_autocomplete_doctor'),
     path('api/autocomplete/sr/', views.autocomplete_sr, name='api_autocomplete_sr'),
@@ -110,6 +127,11 @@ path(
     "payment/report/pdf/",
     tran_views.diagnosis_payment_report_pdf,
     name="diagnosis_payment_report_pdf"
+),
+path(
+    "diagnosis/payment/print/<str:tran_id>/",
+    tran_views.diagnosis_invoice_print,
+    name="diagnosis_invoice_print"
 ),
 
 ]

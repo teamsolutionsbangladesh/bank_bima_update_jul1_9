@@ -35,6 +35,10 @@ function loadTransactionWithMethodsCombo(selected_id = null, callback = null){
 
 $('#transactionmainheads').change(function(){
 
+    if (window.__PAGE_INIT_LOADING) {
+        return;
+    }
+
     loadTransactionWithMethodsCombo(0, function(){
 
     });

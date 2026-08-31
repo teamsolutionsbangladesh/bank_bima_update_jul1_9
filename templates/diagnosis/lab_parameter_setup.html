@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lab Parameter Setup{% endblock %}
+
+{% block content %}
+<input type="hidden" id="global_csrf" value="{{ csrf_token }}"> <!-- #codex -->
+
+<div class="container-fluid py-3"> <!-- #codex -->
+    <div class="row g-3"> <!-- #codex -->
+        <div class="col-lg-4"> <!-- #codex -->
+            <div class="card shadow-sm"> <!-- #codex -->
+                <div class="card-header bg-primary text-white"> <!-- #codex -->
+                    <h5 class="mb-0">Lab Report Parameter Setup</h5> <!-- #codex -->
+                </div> <!-- #codex -->
+                <div class="card-body"> <!-- #codex -->
+                    <form id="labParameterForm"> <!-- #codex -->
+                        {% csrf_token %} <!-- #codex -->
+                        <input type="hidden" id="lab_parameter_id" name="id"> <!-- #codex -->
+
+                        <div class="mb-2"> <!-- #codex -->
+                            <label class="form-label fw-semibold">Group <span class="text-danger">*</span></label> <!-- #codex -->
+                            <select id="group_id" name="group_id" class="form-control" required> <!-- #codex -->
+                                <option value="">-- Select Group --</option> <!-- #codex -->
+                                {% for group in groups %} <!-- #codex -->
+                                    <option value="{{ group.id }}">{{ group.name }}</option> <!-- #codex -->
+                                {% endfor %} <!-- #codex -->
+                            </select> <!-- #codex -->
+                        </div> <!-- #codex -->
+
+                        <div class="mb-2"> <!-- #codex -->
+                            <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label> <!-- #codex -->
+                            <select id="category_id" name="category_id" class="form-control" required> <!-- #codex -->
+                                <option value="">-- Select Group First --</option> <!-- #codex -->
+                            </select> <!-- #codex -->
+                        </div> <!-- #codex -->
+
+                        <div class="mb-2"> <!-- #codex -->
+                            <label class="form-label fw-semibold">Transaction Head</label> <!-- #codex -->
+                            <select id="head_id" name="head_id" class="form-control"> <!-- #codex -->
+                                <option value="">-- Optional --</option> <!-- #codex -->
+                            </select> <!-- #codex -->
+                        </div> <!-- #codex -->
+
+                        <div class="row g-2"> <!-- #codex -->
+                            <div class="col-md-4"> <!-- #codex -->
+                                <label class="form-label fw-semibold">Serial</label> <!-- #codex -->
+                                <input type="number" id="serial" name="serial" class="form-control" value="0"> <!-- #codex -->
+                            </div> <!-- #codex -->
+                            <div class="col-md-8"> <!-- #codex -->
+                                <label class="form-label fw-semibold">Title <span class="text-danger">*</span></label> <!-- #codex -->
+                                <input type="text" id="title" name="title" class="form-control" placeholder="CBC / Biochemistry" required> <!-- #codex -->
+                            </div> <!-- #codex -->
+                        </div> <!-- #codex -->
+
+                        <div class="mb-2 mt-2"> <!-- #codex -->
+                            <label class="form-label fw-semibold">Title Code</label> <!-- #codex -->
+                            <input type="text" id="title_code" name="title_code" class="form-control" placeholder="PLG / CBC"> <!-- #codex -->
+                        </div> <!-- #codex -->
+
+                        <div class="mb-2 mt-2"> <!-- #codex -->
+                            <label class="form-label fw-semibold">Investigation <span class="text-danger">*</span></label> <!-- #codex -->
+                            <input type="text" id="investigation" name="investigation" class="form-control" placeholder="White Blood Cell" required> <!-- #codex -->
+                        </div> <!-- #codex -->
+
+                        <div class="mb-2"> <!-- #codex -->
+                            <label class="form-label fw-semibold">Investigation Code</label> <!-- #codex -->
+                            <input type="text" id="investigation_code" name="investigation_code" class="form-control" placeholder="FBS / WBC"> <!-- #codex -->
+                        </div> <!-- #codex -->
+
+                        <div class="mb-2"> <!-- #codex -->
+                            <label class="form-label fw-semibold">Unit</label> <!-- #codex -->
+                            <input type="text" id="unit" name="unit" class="form-control" placeholder="cells/uL"> <!-- #codex -->
+                        </div> <!-- #codex -->
+
+                        <div class="mb-3"> <!-- #codex -->
+                            <label class="form-label fw-semibold">Reference Range</label> <!-- #codex -->
+                            <textarea id="reff_range" name="reff_range" class="form-control" rows="3" placeholder="Male: 4.5-5.9 | Female: 4.1-5.1"></textarea> <!-- #codex -->
+                        </div> <!-- #codex -->
+
+                        <div class="d-flex gap-2 justify-content-center"> <!-- #codex -->
+                            <button type="submit" id="saveLabParameterBtn" class="btn btn-success px-4">Save</button> <!-- #codex -->
+                            <button type="button" id="resetLabParameterBtn" class="btn btn-secondary px-4">Reset</button> <!-- #codex -->
+                        </div> <!-- #codex -->
+                    </form> <!-- #codex -->
+                </div> <!-- #codex -->
+            </div> <!-- #codex -->
+        </div> <!-- #codex -->
+
+        <div class="col-lg-8"> <!-- #codex -->
+            <div class="card shadow-sm"> <!-- #codex -->
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center"> <!-- #codex -->
+                    <h5 class="mb-0">Saved Parameters</h5> <!-- #codex -->
+                    <span class="badge bg-light text-dark">Investigation wise template</span> <!-- #codex -->
+                </div> <!-- #codex -->
+                <div class="card-body"> <!-- #codex -->
+                    <div class="row g-2 mb-3"> <!-- #codex -->
+                        <div class="col-md-3"> <!-- #codex -->
+                            <select id="filter_group_id" class="form-control"> <!-- #codex -->
+                                <option value="">All Group</option> <!-- #codex -->
+                                {% for group in groups %} <!-- #codex -->
+                                    <option value="{{ group.id }}">{{ group.name }}</option> <!-- #codex -->
+                                {% endfor %} <!-- #codex -->
+                            </select> <!-- #codex -->
+                        </div> <!-- #codex -->
+                        <div class="col-md-3"> <!-- #codex -->
+                            <select id="filter_category_id" class="form-control"> <!-- #codex -->
+                                <option value="">All Category</option> <!-- #codex -->
+                            </select> <!-- #codex -->
+                        </div> <!-- #codex -->
+                        <div class="col-md-3"> <!-- #codex -->
+                            <select id="filter_head_id" class="form-control"> <!-- #codex -->
+                                <option value="">All Head</option> <!-- #codex -->
+                            </select> <!-- #codex -->
+                        </div> <!-- #codex -->
+                        <div class="col-md-3"> <!-- #codex -->
+                            <input type="text" id="search_lab_parameter" class="form-control" placeholder="Search parameter"> <!-- #codex -->
+                        </div> <!-- #codex -->
+                    </div> <!-- #codex -->
+
+                    <div class="table-responsive" style="max-height: 640px; overflow-y: auto;"> <!-- #codex -->
+                        <table class="table table-bordered table-striped table-hover table-sm align-middle"> <!-- #codex -->
+                            <thead class="table-dark" style="position: sticky; top: 0; z-index: 2;"> <!-- #codex -->
+                                <tr> <!-- #codex -->
+                                    <th>#</th> <!-- #codex -->
+                                    <th>Group</th> <!-- #codex -->
+                                    <th>Category</th> <!-- #codex -->
+                                    <th>Head</th> <!-- #codex -->
+                                    <th>SL</th> <!-- #codex -->
+                                    <th>Title</th> <!-- #codex -->
+                                    <th>Title Code</th> <!-- #codex -->
+                                    <th>Investigation</th> <!-- #codex -->
+                                    <th>Inv Code</th> <!-- #codex -->
+                                    <th>Unit</th> <!-- #codex -->
+                                    <th>Reference Range</th> <!-- #codex -->
+                                    <th>Action</th> <!-- #codex -->
+                                </tr> <!-- #codex -->
+                            </thead> <!-- #codex -->
+                            <tbody id="labParameterTableBody"> <!-- #codex -->
+                                <tr><td colspan="12" class="text-center text-muted py-4">Loading...</td></tr> <!-- #codex -->
+                            </tbody> <!-- #codex -->
+                        </table> <!-- #codex -->
+                    </div> <!-- #codex -->
+                </div> <!-- #codex -->
+            </div> <!-- #codex -->
+        </div> <!-- #codex -->
+    </div> <!-- #codex -->
+</div> <!-- #codex -->
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/diagnosis/lab_parameter_setup.js' %}"></script> <!-- #codex -->
+{% endblock %}

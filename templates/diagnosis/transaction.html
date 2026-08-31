@@ -2,315 +2,10 @@
 {% load static %}
 
 {% block title %}{% if edit_mode %}Edit Payment{% else %}Add Payment{% endif %}{% endblock %} {# codex change #}
-<style>
-    body {
-        background: #f5f5f5;
-    }
 
-    .invoice-page-wrapper {
-        padding: 25px 15px;
-    }
-
-    .invoice-actions {
-        max-width: 1000px;
-        margin: 0 auto 15px auto;
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-    }
-
-    .invoice-sheet {
-        max-width: 1000px;
-        margin: 0 auto;
-        background: #fff;
-        padding: 35px 45px;
-        color: #111;
-        font-family: Arial, Helvetica, sans-serif;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
-        min-height: 700px;
-    }
-
-    .invoice-title {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-
-    .invoice-title h3 {
-        margin: 0;
-        font-size: 22px;
-        font-weight: 700;
-    }
-
-    .invoice-title small {
-        color: #555;
-    }
-
-    /* =========================
-       TOP INFO
-    ========================== */
-
-    .invoice-info-section {
-        border-top: 2px solid #111;
-        border-bottom: 2px solid #111;
-    }
-
-    .invoice-info-row {
-        display: flex;
-        width: 100%;
-        min-height: 38px;
-        align-items: center;
-        border-bottom: 1px dashed #999;
-    }
-
-    .invoice-info-row:last-child {
-        border-bottom: none;
-    }
-
-    .invoice-info-column {
-        width: 50%;
-        display: flex;
-        align-items: center;
-        padding: 7px 10px;
-    }
-
-    .invoice-info-full {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        padding: 7px 10px;
-    }
-
-    .invoice-label {
-        width: 115px;
-        min-width: 115px;
-        font-weight: 700;
-    }
-
-    .invoice-colon {
-        width: 20px;
-        min-width: 20px;
-        font-weight: 700;
-    }
-
-    .invoice-value {
-        flex: 1;
-        word-break: break-word;
-    }
-
-    /* =========================
-       TRANSACTION META
-    ========================== */
-
-    .transaction-meta-box {
-        margin-top: 15px;
-        padding: 10px 0;
-        border-top: 1px solid #222;
-        border-bottom: 1px solid #222;
-        font-size: 14px;
-    }
-
-    .transaction-meta-item {
-        padding-top: 5px;
-        padding-bottom: 5px;
-    }
-
-    .transaction-meta-label {
-        font-weight: 700;
-        margin-right: 4px;
-    }
-
-    /* =========================
-       PRODUCT TABLE
-    ========================== */
-
-    .invoice-product-section {
-        margin-top: 18px;
-    }
-
-    .invoice-product-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 0;
-    }
-
-    .invoice-product-table thead th {
-        background: transparent !important;
-        color: #111 !important;
-        border-top: 2px solid #111 !important;
-        border-bottom: 2px solid #111 !important;
-        border-left: none !important;
-        border-right: none !important;
-        padding: 8px 6px;
-        font-weight: 700;
-    }
-
-    .invoice-product-table tbody td {
-        border-left: none !important;
-        border-right: none !important;
-        border-top: none !important;
-        border-bottom: 1px dashed #bbb !important;
-        padding: 7px 6px;
-        vertical-align: middle;
-    }
-
-    .invoice-product-table tbody tr:last-child td {
-        border-bottom: 2px solid #111 !important;
-    }
-
-    /* =========================
-       REMARKS
-    ========================== */
-
-    .invoice-remarks {
-        padding: 8px 5px;
-        border-bottom: 2px solid #111;
-        font-size: 14px;
-    }
-
-    /* =========================
-       BOTTOM
-    ========================== */
-
-    .invoice-bottom-section {
-        margin-top: 18px;
-    }
-
-    .invoice-bottom-left {
-        padding-top: 15px;
-        font-size: 14px;
-    }
-
-    .invoice-bottom-left .info-line {
-        margin-bottom: 8px;
-    }
-
-    /* =========================
-       SUMMARY
-    ========================== */
-
-    .invoice-summary-box {
-        width: 100%;
-        font-size: 15px;
-    }
-
-    .summary-row {
-        display: grid;
-        grid-template-columns: 1fr 50px 120px;
-        align-items: center;
-        padding: 7px 4px;
-        border-bottom: 1px dashed #777;
-    }
-
-    .summary-label {
-        font-weight: 500;
-    }
-
-    .summary-symbol {
-        text-align: center;
-    }
-
-    .summary-value {
-        text-align: right;
-        font-weight: 600;
-    }
-
-    .summary-strong {
-        border-top: 2px solid #111;
-    }
-
-    .summary-strong .summary-label,
-    .summary-strong .summary-value {
-        font-weight: 700;
-    }
-
-    .summary-balance {
-        border-top: 2px solid #111;
-        border-bottom: 2px solid #111;
-        font-size: 17px;
-    }
-
-    .summary-balance .summary-label,
-    .summary-balance .summary-value {
-        font-weight: 800;
-    }
-
-    /* =========================
-       RESPONSIVE
-    ========================== */
-
-    @media (max-width: 768px) {
-        .invoice-sheet {
-            padding: 20px 15px;
-        }
-
-        .invoice-info-row {
-            display: block;
-        }
-
-        .invoice-info-column {
-            width: 100%;
-        }
-
-        .invoice-label {
-            width: 100px;
-            min-width: 100px;
-        }
-
-        .summary-row {
-            grid-template-columns: 1fr 35px 95px;
-        }
-    }
-
-    /* =========================
-       PRINT
-    ========================== */
-
-    @media print {
-        body {
-            background: #fff !important;
-        }
-
-        body * {
-            visibility: hidden;
-        }
-
-        .invoice-sheet,
-        .invoice-sheet * {
-            visibility: visible;
-        }
-
-        .invoice-sheet {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            max-width: none;
-            min-height: auto;
-            padding: 15px 20px;
-            margin: 0;
-            box-shadow: none !important;
-        }
-
-        .invoice-actions {
-            display: none !important;
-        }
-
-        .container,
-        .container-fluid,
-        .card,
-        .card-body {
-            margin: 0 !important;
-            padding: 0 !important;
-            max-width: none !important;
-            width: 100% !important;
-            box-shadow: none !important;
-            border: none !important;
-        }
-    }
-</style>
 {% block content %}
 
-<div class="container-fluid mt-4 px-4">
+<div class="container-fluid mt-4 px-4 diagnosis-payment-page"> {# codex change #}
 
     <div class="card shadow">
 
@@ -327,13 +22,13 @@
             </div>
         </div>
 
-        <div class="card-body">
+	        <div class="card-body diagnosis-payment-workspace"> {# codex change #}
 
 
             <!-- ====================================================== -->
             <!-- 1. LOCATION / DATE TOP FULL WIDTH -->
             <!-- ====================================================== -->
-            <div class="mb-4">
+	            <div class="mb-4 diagnosis-top-strip"> {# codex change #}
 
                 <div class="card border shadow-sm">
                     <div class="card-body py-3">
@@ -371,12 +66,12 @@
             <!-- ====================================================== -->
             <!-- 2. PATIENT + DOCTOR / SR SIDE BY SIDE -->
             <!-- ====================================================== -->
-            <div class="mb-4">
+	            <div class="mb-4 diagnosis-people-section"> {# codex change #}
 
-                <div class="row g-4">
+	                <div class="row g-2"> {# codex change #}
 
-                    <!-- PATIENT BOX -->
-                    <div class="col-md-6">
+	                    <!-- PATIENT BOX -->
+		                    <div class="col-md-6"> {# codex change #}
 
                         <div class="card h-100 border shadow-sm">
 
@@ -525,8 +220,8 @@
                     </div>
 
 
-                    <!-- DOCTOR / SR BOX -->
-                    <div class="col-md-6">
+	                    <!-- DOCTOR / SR BOX -->
+		                    <div class="col-md-6 diagnosis-reference-provider-panel"> {# codex change #}
 
                         <div class="card h-100 border shadow-sm">
 
@@ -573,7 +268,7 @@
                                     </div>
 
 
-                                    <div class="col-md-6">
+		                                    <div class="col-md-6"> {# codex change #}
 
                                         <label class="form-label small text-muted mb-0">
                                             Speciality
@@ -588,7 +283,7 @@
                                     </div>
 
 
-                                    <div class="col-md-6">
+		                                    <div class="col-md-6"> {# codex change #}
 
                                         <label class="form-label small text-muted mb-0">
                                             Chamber
@@ -666,25 +361,26 @@
             <!-- ====================================================== -->
             <!-- 3. PRODUCT INFO LEFT + PRODUCT LIST RIGHT -->
             <!-- ====================================================== -->
-            <div class="mb-4">
+	            <div class="mb-4 diagnosis-product-section"> {# codex change #}
 
-                <div class="row g-4">
+	                <div class="row g-2"> {# codex change #}
 
 
                     <!-- PRODUCT INFO LEFT -->
-                    <div class="col-md-6">
+                    <div class="col-md-6 diagnosis-product-entry-panel"> {# codex change #}
 
                         <div class="card h-100 border shadow-sm">
 
-                            <div class="card-header bg-secondary text-white py-2">
-                                <h6 class="mb-0">Product Information</h6>
-                            </div>
+	                            <div class="card-header bg-secondary text-white py-2 d-flex justify-content-between align-items-center"> {# codex change #}
+	                                <h6 class="mb-0">Product Information</h6>
+	                                <button type="button" id="toggleProductComboBtn" class="btn btn-light btn-sm py-0 px-2">Show</button> {# codex change #}
+	                            </div>
 
                             <div class="card-body">
 
-
-                                <!-- ACCOUNT MAIN HEAD -->
-                                <div class="mb-3">
+	                                <div id="productComboSettings" class="d-none"> {# codex change #}
+	                                <!-- ACCOUNT MAIN HEAD -->
+	                                <div class="mb-3">
 
                                     <label class="form-label fw-semibold">
                                         Account Main Heads
@@ -696,7 +392,7 @@
                                         class="form-control">
                                     </select>
 
-                                </div>
+		                                </div>
 
 
                                 <!-- TRANSACTION METHOD -->
@@ -712,7 +408,7 @@
                                         class="form-control">
                                     </select>
 
-                                </div>
+		                                </div>
 
 
                                 <!-- TRANSACTION GROUP -->
@@ -721,6 +417,7 @@
                                     <label class="form-label fw-semibold">
                                         Transaction Group
                                     </label>
+                                    
 
                                     <select
                                         id="tran_group"
@@ -728,25 +425,25 @@
                                         class="form-control">
                                     </select>
 
-                                </div>
+		                                </div>
 
 
-                                <div class="row g-2 mb-3">
+	                                <div class="row g-2 mb-3"> {# codex change #}
 
                                     <!-- TRANSACTION WITH METHOD -->
-                                    <div class="col-md-4">
+	                                    <div class="col-md-4"> {# codex change #}
 
                                         <label class="fw-semibold">
                                             Transaction With Method
                                         </label>
 
-                                        <select
-                                            id="transaction_with_method"
-                                            name="transaction_with_method"
-                                            class="form-control">
-                                        </select>
-
-                                    </div>
+	                                        <select
+	                                            id="transaction_with_method"
+	                                            name="transaction_with_method"
+	                                            class="form-control">
+	                                        </select>
+	
+	                                    </div>
 
 
                                     <!-- TRANSACTION WITH GROUP -->
@@ -756,12 +453,12 @@
                                             Transaction With Group
                                         </label>
 
-                                        <select
-                                            id="transaction_with"
-                                            class="form-control form-control-sm">
-                                        </select>
-
-                                    </div>
+	                                        <select
+	                                            id="transaction_with"
+	                                            class="form-control form-control-sm">
+	                                        </select>
+	
+	                                    </div>
 
 
                                     <!-- TRANSACTION WITH USER -->
@@ -771,18 +468,19 @@
                                             Transaction with user
                                         </label>
 
-                                        <select
-                                            id="transaction_with_user"
-                                            name="transaction_with_user"
-                                            class="form-control form-control-sm transaction-with-user">
-                                        </select>
+	                                    <select
+	                                            id="transaction_with_user"
+	                                            name="transaction_with_user"
+	                                            class="form-control form-control-sm transaction-with-user">
+	                                        </select>
+	
+	                                    </div>
+	
+	                                </div>
+	                                </div> {# codex change #}
 
-                                    </div>
 
-                                </div>
-
-
-                                <div class="row g-2 mb-3">
+                                <div class="row g-2 mb-3 diagnosis-product-payment-row"> {# codex change #}
 
                                     <!-- INVOICE -->
                                     <div class="col-md-6">
@@ -824,12 +522,14 @@
                                 </div>
 
 
-                                <!-- PRODUCT SEARCH -->
-                                <div class="row g-2 mb-3">
+	                                <!-- PRODUCT SEARCH -->
+	                                <div class="row g-2 mb-3">
 
-                                    <select
-                                        id="productSearch"
-                                        class="form-select form-select-sm select2-product"
+	                                    <label class="fw-semibold text-primary">Search Product (ID / Name)</label> {# codex change #}
+
+	                                    <select
+	                                        id="productSearch"
+	                                        class="form-select form-select-sm select2-product"
                                         style="width: 100%;">
 
                                         <option value="">
@@ -839,7 +539,7 @@
                                     </select>
 
 
-                                    <div class="col-md-4">
+                                    <div class="col-md-4 d-none"> {# codex change #}
 
                                         <label class="fw-semibold">
                                             ID
@@ -972,8 +672,8 @@
 
                     </div>
 
-        <!-- SELECTED PRODUCT LIST RIGHT -->
-        <div class="col-md-6">
+	        <!-- SELECTED PRODUCT LIST RIGHT -->
+	        <div class="col-md-6 diagnosis-selected-products-panel"> {# codex change #}
 
             <div class="card h-100 border shadow-sm">
 
@@ -983,7 +683,7 @@
 
                 <div class="card-body p-0">
 
-                    <div class="table-responsive">
+	                    <div class="table-responsive product-list-scroll"> {# codex change #}
 
                         <table class="table table-bordered table-sm mb-0">
 
@@ -1045,12 +745,12 @@
             <!-- ====================================================== -->
 
 
-                    <div class="row g-4 justify-content-end mt-4">
+		                    <div class="row g-2 justify-content-end mt-2 diagnosis-summary-section"> {# codex change #}
 
         <!-- INVOICE SUMMARY -->
         <div class="col-md-7">
 
-            <div class="card p-3 shadow-sm h-100">
+	            <div class="card p-2 shadow-sm h-100 invoice-summary-compact"> {# codex change #}
 
                 <h6 class="fw-bold mb-3 border-bottom pb-2">
                     Invoice Summary
@@ -1078,7 +778,7 @@
                 <div class="row mb-2">
 
                     <label class="col-md-4 fw-semibold">
-                        Discount(%)
+                        Discount
                     </label>
 
                     <div class="col-md-8">
@@ -1186,525 +886,137 @@
      aria-labelledby="transactionPreviewModalLabel"
      aria-hidden="true">
 
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"> {# codex change #}
 
         <div class="modal-content border-0">
-
-            <!-- MODAL HEADER -->
-            <div class="modal-header bg-dark text-white">
-
-                <div>
-                    <h5 class="modal-title mb-0"
-                        id="transactionPreviewModalLabel">
-                        Diagnosis Transaction Preview
-                    </h5>
-
-                    <small id="previewTranIdText">
-                        Transaction ID: -
-                    </small>
-                </div>
-
-                <button type="button"
-                        class="btn-close btn-close-white"
-                        data-bs-dismiss="modal"
-                        aria-label="Close">
-                </button>
-
-            </div>
 
 
             <!-- MODAL BODY -->
             <div class="modal-body bg-light p-4">
 
-                <div class="invoice-sheet mx-auto">
+                <div class="invoice-sheet compact-invoice">
 
-                    <!-- TITLE -->
-                    <div class="invoice-title">
-                        <h3>Diagnosis Transaction Invoice</h3>
-                        <small>
-                            Transaction ID:
-                            <span id="previewTranId">-</span>
-                        </small>
+                    <div class="invoice-heading">
+                        <div class="brand-name">Team Solutions Bangladesh</div> {# codex change #}
+                        <div class="brand-address">9th floor, 252/2/Kha, Nabinbagh, West Meradia, Khilgaon, Dhaka.</div> {# codex change #}
+                        <div class="brand-phone">Phone: 01700000000</div> {# codex change #}
+                        <div class="invoice-barcode-row">{# codex change #}
+                            <div class="invoice-barcode-block">{# codex change #}
+                                <span class="barcode-label">Invoice Barcode</span>{# codex change #}
+                                <span id="previewInvoiceNoBarcode" class="invoice-barcode-slot">-</span>{# codex change #}
+                            </div>{# codex change #}
+                            <div class="invoice-barcode-block">{# codex change #}
+                                <span class="barcode-label">Patient Barcode</span>{# codex change #}
+                                <span id="previewPatientIdBarcode" class="invoice-barcode-slot">-</span>{# codex change #}
+                            </div>{# codex change #}
+                        </div>{# codex change #}
                     </div>
 
+                    <div class="invoice-info">
 
-                    <!-- ================================================= -->
-                    <!-- TOP INFORMATION -->
-                    <!-- ================================================= -->
-                    <div class="invoice-info-section">
-
-                        <!-- INVOICE / DATE -->
-                        <div class="invoice-info-row">
-
-                            <div class="invoice-info-column">
-                                <span class="invoice-label">Invoice No</span>
-                                <span class="invoice-colon">:</span>
-
-                                <span id="previewInvoiceNo"
-                                      class="invoice-value">
-                                    -
-                                </span>
-                            </div>
-
-                            <div class="invoice-info-column">
-                                <span class="invoice-label">Invoice Date</span>
-                                <span class="invoice-colon">:</span>
-
-                                <span id="previewTranDate"
-                                      class="invoice-value">
-                                    -
-                                </span>
-                            </div>
-
+                        <div class="info-row">
+                            <div><strong>Invoice No</strong><span>:</span><em id="previewInvoiceNoText">-</em></div>
+                            <div><strong>Invoice Date</strong><span>:</span><em id="previewTranDate">-</em></div>
                         </div>
 
-
-                        <!-- PATIENT / AGE -->
-                        <div class="invoice-info-row">
-
-                            <div class="invoice-info-column">
-                                <span class="invoice-label">Patient</span>
-                                <span class="invoice-colon">:</span>
-
-                                <span id="previewPatientName"
-                                      class="invoice-value">
-                                    -
-                                </span>
-                            </div>
-
-                            <div class="invoice-info-column">
-                                <span class="invoice-label">Age</span>
-                                <span class="invoice-colon">:</span>
-
-                                <span id="previewPatientAge"
-                                      class="invoice-value">
-                                    -
-                                </span>
-                            </div>
-
+                        <div class="info-row">
+                            <div><strong>Patient</strong><span>:</span><em id="previewPatientName">-</em></div>
+                            <div><strong>Age</strong><span>:</span><em id="previewPatientAge">-</em></div>
                         </div>
 
-
-                        <!-- CONTACT / GENDER -->
-                        <div class="invoice-info-row">
-
-                            <div class="invoice-info-column">
-                                <span class="invoice-label">Contact</span>
-                                <span class="invoice-colon">:</span>
-
-                                <span class="invoice-value">
-
-                                    <span id="previewPatientAddress">
-                                        -
-                                    </span>
-
-                                    <span class="ms-1">
-                                        [
-                                        <span id="previewPatientPhone">
-                                            -
-                                        </span>
-                                        ]
-                                    </span>
-
-                                </span>
-                            </div>
-
-                            <div class="invoice-info-column">
-                                <span class="invoice-label">Sex</span>
-                                <span class="invoice-colon">:</span>
-
-                                <span id="previewPatientGender"
-                                      class="invoice-value">
-                                    -
-                                </span>
-                            </div>
-
+                        <div class="info-row">
+                            <div><strong>Contact</strong><span>:</span><em id="previewPatientPhone">-</em></div>
+                            <div><strong>Sex</strong><span>:</span><em id="previewPatientGender">-</em></div>
                         </div>
 
-
-                        <!-- CONSULTANT -->
-                        <div class="invoice-info-row">
-
-                            <div class="invoice-info-full">
-                                <span class="invoice-label">Consultant</span>
-                                <span class="invoice-colon">:</span>
-
-                                <span class="invoice-value">
-
-                                    <span id="previewDoctorName">
-                                        -
-                                    </span>
-
-                                    <span class="ms-1 text-muted">
-                                        [
-                                        <span id="previewDoctorId">
-                                            -
-                                        </span>
-                                        ]
-                                    </span>
-
-                                </span>
-                            </div>
-
+                        <div class="info-row">
+                            <div><strong>Consultant</strong><span>:</span><em id="previewDoctorName">-</em></div>
+                            <div><strong>SR</strong><span>:</span><em id="previewSrName">-</em></div>
                         </div>
 
-
-                        <!-- SPECIALITY / CHAMBER -->
-                        <div class="invoice-info-row">
-
-                            <div class="invoice-info-column">
-                                <span class="invoice-label">Speciality</span>
-                                <span class="invoice-colon">:</span>
-
-                                <span id="previewDoctorSpeciality"
-                                      class="invoice-value">
-                                    -
-                                </span>
-                            </div>
-
-                            <div class="invoice-info-column">
-                                <span class="invoice-label">Chamber</span>
-                                <span class="invoice-colon">:</span>
-
-                                <span id="previewDoctorChamber"
-                                      class="invoice-value">
-                                    -
-                                </span>
-                            </div>
-
-                        </div>
-
-
-                        <!-- PATIENT ID / SR -->
-                        <div class="invoice-info-row">
-
-                            <div class="invoice-info-column">
-                                <span class="invoice-label">Patient ID</span>
-                                <span class="invoice-colon">:</span>
-
-                                <span id="previewPatientId"
-                                      class="invoice-value">
-                                    -
-                                </span>
-                            </div>
-
-                            <div class="invoice-info-column">
-                                <span class="invoice-label">SR</span>
-                                <span class="invoice-colon">:</span>
-
-                                <span class="invoice-value">
-
-                                    <span id="previewSrName">
-                                        -
-                                    </span>
-
-                                    <span class="ms-1 text-muted">
-                                        [
-                                        <span id="previewSrId">
-                                            -
-                                        </span>
-                                        ]
-                                    </span>
-
-                                </span>
-                            </div>
-
+                        <div class="info-row">
+                            <div><strong>Patient ID</strong><span>:</span><em id="previewPatientId">-</em></div>
+                            <div></div>
                         </div>
 
                     </div>
 
-
-                    <!-- ================================================= -->
-                    <!-- TRANSACTION META -->
-                    <!-- ================================================= -->
-                    <div class="transaction-meta-box">
-
-                        <div class="row">
-
-                            <div class="col-md-4 transaction-meta-item">
-                                <span class="transaction-meta-label">
-                                    Main Head:
-                                </span>
-
-                                <span id="previewMainHead">
-                                    -
-                                </span>
-                            </div>
-
-
-                            <div class="col-md-4 transaction-meta-item">
-                                <span class="transaction-meta-label">
-                                    Method:
-                                </span>
-
-                                <span id="previewTransactionMethod">
-                                    -
-                                </span>
-                            </div>
-
-
-                            <div class="col-md-4 transaction-meta-item">
-                                <span class="transaction-meta-label">
-                                    Group:
-                                </span>
-
-                                <span id="previewTransactionGroup">
-                                    -
-                                </span>
-                            </div>
-
-
-                            <div class="col-md-4 transaction-meta-item">
-                                <span class="transaction-meta-label">
-                                    With Method:
-                                </span>
-
-                                <span id="previewTransactionWithMethod">
-                                    -
-                                </span>
-                            </div>
-
-
-                            <div class="col-md-4 transaction-meta-item">
-                                <span class="transaction-meta-label">
-                                    Transaction With:
-                                </span>
-
-                                <span id="previewTransactionWith">
-                                    -
-                                </span>
-                            </div>
-
-
-                            <div class="col-md-4 transaction-meta-item">
-                                <span class="transaction-meta-label">
-                                    User:
-                                </span>
-
-                                <span id="previewTransactionUser">
-                                    -
-                                </span>
-                            </div>
-
-
-                            <div class="col-md-4 transaction-meta-item">
-                                <span class="transaction-meta-label">
-                                    Payment:
-                                </span>
-
-                                <span id="previewPaymentMethod">
-                                    -
-                                </span>
-                            </div>
-
-
-                            <div class="col-md-4 transaction-meta-item">
-                                <span class="transaction-meta-label">
-                                    Location:
-                                </span>
-
-                                <span id="previewLocation">
-                                    -
-                                </span>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- ================================================= -->
-                    <!-- TRANSACTION DETAILS TABLE -->
-                    <!-- ================================================= -->
-                    <div class="invoice-product-section">
-
-                        <table class="table invoice-product-table">
-
+                    <div class="invoice-products">
+                        <table>
                             <thead>
                                 <tr>
-                                    <th style="width: 7%;">
-                                        SL
-                                    </th>
-
-                                    <th style="width: 15%;">
-                                        Product ID
-                                    </th>
-
-                                    <th>
-                                        Service / Product Description
-                                    </th>
-
-                                    <th style="width: 10%;"
-                                        class="text-center">
-                                        Qty
-                                    </th>
-
-                                    <th style="width: 15%;"
-                                        class="text-end">
-                                        MRP
-                                    </th>
-
-                                    <th style="width: 15%;"
-                                        class="text-end">
-                                        Total
-                                    </th>
+                                    <th class="sl">SL</th>
+                                    <th class="pid">Product ID</th>
+                                    <th>Service / Product Description</th>
+                                    <th class="qty">Qty</th>
+                                    <th class="money-col">MRP</th>
+                                    <th class="money-col">Total</th>
                                 </tr>
                             </thead>
 
                             <tbody id="previewTransactionRows">
-
                                 <tr>
-                                    <td colspan="6"
-                                        class="text-center text-muted py-3">
+                                    <td colspan="6" class="text-center">
                                         No transaction details found
                                     </td>
                                 </tr>
-
                             </tbody>
-
                         </table>
-
                     </div>
 
-
-                    <!-- ================================================= -->
-                    <!-- REMARKS -->
-                    <!-- ================================================= -->
                     <div class="invoice-remarks">
-                        <strong>Remarks :</strong>
-                        Diagnosis Payment Transaction
+                        <strong>Remarks :</strong> Diagnosis Payment Transaction
                     </div>
 
+                    <div class="invoice-bottom">
 
-                    <!-- ================================================= -->
-                    <!-- BOTTOM SECTION -->
-                    <!-- ================================================= -->
-                    <div class="invoice-bottom-section">
+                        <div class="invoice-bottom-left">
+                            <div class="thank-you-line">Thank you <span id="previewBottomPatientName">-</span></div> {# codex change #}
+                            <div class="payment-status-box" id="previewPaymentStatusBox">-</div> {# codex change #}
+                        </div>
 
-                        <div class="row">
+                        <div class="invoice-summary">
 
-                            <!-- LEFT BOTTOM -->
-                            <div class="col-md-6">
-
-                                <div class="invoice-bottom-left">
-
-                                    <div class="info-line">
-                                        <strong>Transaction ID :</strong>
-
-                                        <span id="previewBottomTranId">
-                                            -
-                                        </span>
-                                    </div>
-
-
-                                    <div class="info-line">
-                                        <strong>Patient :</strong>
-
-                                        <span id="previewBottomPatientName">
-                                            -
-                                        </span>
-                                    </div>
-
-
-                                    <div class="info-line">
-                                        <strong>Doctor :</strong>
-
-                                        <span id="previewBottomDoctorName">
-                                            -
-                                        </span>
-                                    </div>
-
-                                </div>
-
+                            <div>
+                                <span>Invoice Amount</span>
+                                <i>:</i>
+                                <strong id="previewInvoiceAmount">0.00</strong>
                             </div>
 
+                            <div>
+                                <span>Discount</span>
+                                <i>:</i>
+                                <strong id="previewDiscount">0.00</strong>
+                            </div>
 
-                            <!-- RIGHT BILL SUMMARY -->
-                            <div class="col-md-6">
+                            <div class="summary-net">
+                                <span>Net Amount</span>
+                                <i>:</i>
+                                <strong id="previewNetAmount">0.00</strong>
+                            </div>
 
-                                <div class="invoice-summary-box">
+                            <div>
+                                <span>Advance</span>
+                                <i>:</i>
+                                <strong id="previewAdvance">0.00</strong>
+                            </div>
 
-                                    <div class="summary-row">
-                                        <span class="summary-label">
-                                            Invoice Amount
-                                        </span>
+                            <div>
+                                <span>Due Collection</span>
+                                <i>:</i>
+                                <strong id="previewDueCollection">0.00</strong>
+                            </div>
 
-                                        <span class="summary-symbol">
-                                            :
-                                        </span>
+                            <div>
+                                <span>Due Discount</span>
+                                <i>:</i>
+                                <strong id="previewDueDiscount">0.00</strong>
+                            </div>
 
-                                        <span id="previewInvoiceAmount"
-                                              class="summary-value">
-                                            0.00
-                                        </span>
-                                    </div>
-
-
-                                    <div class="summary-row">
-                                        <span class="summary-label">
-                                            Discount
-                                        </span>
-
-                                        <span class="summary-symbol">
-                                            [-]
-                                        </span>
-
-                                        <span id="previewDiscount"
-                                              class="summary-value">
-                                            0.00
-                                        </span>
-                                    </div>
-
-
-                                    <div class="summary-row summary-strong">
-                                        <span class="summary-label">
-                                            Net Amount
-                                        </span>
-
-                                        <span class="summary-symbol">
-                                            :
-                                        </span>
-
-                                        <span id="previewNetAmount"
-                                              class="summary-value">
-                                            0.00
-                                        </span>
-                                    </div>
-
-
-                                    <div class="summary-row">
-                                        <span class="summary-label">
-                                            Advance
-                                        </span>
-
-                                        <span class="summary-symbol">
-                                            [-]
-                                        </span>
-
-                                        <span id="previewAdvance"
-                                              class="summary-value">
-                                            0.00
-                                        </span>
-                                    </div>
-
-
-                                    <div class="summary-row summary-balance">
-                                        <span class="summary-label">
-                                            Balance
-                                        </span>
-
-                                        <span class="summary-symbol">
-                                            :
-                                        </span>
-
-                                        <span id="previewBalance"
-                                              class="summary-value">
-                                            0.00
-                                        </span>
-                                    </div>
-
-                                </div>
-
+                            <div class="summary-balance">
+                                <span>Balance</span>
+                                <i>:</i>
+                                <strong id="previewBalance">0.00</strong>
                             </div>
 
                         </div>
@@ -1884,6 +1196,25 @@
     </div>
 </div>
 
+<!-- DUPLICATE PRODUCT MODAL -->
+<div class="modal fade" id="duplicateProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">Duplicate Product</h5>
+            </div>
+
+            <div class="modal-body text-center">
+                <p class="mb-0 fw-semibold">The product is already selected.</p>
+            </div>
+
+            <div class="modal-footer justify-content-center">
+                <button type="button" id="duplicateProductOkBtn" class="btn btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
 {% endblock %}
@@ -1905,11 +1236,48 @@
         transaction: {{ edit_transaction_json|default:"{}"|safe }}, // codex change
         details: {{ edit_details_json|default:"[]"|safe }} // codex change
     }; // codex change
+	    document.addEventListener("DOMContentLoaded", function () { // codex change
+	        const comboBox = document.getElementById("productComboSettings"); // codex change
+	        const toggleBtn = document.getElementById("toggleProductComboBtn"); // codex change
+	        const summaryBox = document.querySelector(".diagnosis-summary-section"); // codex change
+	        const selectedPanel = document.querySelector(".diagnosis-selected-products-panel"); // codex change
+	        const workspace = document.querySelector(".diagnosis-payment-workspace"); // codex change
+	        const topStrip = document.querySelector(".diagnosis-top-strip"); // codex change
+	        const peopleSection = document.querySelector(".diagnosis-people-section"); // codex change
+	        const productSection = document.querySelector(".diagnosis-product-section"); // codex change
+	        const peopleRow = peopleSection ? peopleSection.querySelector(".row") : null; // codex change
+	        const productRow = productSection ? productSection.querySelector(".row") : null; // codex change
+	        const productEntryPanel = document.querySelector(".diagnosis-product-entry-panel"); // codex change
+	        const referencePanel = document.querySelector(".diagnosis-reference-provider-panel"); // codex change
+	        if (peopleRow && productRow && productEntryPanel && referencePanel && productEntryPanel.parentElement !== peopleRow) { // codex change
+	            peopleRow.appendChild(productEntryPanel); // codex change
+	            productRow.insertBefore(referencePanel, productRow.firstElementChild); // codex change
+	        } // codex change
+	        if (workspace && topStrip && peopleSection && !document.querySelector(".diagnosis-left-panel")) { // codex change
+	            const leftPanel = document.createElement("div"); // codex change
+	            leftPanel.className = "diagnosis-left-panel"; // codex change
+	            workspace.insertBefore(leftPanel, topStrip); // codex change
+	            leftPanel.appendChild(topStrip); // codex change
+	            leftPanel.appendChild(peopleSection); // codex change
+	        } // codex change
+	        const leftPanel = document.querySelector(".diagnosis-left-panel"); // codex change
+	        if (selectedPanel && leftPanel && selectedPanel.parentElement !== leftPanel) { // codex change
+	            leftPanel.appendChild(selectedPanel); // codex change
+	        } // codex change
+	        if (summaryBox && productSection && summaryBox.parentElement !== productSection) { // codex change
+	            productSection.appendChild(summaryBox); // codex change
+	        } // codex change
+	        if (!comboBox || !toggleBtn) { return; } // codex change
+	        toggleBtn.addEventListener("click", function () { // codex change
+	            comboBox.classList.toggle("d-none"); // codex change
+            toggleBtn.textContent = comboBox.classList.contains("d-none") ? "Show" : "Hide"; // codex change
+        }); // codex change
+    }); // codex change
 </script>
 
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="{% static 'js/diagnosis/diagnosis_select2.js' %}"></script>
+				<script src="{% static 'js/diagnosis/diagnosis_select2.js' %}?v=codex-product-focus-lock"></script> {# codex change #}
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="{% static 'js/location/location_load_combo.js' %}"></script>
 <script src="{% static 'js/diagnosis/get_page_init_add_payment.js' %}?v=codex-edit-preload"></script> {# codex change #}
@@ -1919,7 +1287,7 @@
 <script src="{% static 'js/combo_load/transaction_method_combo.js' %}"></script>
 <script src="{% static 'js/combo_load/transaction_group_combo.js' %}"></script>
 <script src="{% static 'js/combo_load/transaction_with_user_combo.js' %}"></script>
-<script src="{% static 'js/diagnosis/product_load.js' %}?v=codex-edit-preload"></script> {# codex change #}
+<script src="{% static 'js/diagnosis/product_load.js' %}?v=codex-barcode-preview-2"></script> {# codex change #}
 
 
 {% endblock %}

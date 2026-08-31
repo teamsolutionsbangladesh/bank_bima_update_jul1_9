@@ -1,25 +1,57 @@
 from django.db import connection
+from django.db import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 import random
 from django.shortcuts import render, redirect
+from core.models import CompanyDetails, LocationInfos, UserInfos
 # from .models import TransactionMainHeads, TransactionWiths, TransactionGroupes
 
 
 # SUBJECT
 
 def add_page_init(request):
-    return render(request, 'page_init/page_init.html')
+    company_id = request.session.get("company_id")
+    if not company_id and request.session.get("company_name"):
+        company = CompanyDetails.objects.filter(company_name=request.session.get("company_name")).order_by("-id").first()
+        company_id = company.id if company else ""
+    return render(request, 'page_init/page_init.html', {
+        "fixed_location_id": request.session.get("loc_id") or "",
+        "fixed_company_id": company_id or "",
+    })
+
+
+def _resolve_company_id(request):
+    company_id = request.session.get("company_id")
+    if company_id:
+        return company_id
+    company_name = request.session.get("company_name")
+    if company_name:
+        company = CompanyDetails.objects.filter(company_name=company_name).order_by("-id").first()
+        if company:
+            request.session["company_id"] = company.id
+            return company.id
+    company = CompanyDetails.objects.order_by("id").first()
+    if company:
+        request.session["company_id"] = company.id
+        return company.id
+    return None
 
 def save_page_init(request):
     if request.method == "POST":
-        page_id = request.POST.get('page_id')        
-        transactionmainheads = request.POST.get('transactionmainheads')
-        load_head_all = request.POST.get('load_head_all')
-        transaction_with_method = request.POST.get('transaction_with_method')
-        transaction_with = request.POST.get('transaction_with')
-        transaction_method = request.POST.get('transaction_method')
-        tran_group = request.POST.get('tran_group')
+        def clean_value(value):
+            return value if value not in ("", None, "null", "undefined") else None
+
+        location_id = clean_value(request.POST.get("location_id")) or request.session.get("loc_id") or 1
+        company_id = clean_value(request.POST.get("company_id")) or _resolve_company_id(request)
+        status = clean_value(request.POST.get("status")) or 1
+        page_id = clean_value(request.POST.get('page_id'))
+        transactionmainheads = clean_value(request.POST.get('transactionmainheads'))
+        load_head_all = clean_value(request.POST.get('load_head_all')) or 0
+        transaction_with_method = clean_value(request.POST.get('transaction_with_method'))
+        transaction_with = clean_value(request.POST.get('transaction_with'))
+        transaction_method = clean_value(request.POST.get('transaction_method'))
+        tran_group = clean_value(request.POST.get('tran_group'))
 
         print("DEBUG >>>>>>>>>>>>>>>>>>>>>>>>>>> ", page_id);        
         print("DEBUG >>>>>>>>>>>>>>>>>>>>>>>>>>> ", transactionmainheads);
@@ -29,39 +61,91 @@ def save_page_init(request):
         print("DEBUG >>>>>>>>>>>>>>>>>>>>>>>>>>> ", transaction_method);
         print("DEBUG >>>>>>>>>>>>>>>>>>>>>>>>>>> ", tran_group);
 
-        cursor = connection.cursor()
-        sql = """
-            INSERT INTO page_init 
-            (page_id, 
-            tran_main_head_id,
-            load_head_all,
-            user_tran_method,
-            user_tran_with_id,
-            tran_method,
-            tran_group_id
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """
-        params = [
-            page_id, 
-            transactionmainheads,
-            load_head_all,
-            transaction_with_method,
-            transaction_with,
-            transaction_method,
-            tran_group,   
+        if not page_id:
+            return JsonResponse({"status":"failed","message":"Page ID required"}, status=400)
+
+        try:
+            cursor = connection.cursor()
+            cursor.execute("SELECT id FROM page_init WHERE page_id = %s LIMIT 1", [page_id])
+            existing = cursor.fetchone()
+
+            if existing:
+                sql = """
+                    UPDATE page_init
+                    SET tran_main_head_id = %s,
+                        location_id = %s,
+                        company_id = %s,
+                        load_head_all = %s,
+                        user_tran_method = %s,
+                        user_tran_with_id = %s,
+                        tran_method = %s,
+                        tran_group_id = %s,
+                        status = %s
+                    WHERE page_id = %s
+                """
+                params = [
+                    transactionmainheads,
+                    location_id,
+                    company_id,
+                    load_head_all,
+                    transaction_with_method,
+                    transaction_with,
+                    transaction_method,
+                    tran_group,
+                    status,
+                    page_id,
+                ]
+                cursor.execute(sql, params)
+                return JsonResponse({"status":"success","message":"Updated Successfull!"})
+
+            sql = """
+                INSERT INTO page_init
+                (page_id,
+                location_id,
+                company_id,
+                tran_main_head_id,
+                load_head_all,
+                user_tran_method,
+                user_tran_with_id,
+                tran_method,
+                tran_group_id,
+                status
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            params = [
+                page_id,
+                location_id,
+                company_id,
+                transactionmainheads,
+                load_head_all,
+                transaction_with_method,
+                transaction_with,
+                transaction_method,
+                tran_group,
+                status,
             ]
 
-        cursor.execute(sql, params)
+            cursor.execute(sql, params)
 
-        return JsonResponse({"status":"success","message":"Save Successfull!"})
+            return JsonResponse({"status":"success","message":"Save Successfull!"})
+        except IntegrityError as exc:
+            return JsonResponse({"status":"failed","message":str(exc)}, status=400)
+        except Exception as exc:
+            return JsonResponse({"status":"failed","message":str(exc)}, status=500)
     
     return JsonResponse({"status":"faield","message":"Invalid entry!"})
 
 def update_page_init(request):
     if request.method == "POST":
+        def clean_value(value):
+            return value if value not in ("", None, "null", "undefined") else None
+
         page_id = request.POST.get('page_id')
-        transactionmainheads = request.POST.get('transactionmainheads')
+        transactionmainheads = clean_value(request.POST.get('transactionmainheads'))
+        location_id = clean_value(request.POST.get("location_id")) or request.session.get("loc_id") or 1
+        company_id = clean_value(request.POST.get("company_id")) or _resolve_company_id(request)
+        status = clean_value(request.POST.get("status")) or 1
         transaction_with_method = request.POST.get('transaction_with_method')
         transaction_with = request.POST.get('transaction_with')
         transaction_method = request.POST.get('transaction_method')
@@ -72,19 +156,25 @@ def update_page_init(request):
             UPDATE page_init 
             SET 
             tran_main_head_id = %s,
+            location_id = %s,
+            company_id = %s,
             user_tran_method = %s,
             user_tran_with_id = %s,
             tran_method = %s,
-            tran_group_id = %s
+            tran_group_id = %s,
+            status = %s
             WHERE page_id = %s
 
         """
         params = [             
             transactionmainheads,
+            location_id,
+            company_id,
             transaction_with_method,
             transaction_with,
             transaction_method,
             tran_group,
+            status,
             page_id,   
             ]
 

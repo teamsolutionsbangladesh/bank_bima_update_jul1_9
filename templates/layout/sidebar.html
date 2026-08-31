@@ -82,6 +82,11 @@
                     <a href="{% url 'transaction_head_page' %}">* Transaction Head</a> 
                 </li>
 
+                <!-- Transaction Category -->
+                <li class="menu-item">
+                    <a href="{% url 'transaction_category_page' %}">* Transaction Category</a> 
+                </li>
+
                 <!-- Transaction With -->
                 <li class="menu-item">
                     <a href="{% url 'transaction_with_page' %}">* Transaction With</a>
@@ -167,6 +172,23 @@
                     <ul class="submenu child-menu">
                         <li><a href="#">Salesman</a></li>
                         <li><a href="#">Store Manager</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
+        <!-- BANK BIMA -->
+        <li class="menu-item has-submenu">
+            <a href="#" class="submenu-toggle">Bank Bima <span class="arrow">›</span></a>
+            <ul class="submenu">
+                <li><a href="{% url 'bank_bima_advertisement_sales' %}">Advertisement sales</a></li>
+                <li><a href="{% url 'bank_bima_office_bazar' %}">Office Bazar</a></li>
+                <li><a href="{% url 'bank_bima_printing_sales' %}">Printing Sale</a></li>
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">General Transaction <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="{% url 'bank_bima_general_transaction_payment_list' %}">Payment</a></li>
+                        <li><a href="{% url 'bank_bima_general_transaction_receive_list' %}">Receive</a></li>
                     </ul>
                 </li>
             </ul>
@@ -678,6 +700,17 @@
                         <li><a href="{% url 'diag_payment_list' %}">Diagnosis Transactions</a></li>
                         <li><a href="#">Pharmacy Issue </a></li>
                         <li><a href="#">Pharmacy Return </a></li>
+                    </ul>
+                </li>
+
+                <!-- Transactions -->
+                <li class="menu-item has-submenu">
+                    <a href="#" class="submenu-toggle">Lab Report Generation <span class="arrow">›</span></a>
+                    <ul class="submenu child-menu">
+                        <li><a href="{% url 'diagnosis_lab_parameter_setup' %}">Setup</a></li> {# #codex #}
+                        <li><a href="{% url 'diagnosis_biochemistry_result' %}">Biochemistry</a></li> {# #codex #}
+                        <li><a href="#">Serology</a></li>
+                        <li><a href="#"> </a></li>
                     </ul>
                 </li>
 

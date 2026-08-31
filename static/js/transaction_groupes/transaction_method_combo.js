@@ -18,11 +18,8 @@ $('#transactionmainheads').change(function(){
                 $select.append(`<option value="${e.method}">${e.method}</option>`);
             });
 
-            // ✅ Automatically trigger table load for first even
-            if (transaction_method_combo.length > 0) {
-                const firstId = transaction_method_combo[0].id;
-                $select.val(firstId).trigger('change');
-            }
+            // Keep selection empty here; page-init or explicit user choice will set it.
+            $select.val('');
         },
         error: function() {
             alert("Failed to load transaction methods");

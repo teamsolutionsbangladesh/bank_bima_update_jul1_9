@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'main_heads',
     'transaction_main_heads',
     'transaction_group',
+    'transaction_category',    
     'transaction_head',
     'transaction_with',
     'transaction_with_user',
@@ -62,6 +63,12 @@ INSTALLED_APPS = [
     'sr',
 
 ]
+
+# transaction_category uses the existing transaction__category table via raw SQL.
+# Do not create a separate Django-managed category table.
+MIGRATION_MODULES = {
+    'transaction_category': None,
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

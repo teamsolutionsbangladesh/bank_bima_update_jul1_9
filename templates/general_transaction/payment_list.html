@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Add Payment{% endblock %}
+{% block title %}{{ page_title|default:"Add Payment" }}{% endblock %}
 
 {% block content %}
 
@@ -9,8 +9,17 @@
 
     <div class="card shadow" style="min-height: 85vh;">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Add Payment</h5>
+            <h5 class="mb-0">{{ page_title|default:"Add Payment" }}</h5>
             <div class="d-flex gap-2">
+                {% if add_payment_buttons %}
+                    {% for button in add_payment_buttons %}
+                        <a href="{{ button.url }}"
+                            class="btn btn-info text-white fw-bold"
+                            id="access_add_payment_page">
+                            {{ button.label }}
+                        </a>
+                    {% endfor %}
+                {% else %}
                 <a href="{% url 'add_payment_page' %}?page_id=1020300001" 
                     class="btn btn-info text-white fw-bold"
                     id="access_add_payment_page">
@@ -22,6 +31,7 @@
                     id="access_add_payment_page">
                     + Add Payment - 1020300005
                 </a>
+                {% endif %}
             </div>
         </div>
 
@@ -114,7 +124,7 @@
             <!-- PAYMENT TABLE -->
             <div class="card">
                 <div class="card-header bg-success text-white text-center">
-                    Payment List
+                    {{ list_title|default:"Payment List" }}
                 </div>
 
                 <div class="table-responsive"
@@ -203,7 +213,7 @@
 {% block extra_js %}
 <script>
     window.APP_URLS = {
-        PAYMENT_LIST_URL: "{% url 'payment_list_load' %}",
+        PAYMENT_LIST_URL: "{{ payment_list_url|default:'/general/payment/load/' }}",
         PAYMENT_REPORT_PDF_URL: "{% url 'payment_report_pdf' %}",
         PAYMENT_EDIT_URL: "/general/payment/edit/",
         TRAN_MAIN_HEAD_URL: "{% url 'get_transaction_main_heads_combo' %}",

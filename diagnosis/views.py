@@ -6,11 +6,14 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse  # #codex
 from django.db import connection, transaction
 from django.utils import timezone
+from django.utils.html import escape  # #codex
 from reportlab.lib import colors  # #codex
 from reportlab.lib.pagesizes import A4, landscape  # #codex
-from reportlab.lib.styles import getSampleStyleSheet  # #codex
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet  # #codex
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle  # #codex
-
+from reportlab.lib.units import inch  # #codex
+from reportlab.lib.enums import TA_CENTER  # #codex
+from reportlab.graphics.barcode import code128  # #codex
 from administrator.views import dictfetchall
 
 from django.http import JsonResponse
@@ -438,6 +441,9 @@ def product_search(request):
     tran_group_id = request.GET.get('tran_group_id')
     limit = 10
 
+    if not tran_group_id:
+        return JsonResponse({'results': []})
+
     print (tran_main_head_id);
     cursor = connection.cursor()
 
@@ -449,7 +455,7 @@ def product_search(request):
                 t.cp,
                 m.manufacturer_name AS manufacturer,
                 f.form_name AS form,
-                c.category_name,
+                c.name AS category_name,
                 t.quantity,
                 t.mrp
             FROM transaction__heads t
@@ -457,15 +463,14 @@ def product_search(request):
             JOIN transaction__main__heads tmh ON tmh.id = tg.tran_groupe_type
             LEFT JOIN item__manufacturers m ON t.manufacturer_id = m.id
             LEFT JOIN item__forms f ON t.form_id = f.id
-            LEFT JOIN item__categories c ON t.category_id = c.id
+            LEFT JOIN transaction__category c ON t.category_id = c.id
             WHERE t.tran_head_name LIKE %s
-            AND tmh.id = %s            
+            AND tmh.id = %s
+            AND tg.id = %s
             ORDER BY t.id ASC
             LIMIT %s OFFSET %s
         """
-        # AND tg.id = %s
-        # params = [f"{q}%", tran_main_head_id, tran_group_id, limit, offset]
-        params = [f"{q}%", tran_main_head_id, limit, offset]
+        params = [f"{q}%", tran_main_head_id, tran_group_id, limit, offset]
     
     else:
 
@@ -476,7 +481,7 @@ def product_search(request):
                 t.cp,
                 m.manufacturer_name AS manufacturer,
                 f.form_name AS form,
-                c.category_name,
+                c.name AS category_name,
                 t.quantity,
                 t.mrp
             FROM transaction__heads t
@@ -484,14 +489,13 @@ def product_search(request):
             JOIN transaction__main__heads tmh ON tmh.id = tg.tran_groupe_type
             LEFT JOIN item__manufacturers m ON t.manufacturer_id = m.id
             LEFT JOIN item__forms f ON t.form_id = f.id
-            LEFT JOIN item__categories c ON t.category_id = c.id
+            LEFT JOIN transaction__category c ON t.category_id = c.id
             WHERE tmh.id = %s
+            AND tg.id = %s
             ORDER BY t.id ASC
             LIMIT %s OFFSET %s
         """
-        # AND tg.id = %s
-        # params = [tran_main_head_id, tran_group_id, limit, offset]
-        params = [tran_main_head_id, limit, offset]
+        params = [tran_main_head_id, tran_group_id, limit, offset]
 
 
     cursor.execute(sql, params)
@@ -819,6 +823,611 @@ def autocomplete_sr(request):
     return JsonResponse({"results": results}, safe=False)
 
 
+# lab report generation
+
+
+def ensure_lab_parameters_table():  # #codex
+    with connection.cursor() as cursor:  # #codex
+        cursor.execute("""  # #codex
+            CREATE TABLE IF NOT EXISTS lab_parameters (  # #codex
+                id BIGINT AUTO_INCREMENT PRIMARY KEY,  # #codex
+                group_id BIGINT NOT NULL,  # #codex
+                category_id BIGINT NOT NULL,  # #codex
+                head_id BIGINT NULL,  # #codex
+                serial INT NOT NULL DEFAULT 0,  # #codex
+                title VARCHAR(255) NOT NULL,  # #codex
+                title_code VARCHAR(100) NULL,  # #codex
+                investigation VARCHAR(255) NOT NULL,  # #codex
+                investigation_code VARCHAR(100) NULL,  # #codex
+                unit VARCHAR(100) NULL,  # #codex
+                reff_range TEXT NULL,  # #codex
+                added_at DATETIME NULL,  # #codex
+                updated_at DATETIME NULL,  # #codex
+                INDEX idx_lab_parameters_group (group_id),  # #codex
+                INDEX idx_lab_parameters_category (category_id),  # #codex
+                INDEX idx_lab_parameters_head (head_id)  # #codex
+            )  # #codex
+        """)  # #codex
+        cursor.execute("ALTER TABLE lab_parameters ADD COLUMN IF NOT EXISTS title_code VARCHAR(100) NULL AFTER title")  # #codex
+        cursor.execute("ALTER TABLE lab_parameters ADD COLUMN IF NOT EXISTS investigation_code VARCHAR(100) NULL AFTER investigation")  # #codex
+        cursor.execute("""  # #codex
+            CREATE TABLE IF NOT EXISTS lab_results (  # #codex
+                id BIGINT AUTO_INCREMENT PRIMARY KEY,  # #codex
+                invoice_id BIGINT NOT NULL,  # #codex
+                group_id BIGINT NOT NULL,  # #codex
+                category_id BIGINT NOT NULL,  # #codex
+                head_id BIGINT NULL,  # #codex
+                serial INT NOT NULL DEFAULT 0,  # #codex
+                title VARCHAR(255) NOT NULL,  # #codex
+                title_code VARCHAR(100) NULL,  # #codex
+                investigation VARCHAR(255) NOT NULL,  # #codex
+                investigation_code VARCHAR(100) NULL,  # #codex
+                unit VARCHAR(100) NULL,  # #codex
+                reff_range TEXT NULL,  # #codex
+                result TEXT NULL,  # #codex
+                added_at DATETIME NULL,  # #codex
+                updated_at DATETIME NULL,  # #codex
+                INDEX idx_lab_results_invoice (invoice_id),  # #codex
+                INDEX idx_lab_results_category (category_id),  # #codex
+                INDEX idx_lab_results_head (head_id)  # #codex
+            )  # #codex
+        """)  # #codex
+        cursor.execute("ALTER TABLE lab_results ADD COLUMN IF NOT EXISTS selected_test_ids TEXT NULL AFTER invoice_id")  # #codex
+        cursor.execute("ALTER TABLE lab_results ADD COLUMN IF NOT EXISTS selected_test_names TEXT NULL AFTER selected_test_ids")  # #codex
+
+
+def _optional_int(value):  # #codex
+    return int(value) if str(value or '').strip() else None  # #codex
+
+
+def _positive_int(value, default=1):  # #codex
+    try:  # #codex
+        parsed = int(value)  # #codex
+        return parsed if parsed > 0 else default  # #codex
+    except (TypeError, ValueError):  # #codex
+        return default  # #codex
+
+
+def normalize_lab_parameter_serials(group_id, category_id, preferred_id=None, preferred_serial=None):  # #codex
+    desired_serial = _positive_int(preferred_serial, 1)  # #codex
+    with connection.cursor() as cursor:  # #codex
+        cursor.execute("""  # #codex
+            SELECT id, serial  # #codex
+            FROM lab_parameters  # #codex
+            WHERE group_id = %s AND category_id = %s  # #codex
+            ORDER BY serial ASC, id ASC  # #codex
+        """, [group_id, category_id])  # #codex
+        rows = [{'id': row[0], 'serial': row[1]} for row in cursor.fetchall()]  # #codex
+        target_row = None  # #codex
+        other_rows = []  # #codex
+        for row in rows:  # #codex
+            if preferred_id and str(row['id']) == str(preferred_id):  # #codex
+                target_row = row  # #codex
+            else:  # #codex
+                other_rows.append(row)  # #codex
+        if target_row:  # #codex
+            insert_index = max(0, min(desired_serial - 1, len(other_rows)))  # #codex
+            ordered_rows = other_rows[:insert_index] + [target_row] + other_rows[insert_index:]  # #codex
+        else:  # #codex
+            ordered_rows = other_rows  # #codex
+        for index, row in enumerate(ordered_rows, start=1):  # #codex
+            cursor.execute("UPDATE lab_parameters SET serial = %s WHERE id = %s", [index, row['id']])  # #codex
+
+
+def lab_parameter_setup_page(request):  # #codex
+    ensure_lab_parameters_table()  # #codex
+    with connection.cursor() as cursor:  # #codex
+        cursor.execute("""  # #codex
+            SELECT id, tran_groupe_name AS name  # #codex
+            FROM transaction__groupes  # #codex
+            WHERE tran_groupe_type = %s AND status = 1  # #codex
+            ORDER BY tran_groupe_name ASC  # #codex
+        """, [DIAGNOSIS_MAIN_HEAD_ID])  # #codex
+        groups = dict_fetchall(cursor)  # #codex
+    return render(request, 'diagnosis/lab_parameter_setup.html', {  # #codex
+        'groups': groups,  # #codex
+    })  # #codex
+
+
+def lab_parameter_categories(request):  # #codex
+    group_id = request.GET.get('group_id')  # #codex
+    if not group_id:  # #codex
+        return JsonResponse({'success': True, 'categories': []})  # #codex
+    with connection.cursor() as cursor:  # #codex
+        cursor.execute("""  # #codex
+            SELECT DISTINCT c.id, c.name  # #codex
+            FROM transaction__category c  # #codex
+            JOIN transaction__groupes selected_group ON selected_group.id = %s  # #codex
+            JOIN transaction__groupes category_group ON category_group.id = c.group_id  # #codex
+            WHERE c.status = 1  # #codex
+              AND (c.group_id = selected_group.id  # #codex
+                   OR (category_group.tran_groupe_name = selected_group.tran_groupe_name  # #codex
+                       AND category_group.tran_groupe_type = selected_group.tran_groupe_type))  # #codex
+            ORDER BY c.name ASC  # #codex
+        """, [group_id])  # #codex
+        categories = dict_fetchall(cursor)  # #codex
+    return JsonResponse({'success': True, 'categories': categories})  # #codex
+
+
+def lab_parameter_heads(request):  # #codex
+    group_id = request.GET.get('group_id')  # #codex
+    if not group_id:  # #codex
+        return JsonResponse({'success': True, 'heads': []})  # #codex
+    params = [group_id]  # #codex
+    with connection.cursor() as cursor:  # #codex
+        cursor.execute(f"""  # #codex
+            SELECT id, tran_head_name AS name  # #codex
+            FROM transaction__heads  # #codex
+            WHERE groupe_id = %s AND status = 1  # #codex
+            ORDER BY tran_head_name ASC  # #codex
+        """, params)  # #codex
+        heads = dict_fetchall(cursor)  # #codex
+    return JsonResponse({'success': True, 'heads': heads})  # #codex
+
+
+def lab_parameter_list(request):  # #codex
+    ensure_lab_parameters_table()  # #codex
+    page = int(request.GET.get('page', 1) or 1)  # #codex
+    limit = int(request.GET.get('limit', 20) or 20)  # #codex
+    offset = (page - 1) * limit  # #codex
+    group_id = request.GET.get('group_id')  # #codex
+    category_id = request.GET.get('category_id')  # #codex
+    head_id = request.GET.get('head_id')  # #codex
+    search = (request.GET.get('search') or '').strip()  # #codex
+    where_sql = []  # #codex
+    params = []  # #codex
+    if group_id:  # #codex
+        where_sql.append("lp.group_id = %s")  # #codex
+        params.append(group_id)  # #codex
+    if category_id:  # #codex
+        where_sql.append("lp.category_id = %s")  # #codex
+        params.append(category_id)  # #codex
+    if head_id:  # #codex
+        where_sql.append("lp.head_id = %s")  # #codex
+        params.append(head_id)  # #codex
+    if search:  # #codex
+        where_sql.append("(lp.title LIKE %s OR lp.investigation LIKE %s OR lp.unit LIKE %s OR lp.reff_range LIKE %s)")  # #codex
+        params.extend([f"%{search}%", f"%{search}%", f"%{search}%", f"%{search}%"])  # #codex
+    where_clause = ("WHERE " + " AND ".join(where_sql)) if where_sql else ""  # #codex
+    with connection.cursor() as cursor:  # #codex
+        cursor.execute(f"""  # #codex
+            SELECT lp.id, lp.group_id, g.tran_groupe_name AS group_name, lp.category_id, c.name AS category_name,  # #codex
+                   lp.head_id, h.tran_head_name, lp.serial, lp.title, lp.title_code, lp.investigation, lp.investigation_code, lp.unit, lp.reff_range  # #codex
+            FROM lab_parameters lp  # #codex
+            LEFT JOIN transaction__groupes g ON g.id = lp.group_id  # #codex
+            LEFT JOIN transaction__category c ON c.id = lp.category_id  # #codex
+            LEFT JOIN transaction__heads h ON h.id = lp.head_id  # #codex
+            {where_clause}  # #codex
+            ORDER BY g.tran_groupe_name ASC, c.name ASC, lp.serial ASC, lp.id ASC  # #codex
+            LIMIT %s OFFSET %s  # #codex
+        """, params + [limit, offset])  # #codex
+        rows = dict_fetchall(cursor)  # #codex
+    return JsonResponse({'success': True, 'lab_parameters': rows})  # #codex
+
+
+@csrf_exempt  # #codex
+def lab_parameter_save(request):  # #codex
+    if request.method != "POST":  # #codex
+        return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)  # #codex
+    try:  # #codex
+        ensure_lab_parameters_table()  # #codex
+        data = request.POST  # #codex
+        group_id = data.get('group_id')  # #codex
+        category_id = data.get('category_id')  # #codex
+        title = (data.get('title') or '').strip()  # #codex
+        investigation = (data.get('investigation') or '').strip()  # #codex
+        if not group_id or not category_id or not title or not investigation:  # #codex
+            return JsonResponse({'success': False, 'message': 'Group, category, title and investigation required'}, status=400)  # #codex
+        desired_serial = _positive_int(data.get('serial'), 1)  # #codex
+        with transaction.atomic():  # #codex
+            with connection.cursor() as cursor:  # #codex
+                cursor.execute("""  # #codex
+                    INSERT INTO lab_parameters (group_id, category_id, head_id, serial, title, title_code, investigation, investigation_code, unit, reff_range, added_at, updated_at)  # #codex
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)  # #codex
+                """, [  # #codex
+                    group_id, category_id, _optional_int(data.get('head_id')), desired_serial,  # #codex
+                    title, (data.get('title_code') or '').strip(), investigation, (data.get('investigation_code') or '').strip(),  # #codex
+                    (data.get('unit') or '').strip(), (data.get('reff_range') or '').strip(),  # #codex
+                    timezone.now(), timezone.now()  # #codex
+                ])  # #codex
+                new_id = cursor.lastrowid  # #codex
+            normalize_lab_parameter_serials(group_id, category_id, new_id, desired_serial)  # #codex
+        return JsonResponse({'success': True, 'message': 'Saved successfully'})  # #codex
+    except Exception as exc:  # #codex
+        traceback.print_exc()  # #codex
+        return JsonResponse({'success': False, 'message': str(exc)}, status=400)  # #codex
+
+
+@csrf_exempt  # #codex
+def lab_parameter_update(request):  # #codex
+    if request.method != "POST":  # #codex
+        return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)  # #codex
+    try:  # #codex
+        ensure_lab_parameters_table()  # #codex
+        data = request.POST  # #codex
+        lab_parameter_id = data.get('id')  # #codex
+        group_id = data.get('group_id')  # #codex
+        category_id = data.get('category_id')  # #codex
+        title = (data.get('title') or '').strip()  # #codex
+        investigation = (data.get('investigation') or '').strip()  # #codex
+        if not lab_parameter_id or not group_id or not category_id or not title or not investigation:  # #codex
+            return JsonResponse({'success': False, 'message': 'Required data missing'}, status=400)  # #codex
+        desired_serial = _positive_int(data.get('serial'), 1)  # #codex
+        with transaction.atomic():  # #codex
+            with connection.cursor() as cursor:  # #codex
+                cursor.execute("SELECT group_id, category_id FROM lab_parameters WHERE id = %s", [lab_parameter_id])  # #codex
+                old_scope = cursor.fetchone()  # #codex
+                cursor.execute("""  # #codex
+                    UPDATE lab_parameters  # #codex
+                    SET group_id = %s, category_id = %s, head_id = %s, serial = %s, title = %s, title_code = %s, investigation = %s, investigation_code = %s,  # #codex
+                        unit = %s, reff_range = %s, updated_at = %s  # #codex
+                    WHERE id = %s  # #codex
+                """, [  # #codex
+                    group_id, category_id, _optional_int(data.get('head_id')), desired_serial, title, (data.get('title_code') or '').strip(), investigation, (data.get('investigation_code') or '').strip(),  # #codex
+                    (data.get('unit') or '').strip(), (data.get('reff_range') or '').strip(), timezone.now(), lab_parameter_id  # #codex
+                ])  # #codex
+            if old_scope and (str(old_scope[0]) != str(group_id) or str(old_scope[1]) != str(category_id)):  # #codex
+                normalize_lab_parameter_serials(old_scope[0], old_scope[1])  # #codex
+            normalize_lab_parameter_serials(group_id, category_id, lab_parameter_id, desired_serial)  # #codex
+        return JsonResponse({'success': True, 'message': 'Updated successfully'})  # #codex
+    except Exception as exc:  # #codex
+        traceback.print_exc()  # #codex
+        return JsonResponse({'success': False, 'message': str(exc)}, status=400)  # #codex
+
+
+@csrf_exempt  # #codex
+def lab_parameter_delete(request):  # #codex
+    if request.method != "POST":  # #codex
+        return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)  # #codex
+    try:  # #codex
+        ensure_lab_parameters_table()  # #codex
+        lab_parameter_id = request.POST.get('id')  # #codex
+        if not lab_parameter_id:  # #codex
+            return JsonResponse({'success': False, 'message': 'ID required'}, status=400)  # #codex
+        with transaction.atomic():  # #codex
+            with connection.cursor() as cursor:  # #codex
+                cursor.execute("SELECT group_id, category_id FROM lab_parameters WHERE id = %s", [lab_parameter_id])  # #codex
+                old_scope = cursor.fetchone()  # #codex
+                cursor.execute("DELETE FROM lab_parameters WHERE id = %s", [lab_parameter_id])  # #codex
+            if old_scope:  # #codex
+                normalize_lab_parameter_serials(old_scope[0], old_scope[1])  # #codex
+        return JsonResponse({'success': True, 'message': 'Deleted successfully'})  # #codex
+    except Exception as exc:  # #codex
+        traceback.print_exc()  # #codex
+        return JsonResponse({'success': False, 'message': str(exc)}, status=400)  # #codex
+
+
+def biochemistry_result_page(request):  # #codex
+    ensure_lab_parameters_table()  # #codex
+    with connection.cursor() as cursor:  # #codex
+        cursor.execute("""  # #codex
+            SELECT id, tran_groupe_name AS name  # #codex
+            FROM transaction__groupes  # #codex
+            WHERE tran_groupe_type = %s AND status = 1  # #codex
+            ORDER BY tran_groupe_name ASC  # #codex
+        """, [DIAGNOSIS_MAIN_HEAD_ID])  # #codex
+        groups = dict_fetchall(cursor)  # #codex
+    return render(request, 'diagnosis/biochemistry_result.html', {'groups': groups})  # #codex
+
+
+def biochemistry_result_add_page(request):  # #codex
+    ensure_lab_parameters_table()  # #codex
+    return render(request, 'diagnosis/biochemistry_result_form.html')  # #codex
+
+
+def _biochemistry_category_ids():  # #codex
+    with connection.cursor() as cursor:  # #codex
+        cursor.execute("""  # #codex
+            SELECT id FROM transaction__category  # #codex
+            WHERE LOWER(name) = 'biochemistry' AND status = 1  # #codex
+        """)  # #codex
+        return [row[0] for row in cursor.fetchall()]  # #codex
+
+
+def _biochemistry_group_ids(category_ids):  # #codex
+    if not category_ids:  # #codex
+        return []  # #codex
+    placeholders = ','.join(['%s'] * len(category_ids))  # #codex
+    with connection.cursor() as cursor:  # #codex
+        cursor.execute(f"""  # #codex
+            SELECT DISTINCT matching_group.id  # #codex
+            FROM transaction__category c  # #codex
+            JOIN transaction__groupes category_group ON category_group.id = c.group_id  # #codex
+            JOIN transaction__groupes matching_group  # #codex
+              ON matching_group.id = category_group.id  # #codex
+              OR (matching_group.tran_groupe_name = category_group.tran_groupe_name  # #codex
+                  AND matching_group.tran_groupe_type = category_group.tran_groupe_type)  # #codex
+            WHERE c.id IN ({placeholders}) AND c.status = 1  # #codex
+        """, category_ids)  # #codex
+        return [row[0] for row in cursor.fetchall()]  # #codex
+
+
+def _invoice_info(invoice_id=None, search=None):  # #codex
+    where_sql = "m.id = %s" if invoice_id else "(m.tran_id = %s OR m.invoice_ref = %s OR m.id = %s)"  # #codex
+    params = [invoice_id] if invoice_id else [search, search, search if str(search or '').isdigit() else 0]  # #codex
+    with connection.cursor() as cursor:  # #codex
+        cursor.execute(f"""  # #codex
+            SELECT m.id, m.tran_id, m.invoice_ref, m.tran_date, m.patient_id,  # #codex
+                   COALESCE(p.patient_name, m.user_name, '') AS patient_name,  # #codex
+                   COALESCE(p.age_y, 0) AS age_y, COALESCE(p.age_m, 0) AS age_m, COALESCE(p.age_d, 0) AS age_d,  # #codex
+                   COALESCE(p.gender, '') AS gender, COALESCE(p.present_mobile, m.user_phone, '') AS phone,  # #codex
+                   COALESCE(p.present_address, m.user_address, '') AS address,  # #codex
+                   COALESCE(doc.name, '') AS doctor_name  # #codex
+            FROM transaction__mains m  # #codex
+            LEFT JOIN patient_info p ON p.user_info_id COLLATE utf8mb4_unicode_ci = m.patient_id COLLATE utf8mb4_unicode_ci  # #codex
+            LEFT JOIN doctors_info doc ON doc.custom_doc_id COLLATE utf8mb4_unicode_ci = m.doctor_id COLLATE utf8mb4_unicode_ci  # #codex
+            WHERE {where_sql} AND m.tran_type = %s  # #codex
+            LIMIT 1  # #codex
+        """, params + [DIAGNOSIS_MAIN_HEAD_ID])  # #codex
+        return dict_fetchone(cursor)  # #codex
+
+
+def biochemistry_invoice_autocomplete(request):  # #codex
+    ensure_lab_parameters_table()  # #codex
+    term = (request.GET.get('q') or '').strip()  # #codex
+    if len(term) < 1:  # #codex
+        return JsonResponse({'results': []})  # #codex
+    like_term = f"%{term}%"  # #codex
+    with connection.cursor() as cursor:  # #codex
+        cursor.execute("""  # #codex
+            SELECT m.id, m.tran_id, m.invoice_ref, COALESCE(p.patient_name, m.user_name, '') AS patient_name  # #codex
+            FROM transaction__mains m  # #codex
+            LEFT JOIN patient_info p ON p.user_info_id COLLATE utf8mb4_unicode_ci = m.patient_id COLLATE utf8mb4_unicode_ci  # #codex
+            WHERE m.tran_type = %s AND (m.tran_id COLLATE utf8mb4_unicode_ci LIKE %s OR m.invoice_ref COLLATE utf8mb4_unicode_ci LIKE %s OR COALESCE(p.patient_name, m.user_name, '') COLLATE utf8mb4_unicode_ci LIKE %s)  # #codex
+            ORDER BY m.id DESC  # #codex
+            LIMIT 12  # #codex
+        """, [DIAGNOSIS_MAIN_HEAD_ID, like_term, like_term, like_term])  # #codex
+        rows = dict_fetchall(cursor)  # #codex
+    results = [{'id': row['id'], 'tran_id': row['tran_id'], 'invoice_ref': row['invoice_ref'], 'patient_name': row['patient_name']} for row in rows]  # #codex
+    return JsonResponse({'results': results})  # #codex
+
+
+def biochemistry_invoice_load(request):  # #codex
+    ensure_lab_parameters_table()  # #codex
+    search = (request.GET.get('invoice') or '').strip()  # #codex
+    invoice_id = request.GET.get('invoice_id')  # #codex
+    selected_test_id = request.GET.get('test_id')  # #codex
+    edit_mode = request.GET.get('edit') == '1'  # #codex
+    if not search and not invoice_id:  # #codex
+        return JsonResponse({'success': False, 'message': 'Transaction ID required'}, status=400)  # #codex
+    category_ids = _biochemistry_category_ids()  # #codex
+    if not category_ids:  # #codex
+        return JsonResponse({'success': False, 'message': 'Biochemistry category setup not found'}, status=400)  # #codex
+    invoice = _invoice_info(invoice_id=invoice_id, search=search)  # #codex
+    if not invoice:  # #codex
+        return JsonResponse({'success': False, 'message': 'Diagnosis transaction not found'}, status=404)  # #codex
+    placeholders = ','.join(['%s'] * len(category_ids))  # #codex
+    group_ids = _biochemistry_group_ids(category_ids)  # #codex
+    with connection.cursor() as cursor:  # #codex
+        test_where = "AND COALESCE(d.tran_groupe_id, h.groupe_id) IN ({})".format(','.join(['%s'] * len(group_ids))) if group_ids else ""  # #codex
+        test_params = [invoice['tran_id'], DIAGNOSIS_MAIN_HEAD_ID] + group_ids  # #codex
+        cursor.execute(f"""  # #codex
+            SELECT DISTINCT d.tran_head_id AS id, h.tran_head_name AS name, COALESCE(d.tran_groupe_id, h.groupe_id) AS group_id  # #codex
+            FROM transaction__details d  # #codex
+            JOIN transaction__heads h ON h.id = d.tran_head_id  # #codex
+            WHERE d.tran_id = %s AND d.tran_type = %s AND d.tran_head_id IS NOT NULL {test_where}  # #codex
+              AND (%s = 1 OR NOT EXISTS (SELECT 1 FROM lab_results lr WHERE lr.invoice_id = %s AND lr.category_id IN ({placeholders})))  # #codex
+            ORDER BY h.tran_head_name ASC  # #codex
+        """, test_params + [1 if edit_mode else 0, invoice['id']] + category_ids)  # #codex
+        tests = dict_fetchall(cursor)  # #codex
+        if not tests:  # #codex
+            cursor.execute(f"SELECT COUNT(*) AS saved_count FROM lab_results WHERE invoice_id = %s AND category_id IN ({placeholders})", [invoice['id']] + category_ids)  # #codex
+            saved_row = dict_fetchone(cursor)  # #codex
+            return JsonResponse({'success': True, 'invoice': invoice, 'tests': [], 'rows': [], 'already_added': (saved_row or {}).get('saved_count', 0) > 0})  # #codex
+        params = category_ids[:]  # #codex
+        cursor.execute(f"""  # #codex
+            SELECT p.id AS parameter_id, p.group_id, p.category_id, p.head_id, h.tran_head_name, p.serial,  # #codex
+                   p.title, p.title_code, p.investigation, p.investigation_code, p.unit, p.reff_range,  # #codex
+                   COALESCE(r.result, '') AS result  # #codex
+            FROM lab_parameters p  # #codex
+            LEFT JOIN transaction__heads h ON h.id = p.head_id  # #codex
+            LEFT JOIN lab_results r ON r.invoice_id = %s AND r.category_id = p.category_id AND COALESCE(r.investigation_code, '') = COALESCE(p.investigation_code, '') AND r.investigation = p.investigation  # #codex
+            WHERE p.category_id IN ({placeholders})  # #codex
+            ORDER BY p.serial ASC, p.id ASC  # #codex
+        """, [invoice['id']] + params)  # #codex
+        rows = dict_fetchall(cursor)  # #codex
+        if not rows:  # #codex
+            cursor.execute(f"""  # #codex
+                SELECT p.id AS parameter_id, p.group_id, p.category_id, p.head_id, h.tran_head_name, p.serial,  # #codex
+                       p.title, p.title_code, p.investigation, p.investigation_code, p.unit, p.reff_range, '' AS result  # #codex
+                FROM lab_parameters p  # #codex
+                LEFT JOIN transaction__heads h ON h.id = p.head_id  # #codex
+                WHERE p.category_id IN ({placeholders})  # #codex
+                ORDER BY p.serial ASC, p.id ASC  # #codex
+            """, category_ids)  # #codex
+            rows = dict_fetchall(cursor)  # #codex
+        cursor.execute(f"SELECT selected_test_ids, selected_test_names FROM lab_results WHERE invoice_id = %s AND category_id IN ({placeholders}) LIMIT 1", [invoice['id']] + category_ids)  # #codex
+        selected_row = dict_fetchone(cursor)  # #codex
+    selected_ids = [item for item in str((selected_row or {}).get('selected_test_ids') or '').split(',') if item]  # #codex
+    selected_names = [item.strip() for item in str((selected_row or {}).get('selected_test_names') or '').split(',') if item.strip()]  # #codex
+    return JsonResponse({'success': True, 'invoice': invoice, 'tests': tests, 'rows': rows, 'selected_test_ids': selected_ids, 'selected_test_names': selected_names})  # #codex
+
+
+@csrf_exempt  # #codex
+def biochemistry_result_save(request):  # #codex
+    if request.method != 'POST':  # #codex
+        return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)  # #codex
+    try:  # #codex
+        ensure_lab_parameters_table()  # #codex
+        payload = json.loads(request.body.decode('utf-8') or '{}')  # #codex
+        invoice_id = payload.get('invoice_id')  # #codex
+        selected_test_ids = ','.join([str(item) for item in (payload.get('selected_test_ids') or []) if str(item).strip()])  # #codex
+        selected_test_names = ', '.join([str(item) for item in (payload.get('selected_test_names') or []) if str(item).strip()])  # #codex
+        rows = [row for row in (payload.get('rows') or []) if str(row.get('result') or '').strip()]  # #codex
+        if not invoice_id or not rows:  # #codex
+            return JsonResponse({'success': False, 'message': 'At least one result value required'}, status=400)  # #codex
+        with transaction.atomic():  # #codex
+            category_ids = sorted({str(row.get('category_id')) for row in rows if row.get('category_id')})  # #codex
+            with connection.cursor() as cursor:  # #codex
+                if category_ids:  # #codex
+                    cursor.execute("DELETE FROM lab_results WHERE invoice_id = %s AND category_id IN ({})".format(','.join(['%s'] * len(category_ids))), [invoice_id] + category_ids)  # #codex
+                insert_rows = []  # #codex
+                for row in rows:  # #codex
+                    row_title = str(row.get('title') or '').strip()  # #codex
+                    row_title = selected_test_names if not row_title or row_title == '-' else row_title  # #codex
+                    insert_rows.append([  # #codex
+                        invoice_id, selected_test_ids, selected_test_names, row.get('group_id'), row.get('category_id'), None, row.get('serial') or 0,  # #codex
+                        row_title, row.get('title_code') or '', row.get('investigation') or '', row.get('investigation_code') or '',  # #codex
+                        row.get('unit') or '', row.get('reff_range') or '', row.get('result') or '', timezone.now(), timezone.now()  # #codex
+                    ])  # #codex
+                cursor.executemany("""  # #codex
+                    INSERT INTO lab_results (invoice_id, selected_test_ids, selected_test_names, group_id, category_id, head_id, serial, title, title_code, investigation, investigation_code, unit, reff_range, result, added_at, updated_at)  # #codex
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)  # #codex
+                """, insert_rows)  # #codex
+        return JsonResponse({'success': True, 'invoice_id': invoice_id, 'preview_url': f'/diagnosis/lab-report/biochemistry/preview/{invoice_id}/', 'download_url': f'/diagnosis/lab-report/biochemistry/pdf/{invoice_id}/?download=1'})  # #codex
+    except Exception as exc:  # #codex
+        traceback.print_exc()  # #codex
+        return JsonResponse({'success': False, 'message': str(exc)}, status=400)  # #codex
+
+
+def biochemistry_result_list(request):  # #codex
+    ensure_lab_parameters_table()  # #codex
+    search = (request.GET.get('search') or '').strip()  # #codex
+    group_id = request.GET.get('group_id')  # #codex
+    category_id = request.GET.get('category_id')  # #codex
+    where_parts = []  # #codex
+    params = []  # #codex
+    if search:  # #codex
+        where_parts.append("(m.tran_id LIKE %s OR m.invoice_ref LIKE %s OR p.patient_name LIKE %s OR m.user_name LIKE %s)")  # #codex
+        params.extend([f"%{search}%", f"%{search}%", f"%{search}%", f"%{search}%"])  # #codex
+    if group_id:  # #codex
+        where_parts.append("r.group_id = %s")  # #codex
+        params.append(group_id)  # #codex
+    if category_id:  # #codex
+        where_parts.append("r.category_id = %s")  # #codex
+        params.append(category_id)  # #codex
+    where_parts.append("COALESCE(r.result, '') <> ''")  # #codex
+    where_sql = "WHERE " + " AND ".join(where_parts) if where_parts else ""  # #codex
+    with connection.cursor() as cursor:  # #codex
+        cursor.execute(f"""  # #codex
+            SELECT r.invoice_id, m.tran_id, m.invoice_ref, COALESCE(p.patient_name, m.user_name, '') AS patient_name,  # #codex
+                   MAX(r.updated_at) AS updated_at, COUNT(*) AS total_rows  # #codex
+            FROM lab_results r  # #codex
+            JOIN transaction__mains m ON m.id = r.invoice_id  # #codex
+            LEFT JOIN patient_info p ON p.user_info_id COLLATE utf8mb4_unicode_ci = m.patient_id COLLATE utf8mb4_unicode_ci  # #codex
+            {where_sql}  # #codex
+            GROUP BY r.invoice_id, m.tran_id, m.invoice_ref, patient_name  # #codex
+            ORDER BY MAX(r.updated_at) DESC, r.invoice_id DESC  # #codex
+            LIMIT 100  # #codex
+        """, params)  # #codex
+        results = dict_fetchall(cursor)  # #codex
+    return JsonResponse({'success': True, 'results': results})  # #codex
+
+
+def _biochemistry_report_rows(invoice_id):  # #codex
+    ensure_lab_parameters_table()  # #codex
+    invoice = _invoice_info(invoice_id=invoice_id)  # #codex
+    if not invoice:  # #codex
+        return None, []  # #codex
+    with connection.cursor() as cursor:  # #codex
+        cursor.execute("""  # #codex
+            SELECT r.title, r.investigation, r.result, r.unit, r.reff_range, r.serial, r.head_id, r.selected_test_names,  # #codex
+                   COALESCE(NULLIF(NULLIF(TRIM(r.title), ''), '-'), NULLIF(TRIM(r.selected_test_names), ''), r.investigation) AS test_name, COALESCE(c.name, 'Biochemistry') AS category_name  # #codex
+            FROM lab_results r  # #codex
+            LEFT JOIN transaction__category c ON c.id = r.category_id  # #codex
+            WHERE r.invoice_id = %s AND COALESCE(r.result, '') <> ''  # #codex
+            ORDER BY c.name ASC, r.serial ASC, r.id ASC  # #codex
+        """, [invoice_id])  # #codex
+        rows = dict_fetchall(cursor)  # #codex
+    return invoice, rows  # #codex
+
+
+def biochemistry_result_preview(request, invoice_id):  # #codex
+    invoice, rows = _biochemistry_report_rows(invoice_id)  # #codex
+    if not invoice:  # #codex
+        return JsonResponse({'success': False, 'message': 'Invoice not found'}, status=404)  # #codex
+    receipt_no = invoice.get('invoice_ref') or invoice.get('tran_id') or str(invoice_id)  # #codex
+    age_text = f"{invoice.get('age_y') or 0}Y {invoice.get('age_m') or 0}M {invoice.get('age_d') or 0}D"  # #codex
+    selected_names = rows[0].get('selected_test_names') if rows else ''  # #codex
+    html = f"""<div class='bio-report-preview'>
+        <div class='bio-report-head'>
+            <div><b>Name</b> : {escape(invoice.get('patient_name') or '-')}</div>
+            <div><b>Age</b> : {escape(age_text)} {escape(invoice.get('gender') or '')}</div>
+            <div><b>Reg No.</b> : {escape(receipt_no)}</div>
+            <div><b>Phone</b> : {escape(invoice.get('phone') or '-')}</div>
+            <div><b>Ref. By</b> : {escape(invoice.get('doctor_name') or '-')}</div>
+            <div><b>Reg. Date</b> : {escape(str(invoice.get('tran_date') or '')[:16])}</div>
+            <div class='bio-full'><b>Address</b> : {escape(invoice.get('address') or '-')}</div>
+            <div class='bio-full'><b>Investigation</b> : {escape(selected_names or '-')}</div>
+        </div>"""  # #codex
+    grouped = {}  # #codex
+    for row in rows:  # #codex
+        grouped.setdefault(row.get('category_name') or 'Biochemistry', {}).setdefault(row.get('test_name') or row.get('title') or 'Test', []).append(row)  # #codex
+    if not grouped:  # #codex
+        html += "<div class='text-center p-4'>No result data found</div>"  # #codex
+    for category, tests in grouped.items():  # #codex
+        html += f"<h4>{escape(str(category).upper())} REPORT</h4><table><colgroup><col style='width:45%'><col style='width:12%'><col style='width:15%'><col style='width:28%'></colgroup><thead><tr><th>Title</th><th>Result</th><th>Unit</th><th>Ref</th></tr></thead><tbody>"  # #codex
+        for test_name, test_rows in tests.items():  # #codex
+            html += f"<tr class='bio-test-title'><td colspan='4'>*{escape(test_name)}</td></tr>"  # #codex
+            for row in test_rows:  # #codex
+                html += f"<tr><td>{escape(row.get('investigation') or '')}</td><td>{escape(row.get('result') or '')}</td><td>{escape(row.get('unit') or '')}</td><td>{escape(row.get('reff_range') or '').replace(chr(10), '<br>')}</td></tr>"  # #codex
+        html += "</tbody></table>"  # #codex
+    html += "</div>"  # #codex
+    return JsonResponse({'success': True, 'html': html, 'download_url': f'/diagnosis/lab-report/biochemistry/pdf/{invoice_id}/?download=1'})  # #codex
+
+
+def biochemistry_result_pdf(request, invoice_id):  # #codex
+    invoice, rows = _biochemistry_report_rows(invoice_id)  # #codex
+    if not invoice:  # #codex
+        return HttpResponse("Invoice not found", status=404)  # #codex
+    buffer = BytesIO()  # #codex
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=34, leftMargin=34, topMargin=34, bottomMargin=28)  # #codex
+    styles = getSampleStyleSheet()  # #codex
+    normal = ParagraphStyle("BioNormal", parent=styles["Normal"], fontName="Helvetica", fontSize=9, leading=12)  # #codex
+    small = ParagraphStyle("BioSmall", parent=styles["Normal"], fontName="Helvetica", fontSize=8, leading=10)  # #codex
+    bold = ParagraphStyle("BioBold", parent=styles["Normal"], fontName="Helvetica-Bold", fontSize=9, leading=12)  # #codex
+    center_title = ParagraphStyle("BioCenterTitle", parent=styles["Normal"], alignment=TA_CENTER, fontName="Helvetica-Bold", fontSize=11, leading=13)  # #codex
+    center_section = ParagraphStyle("BioCenterSection", parent=styles["Normal"], alignment=TA_CENTER, fontName="Helvetica", fontSize=11, leading=13)  # #codex
+    receipt_no = invoice.get('invoice_ref') or invoice.get('tran_id') or str(invoice_id)  # #codex
+    tran_date = str(invoice.get('tran_date') or '')[:16]  # #codex
+    age_text = f"{invoice.get('age_y') or 0} Year {invoice.get('gender') or ''}".strip()  # #codex
+    barcode = code128.Code128(receipt_no, barHeight=0.28 * inch, barWidth=0.7)  # #codex
+    story = []  # #codex
+    header_data = [  # #codex
+        [Paragraph("Name&nbsp;&nbsp;&nbsp;&nbsp;: " + (invoice.get('patient_name') or '-'), normal), Paragraph(age_text, normal), Paragraph("Reg No.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: " + receipt_no, normal), barcode],  # #codex
+        [Paragraph("Ref. By&nbsp;: " + (invoice.get('doctor_name') or '-'), normal), "", Paragraph("Reg. Date&nbsp;&nbsp;: " + tran_date, normal), ""],  # #codex
+        [Paragraph("Address&nbsp;: " + (invoice.get('address') or '-'), normal), "", Paragraph("Collected At&nbsp;: SECL", normal), ""],  # #codex
+        [Paragraph("Phone&nbsp;&nbsp;&nbsp;: " + (invoice.get('phone') or '-'), normal), "", "", ""],  # #codex
+        [Paragraph("Investigation&nbsp;: " + ((rows[0].get('selected_test_names') if rows else '') or '-'), normal), "", "", ""],  # #codex
+    ]  # #codex
+    header = Table(header_data, colWidths=[2.55*inch, 1.35*inch, 1.7*inch, 1.25*inch])  # #codex
+    header.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("SPAN", (3, 0), (3, 2)), ("LINEBELOW", (0, 4), (-1, 4), 0.8, colors.black)]))  # #codex
+    story.append(header)  # #codex
+    story.append(Spacer(1, 0.08 * inch))  # #codex
+    grouped = {}  # #codex
+    for row in rows:  # #codex
+        category = row.get('category_name') or 'Biochemistry'  # #codex
+        test_name = row.get('test_name') or row.get('title') or 'Test'  # #codex
+        grouped.setdefault(category, {}).setdefault(test_name, []).append(row)  # #codex
+    for category, tests in grouped.items():  # #codex
+        story.append(Paragraph(f"<u>{str(category).upper()} REPORT</u>", center_title))  # #codex
+        table_data = [[Paragraph("<u>Title</u>", bold), Paragraph("<u>Result</u>", bold), Paragraph("<u>Unit</u>", bold), Paragraph("<u>Ref</u>", bold)]]  # #codex
+        for test_name, test_rows in tests.items():  # #codex
+            table_data.append([Paragraph(f"<b><u>*{test_name}</u></b>", bold), "", "", ""])  # #codex
+            first_row = True  # #codex
+            for row in test_rows:  # #codex
+                label = (row.get('investigation') or row.get('title') or '')  # #codex
+                display_label = f"<b>{label}</b>" if first_row and len(test_rows) == 1 else label  # #codex
+                table_data.append([Paragraph(display_label, normal), Paragraph(row.get('result') or '', normal), Paragraph(row.get('unit') or '', normal), Paragraph((row.get('reff_range') or '').replace('\n', '<br/>'), small)])  # #codex
+                first_row = False  # #codex
+        result_table = Table(table_data, colWidths=[3.2*inch, 0.85*inch, 1.0*inch, 2.0*inch], repeatRows=1)  # #codex
+        result_table.setStyle(TableStyle([  # #codex
+            ("VALIGN", (0, 0), (-1, -1), "TOP"), ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),  # #codex
+            ("ALIGN", (1, 0), (1, -1), "RIGHT"), ("ALIGN", (2, 0), (2, -1), "LEFT"), ("ALIGN", (3, 0), (3, -1), "LEFT"),  # #codex
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 5), ("TOPPADDING", (0, 0), (-1, -1), 3),  # #codex
+            ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 6), ("LEFTPADDING", (2, 0), (2, -1), 8),  # #codex
+        ]))  # #codex
+        story.append(result_table)  # #codex
+        story.append(Spacer(1, 0.12 * inch))  # #codex
+    if not rows:  # #codex
+        story.append(Paragraph("No result data found", center_section))  # #codex
+    doc.build(story)  # #codex
+    pdf = buffer.getvalue()  # #codex
+    buffer.close()  # #codex
+    response = HttpResponse(pdf, content_type="application/pdf")  # #codex
+    mode = "attachment" if request.GET.get("download") == "1" else "inline"  # #codex
+    response["Content-Disposition"] = f'{mode}; filename="biochemistry_report_{invoice_id}.pdf"'  # #codex
+    return response  # #codex
 
 
 

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Biochemistry Report List{% endblock %}
+
+{% block content %}
+<input type="hidden" id="global_csrf" value="{{ csrf_token }}"> <!-- #codex -->
+
+<div class="container-fluid py-3"> <!-- #codex -->
+    <div class="card shadow-sm"> <!-- #codex -->
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center"> <!-- #codex -->
+            <h5 class="mb-0">Biochemistry Report List</h5> <!-- #codex -->
+            <a href="{% url 'diagnosis_biochemistry_result_add' %}" id="newBiochemistryBtn" class="btn btn-sm btn-info text-white fw-semibold">+ Add Result</a> <!-- #codex -->
+        </div> <!-- #codex -->
+        <div class="card-body"> <!-- #codex -->
+            <div class="row g-3 mb-3"> <!-- #codex -->
+                <div class="col-md-3"> <!-- #codex -->
+                    <label class="fw-semibold">Group</label> <!-- #codex -->
+                    <select id="resultFilterGroup" class="form-control"> <!-- #codex -->
+                        <option value="">All Group</option> <!-- #codex -->
+                        {% for group in groups %} <!-- #codex -->
+                            <option value="{{ group.id }}">{{ group.name }}</option> <!-- #codex -->
+                        {% endfor %} <!-- #codex -->
+                    </select> <!-- #codex -->
+                </div> <!-- #codex -->
+                <div class="col-md-3"> <!-- #codex -->
+                    <label class="fw-semibold">Category</label> <!-- #codex -->
+                    <select id="resultFilterCategory" class="form-control"> <!-- #codex -->
+                        <option value="">All Category</option> <!-- #codex -->
+                    </select> <!-- #codex -->
+                </div> <!-- #codex -->
+                <div class="col-md-4"> <!-- #codex -->
+                    <label class="fw-semibold">Search</label> <!-- #codex -->
+                    <input type="text" id="resultListSearch" class="form-control" placeholder="Search receipt / patient / tran id"> <!-- #codex -->
+                </div> <!-- #codex -->
+                <div class="col-md-2 d-flex align-items-end"> <!-- #codex -->
+                    <button type="button" id="resultListFilterBtn" class="btn btn-primary w-100">Filter</button> <!-- #codex -->
+                </div> <!-- #codex -->
+            </div> <!-- #codex -->
+
+            <div class="table-responsive"> <!-- #codex -->
+                <table class="table table-bordered table-striped table-sm"> <!-- #codex -->
+                    <thead> <!-- #codex -->
+                        <tr class="bg-success text-white"> <!-- #codex -->
+                            <th colspan="8" class="text-center">Biochemistry Report List</th> <!-- #codex -->
+                        </tr> <!-- #codex -->
+                        <tr class="table-dark"> <!-- #codex -->
+                            <th>SL</th> <!-- #codex -->
+                            <th>Tran ID</th> <!-- #codex -->
+                            <th>Invoice Ref</th> <!-- #codex -->
+                            <th>Patient</th> <!-- #codex -->
+                            <th>Rows</th> <!-- #codex -->
+                            <th>Updated</th> <!-- #codex -->
+                            <th>Action</th> <!-- #codex -->
+                        </tr> <!-- #codex -->
+                    </thead> <!-- #codex -->
+                    <tbody id="resultListBody"> <!-- #codex -->
+                        <tr><td colspan="7" class="text-center text-muted">Loading...</td></tr> <!-- #codex -->
+                    </tbody> <!-- #codex -->
+                </table> <!-- #codex -->
+            </div> <!-- #codex -->
+        </div> <!-- #codex -->
+    </div> <!-- #codex -->
+</div> <!-- #codex -->
+
+<div class="modal fade" id="biochemistryPreviewModal" tabindex="-1" aria-hidden="true"> <!-- #codex -->
+    <div class="modal-dialog modal-xl modal-dialog-scrollable"> <!-- #codex -->
+        <div class="modal-content"> <!-- #codex -->
+            <div class="modal-header bg-primary text-white"> <!-- #codex -->
+                <h5 class="modal-title">Biochemistry Report Preview</h5> <!-- #codex -->
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button> <!-- #codex -->
+            </div> <!-- #codex -->
+            <div class="modal-body"> <!-- #codex -->
+                <div id="previewFrame" class="bio-preview-shell"></div> <!-- #codex -->
+            </div> <!-- #codex -->
+            <div class="modal-footer"> <!-- #codex -->
+                <a id="downloadPreviewBtn" class="btn btn-success" href="#" target="_blank">Download</a> <!-- #codex -->
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> <!-- #codex -->
+            </div> <!-- #codex -->
+        </div> <!-- #codex -->
+    </div> <!-- #codex -->
+</div> <!-- #codex -->
+
+<style> /* #codex */
+    .bio-preview-shell { min-height: 76vh; background: #eef0f3; padding: 26px; overflow: auto; } /* #codex */
+    .bio-report-preview { width: 794px; min-height: 1123px; margin: 0 auto; background: #fff; color: #111; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.35; padding: 50px 50px; box-shadow: 0 8px 28px rgba(0,0,0,.18); box-sizing: border-box; } /* #codex */
+    @media (max-width: 900px) { .bio-preview-shell { padding: 14px; } .bio-report-preview { width: 100%; min-height: 0; padding: 28px 20px; } } /* #codex */
+    .bio-report-head { display: grid; grid-template-columns: 1.35fr 1fr 1.15fr; gap: 7px 18px; border-bottom: 1px solid #111; padding-bottom: 10px; margin-bottom: 10px; font-size: 13.5px; } /* #codex */
+    .bio-report-head .bio-full { grid-column: 1 / 4; } /* #codex */
+    .bio-report-preview h4 { text-align: center; font-size: 17px; font-weight: 700; text-decoration: underline; margin: 10px 0 10px; letter-spacing: .3px; } /* #codex */
+    .bio-report-preview h5 { text-align: center; font-size: 16px; font-weight: 400; margin: 0 0 8px; } /* #codex */
+    .bio-report-preview table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 4px; } /* #codex */
+    .bio-report-preview th { text-align: left; text-decoration: underline; padding: 5px 8px 6px; border-bottom: 1px solid #222; font-size: 13.5px; } /* #codex */
+    .bio-report-preview td { vertical-align: top; padding: 5px 8px; } /* #codex */
+    .bio-report-preview th:nth-child(2), .bio-report-preview td:nth-child(2) { text-align: right; padding-right: 12px; } /* #codex */
+    .bio-report-preview th:nth-child(3), .bio-report-preview td:nth-child(3) { text-align: left; padding-left: 12px; } /* #codex */
+    .bio-report-preview .bio-test-title td { font-weight: 700; text-decoration: underline; padding-top: 12px; padding-bottom: 4px; } /* #codex */
+</style> <!-- #codex -->
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/diagnosis/biochemistry_result.js' %}"></script> <!-- #codex -->
+{% endblock %}

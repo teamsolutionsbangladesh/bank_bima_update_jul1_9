@@ -43,6 +43,43 @@ $(document).ready(function () {
 
 });
 
+function loadTransactionCategoryCombo(selected_id = null, callback = null) {
+    let tran_main_head_id = $('#transactionmainheads').val();
+    let tran_group_id = $('#tran_group').val();
+    let $select = $('#transaction_category');
+
+    $select.empty().append('<option value="">Select Category</option>');
+
+    if (!tran_main_head_id || !tran_group_id) {
+        if (callback) callback();
+        return;
+    }
+
+    $.ajax({
+        url: '/combo_load/transaction-category-combo/',
+        method: 'GET',
+        data: {
+            tran_main_head_id: tran_main_head_id,
+            tran_group_id: tran_group_id
+        },
+        success: function (response) {
+            $.each(response.transaction_category_combo || [], function (index, item) {
+                $select.append(`<option value="${item.id}">${item.name}</option>`);
+            });
+
+            $select.val(selected_id || '');
+            if (callback) callback();
+        },
+        error: function () {
+            alert('Failed to load transaction categories');
+        }
+    });
+}
+
+$(document).on('change', '#tran_group', function () {
+    loadTransactionCategoryCombo();
+});
+
 // function loadItemCategoriesCombo(selected_id = null, callback = null){
 //     //  let tran_main_head_id = $('.transactionmainheads').val();
 //     // alert(tran_main_head_id);

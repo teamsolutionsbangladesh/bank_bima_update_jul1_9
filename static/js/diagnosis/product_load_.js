@@ -630,6 +630,32 @@ function showTransactionPreview(response, payload, paymentList) {
         return value;
     }
 
+    function setInvoiceBarcode($target, invoiceValue, barcodeSvg) { // codex change
+        if (!barcodeSvg) { // codex change
+            $target.text(safeText(invoiceValue)); // codex change
+            return; // codex change
+        } // codex change
+        $target.html(barcodeSvg); // codex change
+    } // codex change
+
+    function setPreviewTextOrBarcode(selector, plainSelector, value, svg) { // codex change
+        const $bar = $(selector); // codex change
+        if ($bar.length) { // codex change
+            setInvoiceBarcode($bar, value, svg); // codex change
+        } // codex change
+        $(plainSelector).text(safeText(value)); // codex change
+    } // codex change
+
+    function setPaymentStatus(balance) { // codex change
+        const amount = parseFloat(balance) || 0; // codex change
+        const isPaid = amount <= 0; // codex change
+        const $box = $("#previewPaymentStatusBox"); // codex change
+        $box
+            .text(isPaid ? "PAID" : "DUE") // codex change
+            .removeClass("status-paid status-due") // codex change
+            .addClass(isPaid ? "status-paid" : "status-due"); // codex change
+    } // codex change
+
     function money(value) {
         const amount = parseFloat(value) || 0;
         return amount.toFixed(2);
@@ -675,9 +701,12 @@ function showTransactionPreview(response, payload, paymentList) {
         selectedText("#payment_method")
     );
 
-    $("#previewInvoiceNo").text(
-        safeText(payload.invoice)
-    );
+    setPreviewTextOrBarcode( // codex change
+        "#previewInvoiceNoBarcode", // codex change
+        "#previewInvoiceNoText", // codex change
+        response.invoice_ref || payload.invoice || response.tran_id, // codex change
+        response.invoice_barcode_svg || payload.invoice_barcode_svg // codex change
+    ); // codex change
 
     $("#previewLocation").text(
         selectedText(".location-select")
@@ -686,6 +715,12 @@ function showTransactionPreview(response, payload, paymentList) {
     $("#previewPatientId").text(
         safeText(response.patient_id)
     );
+    setPreviewTextOrBarcode( // codex change
+        "#previewPatientIdBarcode", // codex change
+        "#previewPatientId", // codex change
+        response.patient_id || payload.patient_id, // codex change
+        response.patient_barcode_svg || payload.patient_barcode_svg // codex change
+    ); // codex change
 
     $("#previewPatientName").text(
         safeText(payload.patient_name)
@@ -719,14 +754,6 @@ function showTransactionPreview(response, payload, paymentList) {
 
     $("#previewDoctorName").text(
         selectedText("#doc_lookup")
-    );
-
-    $("#previewDoctorSpeciality").text(
-        safeText($("#doc_speciality").val())
-    );
-
-    $("#previewDoctorChamber").text(
-        safeText($("#doc_chamber").val())
     );
 
     $("#previewSrId").text(
@@ -788,16 +815,8 @@ function showTransactionPreview(response, payload, paymentList) {
 
     $("#previewTransactionRows").html(rowsHtml);
 
-    $("#previewBottomTranId").text(
-        safeText(response.tran_id)
-    );
-
     $("#previewBottomPatientName").text(
         safeText(payload.patient_name)
-    );
-
-    $("#previewBottomDoctorName").text(
-        selectedText("#doc_lookup")
     );
 
     $("#previewInvoiceAmount").text(
@@ -819,6 +838,7 @@ function showTransactionPreview(response, payload, paymentList) {
     $("#previewBalance").text(
         money(payload.due)
     );
+    setPaymentStatus($("#previewBalance").text());
 
     const modalElement =
         document.getElementById("transactionPreviewModal");
@@ -1015,5 +1035,3 @@ $("#saveAllBtn").on("click", function (e) {
         }
     });
 });
-
-

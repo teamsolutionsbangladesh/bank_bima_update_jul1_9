@@ -24,24 +24,26 @@ $(document).ready(function () {
             delay: 250,
 
             data: function (params) {
-                return {
-                    q: params.term
-                };
+	                return {
+	                    q: params.term || "" // codex change
+	                };
             },
 
             processResults: function (data) {
                 return {
-                    results: data.results
+                    results: data.results // codex change
                 };
             },
 
             cache: true
         },
-        placeholder: "-- Start Typing Doctor ID / Name --",
-        minimumInputLength: 1,
-        allowClear: true,
-        width: "100%"
-    });
+	        placeholder: "-- Start Typing Doctor ID / Name --",
+		        minimumInputLength: 0, // codex change
+	        allowClear: true,
+	        width: "100%",
+	        dropdownParent: $("#doc_lookup").closest(".card"), // codex change
+	        dropdownCssClass: "diagnosis-reference-dropdown" // codex change
+	    });
 
     $("#doc_lookup")
         .off("select2:select")
@@ -78,31 +80,44 @@ $(document).ready(function () {
             delay: 250,
 
             data: function (params) {
-                return {
-                    q: params.term
-                };
+	                return {
+	                    q: params.term || "" // codex change
+	                };
             },
 
             processResults: function (data) {
+                let results = data.results || []; // codex change
+                results.unshift({ id: "__blank_sr__", text: "-- No SR --", is_blank_sr: true }); // codex change
                 return {
-                    results: data.results
+                    results: results // codex change
                 };
             },
 
             cache: true
         },
-        placeholder: "-- Start Typing SR ID / Name --",
-        minimumInputLength: 1,
-        allowClear: true,
-        width: "100%"
-    });
+	        placeholder: "-- Start Typing SR ID / Name --",
+		        minimumInputLength: 0, // codex change
+	        allowClear: true,
+	        width: "100%",
+	        dropdownParent: $("#sr_lookup").closest(".card"), // codex change
+	        dropdownCssClass: "diagnosis-reference-dropdown" // codex change
+	    });
 
-    $("#sr_lookup")
-        .off("select2:select")
-        .on("select2:select", function (e) {
-            let data = e.params.data;
+	    $("#sr_lookup")
+	        .off("select2:select")
+	        .on("select2:select", function (e) {
+	            let data = e.params.data;
 
-            $("#sr_id").val(data.id);
+                if (data.is_blank_sr || data.id === "__blank_sr__") { // codex change
+                    $("#sr_lookup").val(null).trigger("change"); // codex change
+                    $("#sr_id").val(""); // codex change
+                    $("#sr_name_display").val(""); // codex change
+                    $("#sr_lookup").select2("close"); // codex change
+                    setTimeout(function () { $("#productSearch").select2("open"); focusOpenedSelect2Search(); }, 100); // codex change
+                    return; // codex change
+                } // codex change
+
+	            $("#sr_id").val(data.id);
             $("#sr_name_display").val(
                 data.name_display || data.text || ""
             );
@@ -120,6 +135,13 @@ $(document).ready(function () {
             $("#sr_id").val("");
             $("#sr_name_display").val("");
         });
+
+    $("#doc_lookup, #sr_lookup") // codex change
+        .off("focus.diagnosisOpenList click.diagnosisOpenList") // codex change
+        .on("focus.diagnosisOpenList click.diagnosisOpenList", function () { // codex change
+            const $field = $(this); // codex change
+            if ($field.data("select2") && !$field.data("select2").isOpen()) { $field.select2("open"); } // codex change
+        }); // codex change
 
     // ==========================================
     // PRODUCT SEARCH AUTO-COMPLETE
@@ -140,10 +162,9 @@ function formatProductResult(product) {
         product.text ||
         "-";
 
-    let genericName =
-        product.generic_name ||
-        product.generic ||
-        "-";
+    let categoryName =
+        product.category_name ||
+        "";
 
     let quantity =
         product.quantity ??
@@ -162,7 +183,7 @@ function formatProductResult(product) {
             </div>
 
             <div class="product-search-generic">
-                ${genericName}
+                ${categoryName}
             </div>
 
             <div class="product-search-qty">
@@ -192,11 +213,11 @@ $(".select2-product").select2({
         dataType: "json",
         delay: 250,
 
-        data: function (params) {
-            return {
-                q: params.term,
-                tran_main_head_id: $("#transactionmainheads").val(),
-                tran_group_id: $("#tran_group").val()
+	        data: function (params) {
+	            return {
+	                q: params.term || "", // codex change
+	                tran_main_head_id: $("#transactionmainheads").val(),
+	                tran_group_id: $("#tran_group").val()
             };
         },
 
@@ -254,12 +275,14 @@ $(".select2-product").select2({
         cache: true
     },
 
-    placeholder: "-- Start Typing Product ID / Name --",
-    minimumInputLength: 1,
-    allowClear: true,
-    width: "100%",
+	    placeholder: "-- Start Typing Product ID / Name --",
+		    minimumInputLength: 0, // codex change
+	    allowClear: true,
+	    width: "100%",
+	    dropdownParent: $("#productSearch").closest(".card-body"), // codex change
+	    dropdownCssClass: "diagnosis-product-dropdown", // codex change
 
-    templateResult: formatProductResult,
+	    templateResult: formatProductResult,
     templateSelection: formatSelectedProduct,
 
     escapeMarkup: function (markup) {
@@ -303,14 +326,15 @@ $("#productSearch")
 
         $("#productSearch").select2("close");
 
-        setTimeout(function () {
+	        window.diagnosisProductAddFocusTimer = setTimeout(function () { // codex change
 
-            let addButton =
-                document.getElementById("addProductBtn");
+	            let addButton =
+	                document.getElementById("addProductBtn");
 
-            if (addButton) {
+	            if (addButton) {
+                    if (window.diagnosisProductFocusLockUntil && Date.now() <= window.diagnosisProductFocusLockUntil) { return; } // codex change
 
-                addButton.scrollIntoView({
+	                addButton.scrollIntoView({
                     behavior: "smooth",
                     block: "center"
                 });
@@ -330,6 +354,13 @@ $("#productSearch")
         $("#mrp").val("0");
         $("#total").val("");
     });
+
+$("#productSearch") // codex change
+    .off("focus.diagnosisOpenList click.diagnosisOpenList") // codex change
+    .on("focus.diagnosisOpenList click.diagnosisOpenList", function () { // codex change
+        const $field = $(this); // codex change
+        if ($field.data("select2") && !$field.data("select2").isOpen()) { $field.select2("open"); } // codex change
+    }); // codex change
 
 function addProductDropdownHeader() {
 
@@ -366,27 +397,80 @@ function addProductDropdownHeader() {
     const header = `
         <div class="product-search-header">
             <div>Product Name</div>
-            <div>Generic Name</div>
+            <div>Category</div>
             <div>Qty</div>
             <div>MRP</div>
         </div>
     `;
 
-    $results.prepend(header);
-}
+	    $results.prepend(header);
+	}
 
-$(document)
-    .off("select2:open.productHeader")
+	function resizeProductDropdown() { // codex change
+	    const productSelect2 = $("#productSearch").data("select2"); // codex change
+	    const productPanel = $("#productSearch").closest(".diagnosis-product-entry-panel"); // codex change
+	    const productWidth = productPanel.find(".card").outerWidth(); // codex change
+	    if (!productSelect2 || !productSelect2.$dropdown || !productWidth) { return; } // codex change
+	    productSelect2.$dropdown.parent().css({ // codex change
+	        left: "0px", // codex change
+	        width: productWidth + "px", // codex change
+	        minWidth: "0", // codex change
+	        maxWidth: productWidth + "px" // codex change
+	    }); // codex change
+	    productSelect2.$dropdown.css({ // codex change
+	        width: productWidth + "px", // codex change
+	        minWidth: "0", // codex change
+	        maxWidth: productWidth + "px" // codex change
+	    }); // codex change
+	} // codex change
+
+	function resizeReferenceDropdown(selector) { // codex change
+	    const referenceSelect2 = $(selector).data("select2"); // codex change
+	    const referenceCard = $(selector).closest(".card"); // codex change
+	    const referenceWidth = referenceCard.outerWidth(); // codex change
+	    if (!referenceSelect2 || !referenceSelect2.$dropdown || !referenceWidth) { return; } // codex change
+	    referenceSelect2.$dropdown.closest(".select2-container").css({ // codex change
+	        left: "0px", // codex change
+	        width: referenceWidth + "px", // codex change
+	        minWidth: "0", // codex change
+	        maxWidth: referenceWidth + "px" // codex change
+	    }); // codex change
+	    referenceSelect2.$dropdown.parent().css({ // codex change
+	        left: "0px", // codex change
+	        width: referenceWidth + "px", // codex change
+	        minWidth: "0", // codex change
+	        maxWidth: referenceWidth + "px" // codex change
+	    }); // codex change
+	    referenceSelect2.$dropdown.css({ // codex change
+	        width: referenceWidth + "px", // codex change
+	        minWidth: "0", // codex change
+	        maxWidth: referenceWidth + "px" // codex change
+	    }); // codex change
+	} // codex change
+
+	$(document)
+	    .off("select2:open.productHeader")
     .on("select2:open.productHeader", function (e) {
 
         if ($(e.target).attr("id") !== "productSearch") {
             return;
-        }
+	        }
 
-        setTimeout(function () {
-            addProductDropdownHeader();
-        }, 50);
-    });
+		        setTimeout(function () {
+		            resizeProductDropdown(); // codex change
+		            addProductDropdownHeader();
+		        }, 50);
+		    });
+
+	    $(document) // codex change
+	        .off("select2:open.referenceDropdownWidth") // codex change
+	        .on("select2:open.referenceDropdownWidth", function (e) { // codex change
+	            const openedId = $(e.target).attr("id"); // codex change
+	            if (openedId !== "doc_lookup" && openedId !== "sr_lookup") { return; } // codex change
+	            setTimeout(function () { // codex change
+	                resizeReferenceDropdown("#" + openedId); // codex change
+	            }, 50); // codex change
+	        }); // codex change
 
     // ==========================================
     // SELECT2 OPEN HOLE SEARCH INPUT FOCUS

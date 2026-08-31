@@ -35,17 +35,20 @@ function loadTransactionGroupCombo(selected_id = null, callback = null){
 
 $('#transaction_method').on('change click', function () {
 
-    loadTransactionGroupCombo(0, function(){
-        $('#tran_group').prop('selectedIndex', 0); // First option
-    
+    if (window.__PAGE_INIT_LOADING) {
+        return;
+    }
+
+    loadTransactionGroupCombo(null, function(){
+        $('#tran_group').val('').trigger('change');
     });
 
 });
 
-$('#tran_group').on('change click', function () {
+$('#tran_group').on('change', function () {
 
-    // alert("hello");
-
-    loadProducts();
+    if (typeof loadProducts === 'function') {
+        loadProducts();
+    }
 
 });

@@ -27,9 +27,11 @@ urlpatterns = [
     path('', include('administrator.urls')),
     path('general/', include('general_transaction.urls')), 
     path('general/', include('general_transaction.urls_payment')), 
+    path('bank-bima/', include('bank_bima.urls')),
     path('diagnosis/', include('diagnosis.urls')),
     path('doctors/', include('doctors.urls')),
     path('representatives/', include('sr.urls')),
+    path('transaction-category/', include('transaction_category.urls')),
 
 ]
 

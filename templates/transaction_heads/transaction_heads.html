@@ -46,10 +46,34 @@
 <h4 class="text-center mb-3">Transaction Head Details</h4>
 
 <!-- Filter section -->
-<div class="mb-3">
-<label class="form-label fw-semibold">Transaction Main Heads</label>
-<select id="filter_transactionmainheads" class="form-control"></select>
-</select>
+<div class="row g-2 mb-3">
+    <div class="col-md-3">
+        <label class="form-label fw-semibold">Transaction Main Head</label>
+        <select id="transactionmainheads" class="form-control"></select>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label fw-semibold">Transaction Group</label>
+        <select id="tran_group" class="form-control">
+            <option value="">All Groups</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label fw-semibold">Transaction Category</label>
+        <select id="transaction_category" class="form-control">
+            <option value="">All Categories</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label fw-semibold">Transaction Head</label>
+        <select id="transaction_head" class="form-control">
+            <option value="">All Transaction Heads</option>
+        </select>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between mb-3">
+    <button type="button" id="filterBtn" class="btn btn-primary">Filter</button>
+    <button type="button" id="printBtn" class="btn btn-success">Print</button>
 </div>
 
 <div class="mb-3">
@@ -64,11 +88,11 @@
         <thead class="table-dark" style="position: sticky; top: 0; z-index: 2;">
             <tr>
                 <th>#</th>
-                <th>Tran Main Head ID</th>
+                <th>Transaction Main Head</th>
                 <th>Tran Method</th>
-                <th>Tran Group ID</th>
-                <th>Tran Head Id</th>
-                <th>Tran Head</th>
+                <th>Transaction Group</th>
+                <th>Category</th>
+                <th>Transaction Head</th>
                 <th>CP</th>
                 <th>MRP/Rate</th>
                 <th>Status</th>
@@ -177,5 +201,8 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script src="{% static 'js/combo_load/transaction_main_heads_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_group_combo_on_main_head.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_category_combo.js' %}"></script>
+<script src="{% static 'js/combo_load/transaction_head_combo.js' %}"></script>
 <script src="{% static 'js/transaction_heads/transaction_heads.js' %}"></script>
 {% endblock %}

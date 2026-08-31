@@ -1214,11 +1214,25 @@
 
                     <!-- TITLE -->
                     <div class="invoice-title">
-                        <h3>Diagnosis Transaction Invoice</h3>
-                        <small>
-                            Transaction ID:
-                            <span id="previewTranId">-</span>
-                        </small>
+                        <h3>Team Solutions Bangladesh</h3> {# codex change #}
+                        <small>9th floor, 252/2/Kha, Nabinbagh, West Meradia, Khilgaon, Dhaka.</small> {# codex change #}
+                        <small>Phone: 01700000000</small> {# codex change #}
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">{# codex change #}
+                        <div class="invoice-top-meta">{# codex change #}
+                            <small class="d-block text-muted">Invoice No: <span id="previewInvoiceNoText">-</span></small>{# codex change #}
+                        </div>{# codex change #}
+                        <div class="invoice-barcode-row justify-content-end">{# codex change #}
+                            <div class="invoice-barcode-block text-end">{# codex change #}
+                                <span class="barcode-label">Invoice No</span>{# codex change #}
+                                <span id="previewInvoiceNoBarcode" class="invoice-barcode-slot">-</span>{# codex change #}
+                            </div>{# codex change #}
+                            <div class="invoice-barcode-block text-end">{# codex change #}
+                                <span class="barcode-label">Patient ID</span>{# codex change #}
+                                <span id="previewPatientIdBarcode" class="invoice-barcode-slot">-</span>{# codex change #}
+                            </div>{# codex change #}
+                        </div>{# codex change #}
                     </div>
 
 
@@ -1234,10 +1248,10 @@
                                 <span class="invoice-label">Invoice No</span>
                                 <span class="invoice-colon">:</span>
 
-                                <span id="previewInvoiceNo"
+                                <em id="previewInvoiceNoText"
                                       class="invoice-value">
                                     -
-                                </span>
+                                </em>
                             </div>
 
                             <div class="invoice-info-column">
@@ -1341,33 +1355,6 @@
                             </div>
 
                         </div>
-
-
-                        <!-- SPECIALITY / CHAMBER -->
-                        <div class="invoice-info-row">
-
-                            <div class="invoice-info-column">
-                                <span class="invoice-label">Speciality</span>
-                                <span class="invoice-colon">:</span>
-
-                                <span id="previewDoctorSpeciality"
-                                      class="invoice-value">
-                                    -
-                                </span>
-                            </div>
-
-                            <div class="invoice-info-column">
-                                <span class="invoice-label">Chamber</span>
-                                <span class="invoice-colon">:</span>
-
-                                <span id="previewDoctorChamber"
-                                      class="invoice-value">
-                                    -
-                                </span>
-                            </div>
-
-                        </div>
-
 
                         <!-- PATIENT ID / SR -->
                         <div class="invoice-info-row">
@@ -1582,31 +1569,11 @@
 
                                 <div class="invoice-bottom-left">
 
-                                    <div class="info-line">
-                                        <strong>Transaction ID :</strong>
-
-                                        <span id="previewBottomTranId">
-                                            -
-                                        </span>
+                                    <div class="thank-you-line">
+                                        Thank you <span id="previewBottomPatientName">-</span>
                                     </div>
 
-
-                                    <div class="info-line">
-                                        <strong>Patient :</strong>
-
-                                        <span id="previewBottomPatientName">
-                                            -
-                                        </span>
-                                    </div>
-
-
-                                    <div class="info-line">
-                                        <strong>Doctor :</strong>
-
-                                        <span id="previewBottomDoctorName">
-                                            -
-                                        </span>
-                                    </div>
+                                    <div id="previewPaymentStatusBox" class="payment-status-box">-</div>
 
                                 </div>
 
@@ -1768,7 +1735,7 @@
 <script src="{% static 'js/combo_load/transaction_method_combo.js' %}"></script>
 <script src="{% static 'js/combo_load/transaction_group_combo.js' %}"></script>
 <script src="{% static 'js/combo_load/transaction_with_user_combo.js' %}"></script>
-<script src="{% static 'js/diagnosis/product_load.js' %}"></script>
+<script src="{% static 'js/diagnosis/product_load.js' %}?v=codex-barcode-preview-2"></script>
 
 
 {% endblock %}

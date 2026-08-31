@@ -311,10 +311,27 @@ def payment_list_load(request):
     status_filter = request.GET.get('status', '').strip()
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
+    page_id = request.GET.get('page_id')
     tran_main_head = request.GET.get('tran_main_head') or request.GET.get('transactionmainheads')  # #codex
     tran_with_method = request.GET.get('tran_with_method') or request.GET.get('transaction_with_method')  # #codex
     tran_with = request.GET.get('tran_with') or request.GET.get('transaction_with')  # #codex
     supplier = request.GET.get('supplier') or request.GET.get('transaction_with_user')  # #codex
+    tran_group = request.GET.get('tran_group') or request.GET.get('tran_group_id')  # #codex
+
+    if page_id:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT tran_main_head_id, user_tran_method, user_tran_with_id, tran_group_id
+                FROM page_init
+                WHERE page_id = %s
+                LIMIT 1
+            """, [page_id])
+            init_row = cursor.fetchone()
+        if init_row:
+            tran_main_head = init_row[0]
+            tran_with_method = init_row[1]
+            tran_with = init_row[2]
+            tran_group = init_row[3]
 
     try:
         offset = int(request.GET.get('offset', 0))
@@ -400,11 +417,33 @@ def payment_list_load(request):
         total_params.append(status_filter)
 
     if tran_main_head:
-        sql += " AND m.tran_type = %s"
-        params.append(tran_main_head)
+        sql += """
+            AND (
+                m.tran_type = %s
+                OR EXISTS (
+                    SELECT 1
+                    FROM transaction__details d
+                    JOIN transaction__groupes g ON g.id = d.tran_groupe_id
+                    WHERE d.tran_id = m.tran_id
+                    AND g.tran_groupe_type = %s
+                )
+            )
+        """
+        params.extend([tran_main_head, tran_main_head])
 
-        total_sql += " AND m.tran_type = %s"
-        total_params.append(tran_main_head)
+        total_sql += """
+            AND (
+                m.tran_type = %s
+                OR EXISTS (
+                    SELECT 1
+                    FROM transaction__details d
+                    JOIN transaction__groupes g ON g.id = d.tran_groupe_id
+                    WHERE d.tran_id = m.tran_id
+                    AND g.tran_groupe_type = %s
+                )
+            )
+        """
+        total_params.extend([tran_main_head, tran_main_head])
 
     if tran_with_method:
         sql += """
@@ -429,6 +468,27 @@ def payment_list_load(request):
 
         total_sql += " AND m.tran_type_with = %s"
         total_params.append(tran_with)
+
+    if tran_group:
+        sql += """
+            AND EXISTS (
+                SELECT 1
+                FROM transaction__details d
+                WHERE d.tran_id = m.tran_id
+                AND d.tran_groupe_id = %s
+            )
+        """
+        params.append(tran_group)
+
+        total_sql += """
+            AND EXISTS (
+                SELECT 1
+                FROM transaction__details d
+                WHERE d.tran_id = m.tran_id
+                AND d.tran_groupe_id = %s
+            )
+        """
+        total_params.append(tran_group)
 
     if supplier:
         sql += """
@@ -739,6 +799,7 @@ def save_general_payment(request):
         user_name = data.get("user_name")
         tran_type_with = data.get("tran_type_with")
         tran_group_id = data.get("tran_group_id")
+        tran_type = data.get("tran_type") or 1
         payment_method = data.get("payment_method")
         edit_id = data.get("edit_id")
 
@@ -842,7 +903,7 @@ def save_general_payment(request):
                         due = %s
                     WHERE id = %s
                 """, [
-                    1,
+                    tran_type,
                     payment_method,
                     user_info_id,
                     user_name,
@@ -877,7 +938,7 @@ def save_general_payment(request):
 
                 details_data.append([
                     tran_id,
-                    1,
+                    tran_type,
                     payment_method,
                     invoice,
                     location_id,
@@ -936,7 +997,7 @@ def save_general_payment(request):
                 VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             """, [
                 tran_id,
-                1,
+                tran_type,
                 payment_method,
                 user_info_id,
                 user_name,  # ✔ FIXED (earlier blank issue solved here)
@@ -983,7 +1044,7 @@ def save_general_payment(request):
                 )
             """, [
                 tran_id,
-                1,
+                tran_type,
                 payment_method,
                 user_info_id,
                 user_name,
@@ -1016,7 +1077,7 @@ def save_general_payment(request):
 
             details_data.append([
                 tran_id,
-                1,
+                tran_type,
                 payment_method,
                 invoice,
                 location_id,
@@ -1678,11 +1739,7 @@ def get_page_init_add_payment(request):
             s.user_tran_method AS user_tran_method,
             s.user_tran_with_id AS user_tran_with_id,
 
-            CASE
-                WHEN s.tran_method = 0 THEN 'Receive'
-                WHEN s.tran_method = 1 THEN 'Payment'
-                ELSE s.tran_method
-            END AS tran_method,
+            s.tran_method AS tran_method,
 
             s.tran_group_id AS tran_group_id
 
@@ -2085,6 +2142,21 @@ def process_party_payment(request, id):
 
     new_due_disc = old_due_disc + due_discount
 
+    # ================= NEW TRAN ID =================
+    cursor.execute("""
+        SELECT tran_id
+        FROM transaction__party__payments
+        WHERE tran_id LIKE 'GPA%'
+        ORDER BY id DESC
+        LIMIT 1
+    """)
+
+    last = cursor.fetchone()
+
+    last_no = int(last[0].replace("GPA", "")) if last and last[0] else 0
+
+    new_tran_id = "GPA" + str(last_no + 1).zfill(9)
+
     # ================= UPDATE MAIN ONLY =================
     cursor.execute("""
         UPDATE transaction__mains
@@ -2128,7 +2200,7 @@ def process_party_payment(request, id):
             %s,%s,%s,%s,%s,%s,%s,%s,%s
         )
     """, [
-        old_tran_id,     # same tran_id
+        new_tran_id,     # same tran_id
         old_tran_id,     # same invoice_ref
 
         tran_type,

@@ -203,7 +203,167 @@
     </div>
 
 </div>
+<!-- TRANSACTION PREVIEW MODAL -->
+<div class="modal fade" id="transactionPreviewModal" tabindex="-1" aria-hidden="true">
 
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+
+        <div class="modal-content border-0">
+
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    Diagnosis Transaction Invoice
+                </h5>
+
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body bg-light p-4">
+
+                <div class="invoice-sheet compact-invoice">
+
+                    <div class="invoice-heading">
+                        <div class="brand-name">Team Solutions Bangladesh</div> {# codex change #}
+                        <div class="brand-address">9th floor, 252/2/Kha, Nabinbagh, West Meradia, Khilgaon, Dhaka.</div> {# codex change #}
+                        <div class="brand-phone">Phone: 01700000000</div> {# codex change #}
+                    </div>
+
+                    <div class="invoice-info">
+
+                        <div class="info-row">
+                            <div><strong>Invoice No</strong><span>:</span><em id="previewInvoiceNoText">-</em></div>
+                            <div><strong>Invoice Date</strong><span>:</span><em id="previewTranDate">-</em></div>
+                        </div>
+
+                        <div class="info-row">
+                            <div><strong>Patient</strong><span>:</span><em id="previewPatientName">-</em></div>
+                            <div><strong>Age</strong><span>:</span><em id="previewPatientAge">-</em></div>
+                        </div>
+
+                        <div class="info-row">
+                            <div><strong>Contact</strong><span>:</span><em id="previewPatientPhone">-</em></div>
+                            <div><strong>Sex</strong><span>:</span><em id="previewPatientGender">-</em></div>
+                        </div>
+
+                        <div class="info-row">
+                            <div><strong>Consultant</strong><span>:</span><em id="previewDoctorName">-</em></div>
+                            <div><strong>SR</strong><span>:</span><em id="previewSrName">-</em></div>
+                        </div>
+
+                        <div class="info-row">
+                                                    </div>
+
+                        <div class="info-row">
+                            <div><strong>Patient ID</strong><span>:</span><em id="previewPatientId">-</em></div>
+                            <div></div>
+                        </div>
+
+                    </div>
+
+                    <div class="invoice-products">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="sl">SL</th>
+                                    <th class="pid">Product ID</th>
+                                    <th>Service / Product Description</th>
+                                    <th class="qty">Qty</th>
+                                    <th class="money-col">MRP</th>
+                                    <th class="money-col">Total</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="previewTransactionRows">
+                                <tr>
+                                    <td colspan="6" class="text-center">
+                                        No transaction details found
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="invoice-remarks">
+                        <strong>Remarks :</strong> Diagnosis Payment Transaction
+                    </div>
+
+                    <div class="invoice-bottom">
+
+                        <div class="invoice-bottom-left">
+                            <div class="thank-you-line">Thank you <span id="previewBottomPatientName">-</span></div>
+                            <div class="payment-status-box" id="previewPaymentStatusBox">-</div>
+                        </div>
+
+                        <div class="invoice-summary">
+
+                            <div>
+                                <span>Invoice Amount</span>
+                                <i>:</i>
+                                <strong id="previewInvoiceAmount">0.00</strong>
+                            </div>
+
+                            <div>
+                                <span>Discount</span>
+                                <i>:</i>
+                                <strong id="previewDiscount">0.00</strong>
+                            </div>
+
+                            <div class="summary-net">
+                                <span>Net Amount</span>
+                                <i>:</i>
+                                <strong id="previewNetAmount">0.00</strong>
+                            </div>
+
+                            <div>
+                                <span>Advance</span>
+                                <i>:</i>
+                                <strong id="previewAdvance">0.00</strong>
+                            </div>
+
+                            <div>
+                                <span>Due Collection</span>
+                                <i>:</i>
+                                <strong id="previewDueCollection">0.00</strong>
+                            </div>
+
+                            <div>
+                                <span>Due Discount</span>
+                                <i>:</i>
+                                <strong id="previewDueDiscount">0.00</strong>
+                            </div>
+
+                            <div class="summary-balance">
+                                <span>Balance</span>
+                                <i>:</i>
+                                <strong id="previewBalance">0.00</strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Close
+                </button>
+
+                <button type="button" id="openPrintableInvoiceBtn" class="btn btn-dark">
+                    Print Invoice
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -211,6 +371,7 @@
 <script>
 window.APP_URLS = {
     PAYMENT_LIST_URL: "{% url 'diagnosis_party_payment_list_load' %}", // codex change
+    PAYMENT_PREVIEW_URL: "/diagnosis/party-payment/preview/",
     PAYMENT_FORM_BASE_URL: "/diagnosis/party-payment/payment-form/", // codex change
     FIFO_PAYMENT_URL: "/diagnosis/party-payment/process-fifo-payment/", // codex change
     PAYMENT_REPORT_URL: "{% url 'diagnosis_party_payment_report_pdf' %}", // codex change

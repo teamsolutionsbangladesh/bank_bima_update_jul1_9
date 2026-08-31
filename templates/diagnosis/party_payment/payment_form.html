@@ -140,14 +140,181 @@
     </div>
 
 </div>
+<!-- TRANSACTION PREVIEW MODAL -->
+<div class="modal fade" id="transactionPreviewModal" tabindex="-1" aria-hidden="true">
 
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+
+        <div class="modal-content border-0">
+
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    Diagnosis Transaction Invoice
+                </h5>
+
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body bg-light p-4">
+
+                <div class="invoice-sheet compact-invoice">
+
+                    <div class="invoice-heading">
+                        <div class="brand-name">Team Solutions Bangladesh</div> {# codex change #}
+                        <div class="brand-address">9th floor, 252/2/Kha, Nabinbagh, West Meradia, Khilgaon, Dhaka.</div> {# codex change #}
+                        <div class="brand-phone">Phone: 01700000000</div> {# codex change #}
+                    </div>
+
+                    <div class="invoice-info">
+
+                        <div class="info-row">
+                            <div><strong>Invoice No</strong><span>:</span><em id="previewInvoiceNoText">-</em></div>
+                            <div><strong>Invoice Date</strong><span>:</span><em id="previewTranDate">-</em></div>
+                        </div>
+
+                        <div class="info-row">
+                            <div><strong>Patient</strong><span>:</span><em id="previewPatientName">-</em></div>
+                            <div><strong>Age</strong><span>:</span><em id="previewPatientAge">-</em></div>
+                        </div>
+
+                        <div class="info-row">
+                            <div><strong>Contact</strong><span>:</span><em id="previewPatientPhone">-</em></div>
+                            <div><strong>Sex</strong><span>:</span><em id="previewPatientGender">-</em></div>
+                        </div>
+
+                        <div class="info-row">
+                            <div><strong>Consultant</strong><span>:</span><em id="previewDoctorName">-</em></div>
+                            <div><strong>SR</strong><span>:</span><em id="previewSrName">-</em></div>
+                        </div>
+
+                        <div class="info-row">
+                                                    </div>
+
+                        <div class="info-row">
+                            <div><strong>Patient ID</strong><span>:</span><em id="previewPatientId">-</em></div>
+                            <div></div>
+                        </div>
+
+                    </div>
+
+                    <div class="invoice-products">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="sl">SL</th>
+                                    <th class="pid">Product ID</th>
+                                    <th>Service / Product Description</th>
+                                    <th class="qty">Qty</th>
+                                    <th class="money-col">MRP</th>
+                                    <th class="money-col">Total</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="previewTransactionRows">
+                                <tr>
+                                    <td colspan="6" class="text-center">
+                                        No transaction details found
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="invoice-remarks">
+                        <strong>Remarks :</strong> Diagnosis Payment Transaction
+                    </div>
+
+                    <div class="invoice-bottom">
+
+                        <div class="invoice-bottom-left">
+                            <div class="thank-you-line">Thank you <span id="previewBottomPatientName">-</span></div>
+                            <div class="payment-status-box" id="previewPaymentStatusBox">-</div>
+                        </div>
+
+                        <div class="invoice-summary">
+
+                            <div>
+                                <span>Invoice Amount</span>
+                                <i>:</i>
+                                <strong id="previewInvoiceAmount">0.00</strong>
+                            </div>
+
+                            <div>
+                                <span>Discount</span>
+                                <i>:</i>
+                                <strong id="previewDiscount">0.00</strong>
+                            </div>
+
+                            <div class="summary-net">
+                                <span>Net Amount</span>
+                                <i>:</i>
+                                <strong id="previewNetAmount">0.00</strong>
+                            </div>
+
+                            <div>
+                                <span>Advance</span>
+                                <i>:</i>
+                                <strong id="previewAdvance">0.00</strong>
+                            </div>
+
+                            <div>
+                                <span>Due Collection</span>
+                                <i>:</i>
+                                <strong id="previewDueCollection">0.00</strong>
+                            </div>
+
+                            <div>
+                                <span>Due Discount</span>
+                                <i>:</i>
+                                <strong id="previewDueDiscount">0.00</strong>
+                            </div>
+
+                            <div class="summary-balance">
+                                <span>Balance</span>
+                                <i>:</i>
+                                <strong id="previewBalance">0.00</strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Close
+                </button>
+
+                <button type="button" id="openPrintableInvoiceBtn" class="btn btn-dark">
+                    Print Invoice
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 {% endblock %}
 
 {% block extra_js %}
 
 <script>
-    window.TRANSACTION_ID = "{{ transaction.id }}"; // codex change
-    window.PARTY_PAYMENT_PROCESS_URL = "/diagnosis/party-payment/process/{{ transaction.id }}/"; // codex change
+window.TRANSACTION_ID = "{{ transaction.id }}";
+
+window.PARTY_PAYMENT_PROCESS_URL =
+    "/diagnosis/party-payment/process/{{ transaction.id }}/";
+
+window.APP_URLS = window.APP_URLS || {};
+
+window.APP_URLS.PAYMENT_PREVIEW_URL =
+    "/diagnosis/party-payment/preview/";
 </script>
 
 <script>
@@ -186,19 +353,224 @@
                 due_discount: dueDiscount
             },
             success: function (res) {
-                if (res.success) {
-                    alert("Payment Successful!");
-                    window.location.href = res.redirect_url;
-                } else {
+
+                if (!res.success) {
                     alert(res.error || "Payment failed");
+                    return;
                 }
+
+                $("#proceedPaymentBtn").prop("disabled", true);
+
+                openPaymentFormPreview(
+                    window.TRANSACTION_ID,
+                    res.redirect_url
+                );
             },
-            error: function (err) {
+                error: function (err) {
                 console.log(err.responseText);
                 alert(err.responseJSON?.error || "Payment failed");
             }
         });
     });
+
+    function paymentFormPreviewMoney(value) {
+    return (parseFloat(value) || 0).toFixed(2);
+}
+
+function paymentFormPreviewText(value) {
+    if (value === undefined || value === null || value === "") {
+        return "-";
+    }
+
+    return value;
+}
+
+function paymentFormSetInvoiceBarcode($target, invoiceValue, barcodeSvg) {
+    if (!barcodeSvg) {
+        $target.text(paymentFormPreviewText(invoiceValue));
+        return;
+    }
+    $target.html(barcodeSvg);
+}
+
+function openPaymentFormPreview(transactionId, redirectAfterClose = null) {
+
+    $.ajax({
+        url: window.APP_URLS.PAYMENT_PREVIEW_URL + transactionId + "/",
+        method: "GET",
+
+        success: function (res) {
+
+            if (!res.success) {
+                alert(res.error || "Unable to load transaction preview.");
+                return;
+            }
+
+            const transaction = res.transaction || {};
+            const details = res.details || [];
+
+            $("#previewTranId").text(
+                paymentFormPreviewText(transaction.tran_id)
+            );
+
+            paymentFormSetInvoiceBarcode(
+                $("#previewInvoiceNoBarcode"),
+                transaction.invoice_ref,
+                res.invoice_barcode_svg
+            );
+            paymentFormSetInvoiceBarcode(
+                $("#previewPatientIdBarcode"),
+                transaction.patient_id,
+                res.patient_barcode_svg
+            );
+
+            $("#previewTranDate").text(
+                paymentFormPreviewText(transaction.tran_date)
+            );
+
+            $("#previewPatientId").text(
+                paymentFormPreviewText(transaction.patient_id)
+            );
+
+            $("#previewPatientName").text(
+                paymentFormPreviewText(transaction.patient_name)
+            );
+
+            $("#previewPatientAge").text(
+                paymentFormPreviewText(transaction.patient_age)
+            );
+
+            $("#previewPatientGender").text(
+                paymentFormPreviewText(transaction.patient_gender)
+            );
+
+            $("#previewPatientPhone").text(
+                paymentFormPreviewText(
+                    transaction.patient_phone ||
+                    transaction.patient_mobile
+                )
+            );
+
+            $("#previewPatientAddress").text(
+                paymentFormPreviewText(transaction.patient_address)
+            );
+
+            $("#previewDoctorName").text(
+                paymentFormPreviewText(transaction.doctor_name)
+            );
+
+            $("#previewDoctorSpeciality").text( // codex change
+                paymentFormPreviewText(transaction.doctor_speciality || transaction.doctor_specialty) // codex change
+            ); // codex change
+
+            $("#previewDoctorChamber").text( // codex change
+                paymentFormPreviewText(transaction.doctor_chamber) // codex change
+            ); // codex change
+
+            $("#previewSrName").text(
+                paymentFormPreviewText(transaction.sr_name)
+            );
+
+            let rowsHtml = "";
+
+            details.forEach(function (item, index) {
+
+                rowsHtml += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${paymentFormPreviewText(item.product_id)}</td>
+                        <td>${paymentFormPreviewText(item.product_name)}</td>
+                        <td class="text-center">${parseFloat(item.quantity) || 0}</td>
+                        <td class="text-end">${paymentFormPreviewMoney(item.mrp)}</td>
+                        <td class="text-end fw-semibold">${paymentFormPreviewMoney(item.total)}</td>
+                    </tr>
+                `;
+            });
+
+            if (!rowsHtml) {
+                rowsHtml = `
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-3">
+                            No transaction details found
+                        </td>
+                    </tr>
+                `;
+            }
+
+            $("#previewTransactionRows").html(rowsHtml);
+
+            $("#previewInvoiceAmount").text(
+                paymentFormPreviewMoney(transaction.bill_amount)
+            );
+
+            $("#previewDiscount").text(
+                paymentFormPreviewMoney(transaction.discount)
+            );
+
+            $("#previewNetAmount").text(
+                paymentFormPreviewMoney(transaction.net_amount)
+            );
+
+            $("#previewAdvance").text(
+                paymentFormPreviewMoney(transaction.payment)
+            );
+
+            $("#previewDueCollection").text(
+                paymentFormPreviewMoney(transaction.due_col)
+            );
+
+            $("#previewDueDiscount").text(
+                paymentFormPreviewMoney(transaction.due_disc)
+            );
+
+            $("#previewBalance").text(
+                paymentFormPreviewMoney(transaction.due)
+            );
+            $("#previewPaymentStatusBox").text((parseFloat(transaction.due) || 0) <= 0 ? "PAID" : "DUE");
+
+            const modalElement =
+                document.getElementById("transactionPreviewModal");
+
+            if (!modalElement) {
+                console.error("transactionPreviewModal not found");
+                return;
+            }
+
+            let previewModal =
+                bootstrap.Modal.getInstance(modalElement);
+
+            if (!previewModal) {
+                previewModal =
+                    new bootstrap.Modal(modalElement);
+            }
+
+            $(modalElement)
+                .off("hidden.bs.modal.paymentPreviewRedirect");
+
+            if (redirectAfterClose) {
+                $(modalElement)
+                    .one(
+                        "hidden.bs.modal.paymentPreviewRedirect",
+                        function () {
+                            window.location.href = redirectAfterClose;
+                        }
+                    );
+            }
+
+            previewModal.show();
+        },
+
+        error: function (xhr) {
+
+            console.error(xhr.responseText);
+
+            alert(
+                xhr.responseJSON?.error ||
+                "Unable to load transaction preview."
+            );
+        }
+    });
+}
 </script>
 
 {% endblock %}

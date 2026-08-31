@@ -22,6 +22,17 @@ function loadTransactionMethodsCombo(selected_id = null, callback = null){
             });
 
             $select.val(selected_id);
+            if (!$select.val() && selected_id !== null && selected_id !== undefined && String(selected_id).trim() !== "") {
+                const wanted = String(selected_id).trim().toLowerCase();
+                $select.find('option').each(function () {
+                    const optionValue = String($(this).val() || '').trim().toLowerCase();
+                    const optionText = String($(this).text() || '').trim().toLowerCase();
+                    if (optionValue === wanted || optionText === wanted) {
+                        $select.val($(this).val());
+                        return false;
+                    }
+                });
+            }
 
             if(callback){
                 callback();
@@ -35,9 +46,12 @@ function loadTransactionMethodsCombo(selected_id = null, callback = null){
 
 $('#transactionmainheads').on('change click', function () {
 
-    loadTransactionMethodsCombo(0, function(){
-        $('#transaction_method').prop('selectedIndex', 0); // First option
-    
+    if (window.__PAGE_INIT_LOADING) {
+        return;
+    }
+
+    loadTransactionMethodsCombo(null, function(){
+        $('#transaction_method').val('').trigger('change');
     });
 
 });

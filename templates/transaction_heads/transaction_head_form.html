@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}New Transaction Heads{% endblock %}
+{% block title %}{% if edit_mode %}Edit Transaction Head{% else %}New Transaction Head{% endif %}{% endblock %}
 
 {% block content %}
 
@@ -22,48 +22,70 @@
 
       <div class="col-md-6">
         <div class="card shadow-sm p-4">
-          <h2>New Transaction Head</h2>
-          <form id="addForm" method="POST">
+          <h2>{% if edit_mode %}Edit Transaction Head{% else %}New Transaction Head{% endif %}</h2>
+          <form
+            id="addForm"
+            method="POST"
+            data-edit-id="{{ edit_transaction.id|default:'' }}"
+            data-main-head-id="{{ edit_transaction.tran_main_head_id|default:'' }}"
+            data-method="{{ edit_transaction.tran_method|default:'' }}"
+            data-group-id="{{ edit_transaction.group_id|default:'' }}"
+            data-category-id="{{ edit_transaction.category_id|default:'' }}"
+          >
             {% csrf_token %}
 
               <!-- <input type="hidden" id="tran_head_id"> -->
-              <input id="tran_head_id">            
+              <input type="hidden" id="tran_head_id" value="{{ edit_transaction.id|default:'' }}">
               <div class="mb-3">
                 <label class="form-label fw-semibold">Transaction Main Heads</label>
                 <select id="transactionmainheads" name="transactionmainheads" class="form-control">
+                  {% if edit_mode %}<option value="{{ edit_transaction.tran_main_head_id }}" selected>{{ edit_transaction.tran_main_head_name }}</option>{% endif %}
                 </select>
               </div>
 
               <div class="col-md-4">
                   <label class="fw-semibold">Transaction Method</label>
                   <select id="transaction_method" name="transaction_method" class="form-control">
+                    {% if edit_mode %}<option value="{{ edit_transaction.tran_method }}" selected>{{ edit_transaction.tran_method }}</option>{% endif %}
                   </select>
               </div>
               <div class="col-md-4">
                   <label class="fw-semibold">Transaction Group</label>
                   <select id="tran_group" name="tran_group" class="form-control">
+                    {% if edit_mode %}<option value="{{ edit_transaction.group_id }}" selected>{{ edit_transaction.group_name }}</option>{% endif %}
                   </select>
               </div>
-              <div class="col-md-4">
+              {% comment %} <div class="col-md-4">
                   <label class="fw-semibold">Item Categories</label>
                   <select id="item_categories" name="item_categories" class="form-control">
                   </select>
-              </div>              
+              </div> {% endcomment %}
+
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Transaction Category</label>
+                  <select id="transaction_category" name="category_id" class="form-control">
+                      {% if edit_mode %}
+                        <option value="{{ edit_transaction.category_id }}" selected>{{ edit_transaction.category_name }}</option>
+                      {% else %}
+                        <option value="">Select Category</option>
+                      {% endif %}
+                  </select>
+              </div>
 
               <div class="mb-3">
                 <label class="form-label fw-semibold">CP</label>
-                <input type="text" id="tran_head_cp" name="tran_head_cp" class="form-control" placeholder="Enter full name">
+                <input type="text" id="tran_head_cp" name="tran_head_cp" class="form-control" placeholder="Enter full name" value="{{ edit_transaction.cp|default:'' }}">
                 <span class="text-danger small name_error"></span>
               </div>
               <div class="mb-3">
                 <label class="form-label fw-semibold">MRP/Rate</label>
-                <input type="text" id="tran_head_mrp" name="tran_head_mrp" class="form-control" placeholder="Enter full name">
+                <input type="text" id="tran_head_mrp" name="tran_head_mrp" class="form-control" placeholder="Enter full name" value="{{ edit_transaction.mrp|default:'' }}">
+              </div>
+
               <div class="mb-3">
-                <label class="form-label fw-semibold">Transaction Main Heads</label>
-                <select id="transactionmainheads" name="transactionmainheads" class="form-control">
-                </select>
-              </div> 
-              <span class="text-danger small name_error"></span>
+                <label class="form-label fw-semibold">Transaction Head</label>
+                <input type="text" id="tran_head_name" name="tran_head_name" class="form-control" placeholder="Enter full name" value="{{ edit_transaction.tran_head_name|default:'' }}">
+                <span class="text-danger small name_error"></span>
               </div>
 
               <div class="mb-3" style="display:none;">
@@ -79,7 +101,7 @@
             
             <div class="d-flex justify-content-center mt-3">
               <button type="submit" id="saveBtn" class="btn btn-primary me-2 px-4">
-                💾 Save
+                {% if edit_mode %}🔄 Update{% else %}💾 Save{% endif %}
               </button>
               <button type="button" class="btn btn-success px-4" onclick="history.back()">
                   ⬅️ Back
@@ -111,11 +133,11 @@
               <thead class="table-dark" style="position: sticky; top: 0; z-index: 2;">
                 <tr>
                     <th>#</th>
-                    <th>Tran Main Head ID</th>
+                    <th>Transaction Main Head</th>
                     <th>Tran Method</th>
-                    <th>Tran Group ID</th>
-                    <th>Tran Head Id</th>
-                    <th>Tran Head</th>
+                    <th>Transaction Group</th>
+                    <th>Category</th>
+                    <th>Transaction Head</th>
                     <th>CP</th>
                     <th>MRP/Rate</th>
                     <th>Status</th>
@@ -150,15 +172,11 @@
 <script src="{% static 'js/combo_load/transaction_group_combo.js' %}"></script>
 <!-- <script src="{% static 'js/combo_load/transaction_with_user_combo.js' %}"></script> -->
 <script src="{% static 'js/combo_load/user_role_combo.js' %}"></script>
-{% comment %} <script src="{% static 'js/combo_load/transaction_main_heads_combo.js' %}"></script> {% endcomment %}
 
 <script src="{% static 'js/combo_load/transaction_category_combo.js' %}"></script>
 
-
 <script src="{% static 'js/transaction_heads/load_nested_combo.js' %}"></script>
 <script src="{% static 'js/transaction_heads/transaction_heads.js' %}"></script>
-
-<!-- <script src="{% static 'js/users/save_users.js' %}"></script> -->
 
 {% endblock %}
 

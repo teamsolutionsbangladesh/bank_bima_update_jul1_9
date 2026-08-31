@@ -854,7 +854,7 @@ $('#saveAllBtn').on('click', function (e) {
         user_name: selectedUserText, 
         tran_type_with: parseInt($('#transaction_with').val()) || null,
         tran_group_id: parseInt($('#tran_group').val()) || null,
-        tran_type: 1,          // Pharmacy
+        tran_type: parseInt($('#transactionmainheads').val()) || 1,
         tran_method: "payment",
         invoice: $('#paymentinvoice').val(),
         payment_method: $('#payment_method').val(),
@@ -876,17 +876,7 @@ $('#saveAllBtn').on('click', function (e) {
         data: JSON.stringify(payload),
         success: function (response) {
             alert(window.EDIT_PAYMENT_DATA?.is_edit ? "Updated Successfully!" : "Saved Successfully!");
-            if (window.EDIT_PAYMENT_DATA?.is_edit) {
-                window.location.href = "/general/payment/";
-                return;
-            }
-            $("#selectedPaymentListPayment").empty();
-            $("#invoiceAmount").val("0");
-            $("#discount").val("0");
-            $("#netAmount").val("0");
-            $("#advanced").val("0");
-            $("#balance").val("0");
-            $('#productSearch').focus();
+            window.location.href = "/general/payment/";
             console.log(response);
         },
         error: function(xhr){

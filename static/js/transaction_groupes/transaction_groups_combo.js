@@ -21,11 +21,8 @@ $('#transaction_method').change(function(){
                 $select.append(`<option value="${e.id}">${e.name}</option>`);
             });
 
-            // ✅ Automatically trigger table load for first even
-            if (transaction_groups_combo.length > 0) {
-                const firstId = transaction_groups_combo[0].id;
-                $select.val(firstId).trigger('change');
-            }
+            // Keep selection empty here; page-init or explicit user choice will set it.
+            $select.val('');
         },
         error: function() {
             alert("Failed to load transaction groups!!");

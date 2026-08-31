@@ -19,6 +19,8 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from reportlab.lib import colors
+from reportlab.graphics import renderSVG  # #codex
+from reportlab.graphics.barcode import createBarcodeDrawing  # #codex
 from django.template.loader import get_template
 from reportlab.platypus import Table
 from django.utils.dateparse import parse_date
@@ -34,6 +36,24 @@ def dictfetchall(cursor):
         dict(zip(columns, row))
         for row in cursor.fetchall()
     ]
+
+
+def build_invoice_barcode_svg(invoice_value):  # #codex
+    barcode_value = str(invoice_value or "").strip()  # #codex
+    if not barcode_value:  # #codex
+        return ""  # #codex
+    drawing = createBarcodeDrawing(  # #codex
+        "Code128",  # #codex
+        value=barcode_value,  # #codex
+        barHeight=18,  # #codex
+        humanReadable=False  # #codex
+    )  # #codex
+    svg = renderSVG.drawToString(drawing)  # #codex
+    start = svg.find("<svg")  # #codex
+    end = svg.rfind("</svg>")  # #codex
+    if start != -1 and end != -1:  # #codex
+        return svg[start:end + len("</svg>")]  # #codex
+    return svg  # #codex
 
 def get_recent_session_user():  # #codex
     for session in Session.objects.filter(expire_date__gt=timezone.now()).order_by("-expire_date")[:20]:  # #codex
@@ -78,7 +98,7 @@ def edit_diagnosis_payment_page(request, id):  # codex change
             tw.tran_method AS tran_with_method,  # codex change
             m.tran_user, COALESCE(m.user_name, m.tran_user, '') AS user_name,  # codex change
             loc.division AS location_name,  # codex change
-            m.bill_amount, m.discount, m.net_amount, m.payment, m.due, m.tran_date,  # codex change
+            m.bill_amount, m.discount, m.net_amount, m.payment,m.due_col,m.due_disc, m.due, m.tran_date,  # codex change
             m.doctor_id, COALESCE(doc.name, '') AS doctor_name,  # codex change
             COALESCE(doc.specialization, '') AS doctor_speciality, COALESCE(doc.chamber, '') AS doctor_chamber,  # codex change
             m.sr_id, COALESCE(sr.name, '') AS sr_name,  # codex change
@@ -99,6 +119,12 @@ def edit_diagnosis_payment_page(request, id):  # codex change
     transaction = rows[0] if rows else None  # codex change
     if not transaction:  # codex change
         return redirect('diag_payment_list')  # codex change
+    print("========== EDIT TRANSACTION ==========")
+    print("Due      :", transaction["due"])
+    print("Due Col  :", transaction["due_col"])
+    print("Due Disc :", transaction["due_disc"])
+    print("Tran ID  :", transaction["tran_id"])
+    print("======================================")
     cursor.execute("""  # codex change
         SELECT  # codex change
             d.id, d.tran_head_id AS product_id, h.tran_head_name AS product_name,  # codex change
@@ -194,7 +220,7 @@ def product_search(request):
                 t.cp,
                 m.manufacturer_name AS manufacturer,
                 f.form_name AS form,
-                c.category_name,
+                c.name AS category_name,
                 t.quantity,
                 t.mrp
             FROM transaction__heads t
@@ -202,7 +228,7 @@ def product_search(request):
             JOIN transaction__main__heads tmh ON tmh.id = tg.tran_groupe_type
             LEFT JOIN item__manufacturers m ON t.manufacturer_id = m.id
             LEFT JOIN item__forms f ON t.form_id = f.id
-            LEFT JOIN item__categories c ON t.category_id = c.id
+            LEFT JOIN transaction__category c ON t.category_id = c.id
             WHERE t.tran_head_name LIKE %s
             AND tmh.id = %s
             AND tg.id = %s
@@ -221,7 +247,7 @@ def product_search(request):
                 t.cp,
                 m.manufacturer_name AS manufacturer,
                 f.form_name AS form,
-                c.category_name,
+                c.name AS category_name,
                 t.quantity,
                 t.mrp
             FROM transaction__heads t
@@ -229,7 +255,7 @@ def product_search(request):
             JOIN transaction__main__heads tmh ON tmh.id = tg.tran_groupe_type
             LEFT JOIN item__manufacturers m ON t.manufacturer_id = m.id
             LEFT JOIN item__forms f ON t.form_id = f.id
-            LEFT JOIN item__categories c ON t.category_id = c.id
+            LEFT JOIN transaction__category c ON t.category_id = c.id
             WHERE tmh.id = %s
             AND tg.id = %s
             ORDER BY t.id ASC
@@ -1489,7 +1515,7 @@ def save_diagnosis_payment(request):
                 # 5) Insert patient-specific data into patient_info
                 cursor.execute("""
                     INSERT INTO patient_info
-                    (
+                    ( 
                         patient_name,
                         age_y,
                         age_m,
@@ -1598,15 +1624,33 @@ def save_diagnosis_payment(request):
                     WHERE id = %s  # codex change
                 """, [payment_method, invoice_ref, location_id, tran_type_with, user_id, tran_by, user_name, store_id, tran_date, status, bill_amount, discount, net_amount, receive, payment, due, doctor_custom_id, patient_id, sr_id, edit_id])  # codex change
                 cursor.execute("DELETE FROM transaction__details WHERE tran_id = %s", [tran_id])  # codex change
+                cursor.execute("""
+                SELECT due_col, due_disc
+                FROM transaction__mains
+                WHERE tran_id=%s
+                """,[tran_id])
+    
+                row = cursor.fetchone()
+    
+                due_col = row[0] or 0
+                due_disc = row[1] or 0
             insert_diagnosis_detail_rows(products, tran_id, tran_type, payment_method, invoice_ref, location_id, tran_type_with, user_id, tran_by, store_id, tran_date, status, discount, receive, payment, due, doctor_custom_id, patient_id, sr_id)  # codex change
+            
             return JsonResponse({  # codex change
                 "success": True,  # codex change
                 "updated": True,  # codex change
                 "tran_id": tran_id,  # codex change
+                "invoice_ref": invoice_ref,  # codex change
+                "invoice": invoice_ref,  # codex change
+                "invoice_barcode_svg": build_invoice_barcode_svg(invoice_ref),  # codex change
+                "patient_barcode_svg": build_invoice_barcode_svg(patient_id),  # codex change
                 "doctor_id": doctor_custom_id,  # codex change
                 "patient_id": patient_id,  # codex change
                 "sr_id": sr_id,  # codex change
-                "tran_by": tran_by  # codex change
+                "tran_by": tran_by,  # codex change
+                "due_col": due_col,
+                "due_disc": due_disc
+                
             })  # codex change
 
         # =========================
@@ -1666,9 +1710,14 @@ def save_diagnosis_payment(request):
         return JsonResponse({
             "success": True,
             "tran_id": tran_id,
+            "invoice_ref": invoice_ref,  # codex change
+            "invoice": invoice_ref,  # codex change
+            "invoice_barcode_svg": build_invoice_barcode_svg(invoice_ref),  # codex change
+            "patient_barcode_svg": build_invoice_barcode_svg(patient_id),  # codex change
             "doctor_id": doctor_custom_id,
             "patient_id": patient_id,
             "sr_id": sr_id,
+            
             "tran_by": tran_by
         })
 
@@ -2283,6 +2332,21 @@ def process_diagnosis_payment(request, id):
         new_due_col = old_due_col + pay_amount
         new_due_disc = old_due_disc + due_discount
 
+        # ================= NEW TRAN ID =================
+        cursor.execute("""
+            SELECT tran_id
+            FROM transaction__party__payments
+            WHERE tran_id LIKE 'DPA%'
+            ORDER BY id DESC
+            LIMIT 1
+        """)
+
+        last = cursor.fetchone()
+
+        last_no = int(last[0].replace("DPA", "")) if last and last[0] else 0
+
+        new_tran_id = "DPA" + str(last_no + 1).zfill(9)
+
         # ================= UPDATE MAIN =================
         cursor.execute("""
             UPDATE transaction__mains
@@ -2297,6 +2361,21 @@ def process_diagnosis_payment(request, id):
             new_due_col,
             new_due_disc,
             id
+        ])
+
+                # ================= UPDATE DETAILS =================
+        cursor.execute("""
+            UPDATE transaction__details
+            SET
+                due = %s,
+                due_col = %s,
+                due_disc = %s
+            WHERE tran_id = %s
+        """, [
+            new_due,
+            new_due_col,
+            new_due_disc,
+            old_tran_id
         ])
 
         # ================= INSERT PARTY PAYMENT HISTORY =================  # codex change
@@ -2327,8 +2406,9 @@ def process_diagnosis_payment(request, id):
                 %s,%s,%s,%s,%s,%s,%s,%s,%s
             )
         """, [
+            new_tran_id,
             old_tran_id,
-            invoice_ref,
+            
 
             tran_type,
             tran_method,
@@ -3188,5 +3268,222 @@ def diagnosis_payment_report_pdf(request):
 
 def diagnosis_party_payment_report_pdf(request):  # codex change
     return diagnosis_payment_report_pdf(request)  # codex change
+
+def diagnosis_invoice_print(request, tran_id):
+
+    cursor = connection.cursor()
+
+    # ===========================
+    # MAIN INFO
+    # ===========================
+    cursor.execute("""
+        SELECT
+            tran_id,
+            invoice_ref,
+            DATE_FORMAT(tran_date,'%%d-%%m-%%Y'),
+            user_name,
+            tran_type_with,
+            bill_amount,
+            discount,
+            net_amount,
+            payment,
+            due_col,
+            due_disc,
+            due,
+            doctor_id,
+            patient_id
+        FROM transaction__mains
+        WHERE tran_id=%s
+        LIMIT 1
+    """, [tran_id])
+
+    row = cursor.fetchone()
+
+    if not row:
+        return render(request, "404.html")
+
+    invoice = {
+        "tran_id": row[0],
+        "invoice_ref": row[1],
+        "tran_date": row[2],
+        "patient_name": row[3],
+        "tran_type_with": row[4],
+        "bill_amount": row[5],
+        "discount": row[6],
+        "net_amount": row[7],
+        "payment": row[8],
+        "due_col": row[9],
+        "due_disc": row[10],
+        "due": row[11],
+        "doctor_id": row[12],
+        "patient_id": row[13],
+    }
+
+    # ===========================
+    # DETAILS
+    # ===========================
+    cursor.execute("""
+        SELECT
+            tran_head,
+            quantity,
+            amount,
+            tot_amount
+        FROM transaction__details
+        WHERE tran_id=%s
+        ORDER BY id
+    """, [tran_id])
+
+    columns = [col[0] for col in cursor.description]
+
+    details = [
+        dict(zip(columns, r))
+        for r in cursor.fetchall()
+    ]
+
+    return render(
+        request,
+        "diagnosis/payment/print_invoice.html",
+        {
+            "invoice": invoice,
+            "details": details
+        }
+    )
+
+def diagnosis_party_payment_preview(request, transaction_id):
+    try:
+        with connection.cursor() as cursor:
+
+            # =========================
+            # MAIN + PATIENT + DOCTOR + SR
+            # =========================
+            cursor.execute("""
+                SELECT
+                    tm.id,
+                    tm.tran_id,
+                    tm.invoice_ref,
+                    tm.tran_date,
+                    tm.patient_id,
+
+                    pi.patient_name,
+                    pi.age_y,
+                    pi.age_m,
+                    pi.age_d,
+                    pi.gender,
+                    pi.present_mobile,
+                    pi.present_address,
+
+                    d.name AS doctor_name,  # codex change
+                    COALESCE(d.specialization, '') AS doctor_speciality,  # codex change
+                    COALESCE(d.chamber, '') AS doctor_chamber,  # codex change
+                    sr.name AS sr_name,  # codex change
+
+                    tm.bill_amount,
+                    tm.discount,
+                    tm.net_amount,
+                    tm.payment,
+                    tm.due_col,
+                    tm.due_disc,
+                    tm.due
+
+                FROM transaction__mains tm
+
+                LEFT JOIN patient_info pi
+                    ON pi.user_info_id COLLATE utf8mb4_general_ci
+                    = tm.patient_id COLLATE utf8mb4_general_ci
+
+                LEFT JOIN doctors_info d
+                    ON d.custom_doc_id COLLATE utf8mb4_general_ci
+                    = tm.doctor_id COLLATE utf8mb4_general_ci
+
+                LEFT JOIN item__sr_agents sr
+                    ON sr.custom_sr_id COLLATE utf8mb4_general_ci
+                    = tm.sr_id COLLATE utf8mb4_general_ci
+
+                WHERE tm.id = %s
+                LIMIT 1
+            """, [transaction_id])
+
+            row = cursor.fetchone()
+
+            if not row:
+                return JsonResponse({
+                    "success": False,
+                    "error": "Transaction not found"
+                }, status=404)
+
+            transaction = {
+                "id": row[0],
+                "tran_id": row[1],
+                "invoice_ref": row[2],
+                "tran_date": str(row[3]) if row[3] else "",
+
+                "patient_id": row[4],
+                "patient_name": row[5] or "",
+                "patient_age": f"{row[6] or 0}Y - {row[7] or 0}M - {row[8] or 0}D",
+                "patient_gender": row[9] or "",
+                "patient_phone": row[10] or "",
+                "patient_address": row[11] or "",
+
+                "doctor_name": row[12] or "",  # codex change
+                "doctor_speciality": row[13] or "",  # codex change
+                "doctor_chamber": row[14] or "",  # codex change
+                "sr_name": row[15] or "",  # codex change
+
+                "bill_amount": row[16] or 0,  # codex change
+                "discount": row[17] or 0,  # codex change
+                "net_amount": row[18] or 0,  # codex change
+                "payment": row[19] or 0,  # codex change
+                "due_col": row[20] or 0,  # codex change
+                "due_disc": row[21] or 0,  # codex change
+                "due": row[22] or 0,  # codex change
+            }
+
+            # =========================
+            # TRANSACTION DETAILS + PRODUCT NAME
+            # =========================
+            cursor.execute("""
+                SELECT
+                    td.tran_head_id,
+                    th.tran_head_name,
+                    td.quantity,
+                    td.mrp,
+                    td.tot_amount
+
+                FROM transaction__details td
+
+                LEFT JOIN transaction__heads th
+                    ON th.id = td.tran_head_id
+
+                WHERE td.tran_id = %s
+
+                ORDER BY td.id ASC
+            """, [transaction["tran_id"]])
+
+            detail_rows = cursor.fetchall()
+
+            details = []
+
+            for item in detail_rows:
+                details.append({
+                    "product_id": item[0],
+                    "product_name": item[1] or "",
+                    "quantity": item[2] or 0,
+                    "mrp": item[3] or 0,
+                    "total": item[4] or 0,
+                })
+
+        return JsonResponse({
+            "success": True,
+            "transaction": transaction,
+            "details": details,
+            "invoice_barcode_svg": build_invoice_barcode_svg(transaction.get("invoice_ref") or transaction.get("tran_id")),  # codex change
+            "patient_barcode_svg": build_invoice_barcode_svg(transaction.get("patient_id")),  # codex change
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            "success": False,
+            "error": str(e)
+        }, status=500)
 
 # refferal
